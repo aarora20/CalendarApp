@@ -1,6 +1,6 @@
 # Fullstack Project CS346
 
-
+Project Proposal: https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Project-Proposal
 
 ## Getting started
 
