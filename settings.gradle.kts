@@ -5,10 +5,10 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("jvm").version(extra["kotlin.version"] as String)
+        kotlin("jvm").version(extra["kotlinVersion"] as String)
         id("org.jetbrains.compose").version(extra["compose.version"] as String)
     }
 }
 
 rootProject.name = "CalendarApp"
-include("application")
+include("application", "server")
