@@ -12,7 +12,7 @@ object DatabaseFactory {
         val database = Database.connect(jdbcURL, driverClassName)
 
         transaction(database) {
-            // Statements here
+            // create tables if not already created
             SchemaUtils.create(Users);
             SchemaUtils.create(UserCourses);
         }

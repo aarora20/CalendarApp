@@ -1,7 +1,6 @@
 package com.example.models
 
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.*
 
 data class UserCourse(val userId: String, val courseId: String, val times: String)
 
