@@ -1,6 +1,6 @@
 package com.example.plugins
 
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.serialization.jackson.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -14,6 +14,7 @@ fun Application.configureSerialization() {
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)
         }
+
     }
     routing {
         get("/json/kotlinx-serialization") {
