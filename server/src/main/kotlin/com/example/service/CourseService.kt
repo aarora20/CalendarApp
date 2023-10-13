@@ -41,9 +41,31 @@ suspend fun fetchClassScheduleBySubjectAndCatalogNumber(client: HttpClient, term
 
 
 // Courses
-suspend fun fetchCourses(client: HttpClient): Courses {
-    return client.get("https://openapi.data.uwaterloo.ca/v3/Courses/1239").body()
+suspend fun fetchCourses(client: HttpClient, termCode: String): Courses {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode")
+    return response.body<Courses>()
 }
+
+suspend fun fetchCourseByTermAndId(client: HttpClient, termCode: String, courseId: String): Courses {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode/$courseId")
+    return response.body<Courses>()
+}
+
+suspend fun fetchCourseOfferNumber(client: HttpClient, termCode: String, courseId: String, offerNumber: String): CourseDetails {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode/$courseId/$offerNumber")
+    return response.body<CourseDetails>()
+}
+
+suspend fun fetchCoursesBySubject(client: HttpClient, termCode: String, subject: String): Courses {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode/$subject")
+    return response.body<Courses>()
+}
+
+suspend fun fetchCourseByCatalogNumber(client: HttpClient, termCode: String, subject: String, catalogNumber: String): Courses {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode/$subject/$catalogNumber")
+    return response.body<Courses>()
+}
+
 // Subjects
 suspend fun fetchSubjects(client: HttpClient): Subjects {
     val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Subjects")

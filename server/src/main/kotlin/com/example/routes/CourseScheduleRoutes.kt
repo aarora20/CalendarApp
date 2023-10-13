@@ -40,12 +40,48 @@ fun Route.courseSchedulesRouting() {
     }
 
     // Courses
-    route("/courses") {
+    route("/courses/{termCode}") {
         handle {
-            val data = fetchCourses(client)
+            val termCode = call.parameters["termCode"] ?: throw IllegalArgumentException("Missing or malformed termCode")
+            val data = fetchCourses(client, termCode)
             call.respond(data)
         }
+        route("/{courseId}") {
+            handle {
+                val termCode = call.parameters["TermCode"] ?: throw IllegalArgumentException("Missing or malformed TermCode")
+                val courseId = call.parameters["courseId"] ?: throw IllegalArgumentException("Missing or malformed courseId")
+                val data = fetchCourseByTermAndId(client, termCode, courseId)
+                call.respond(data)
+            }
+        }
+        route("/{courseId}/{offerNumber}") {
+            handle {
+                val termCode = call.parameters["TermCode"] ?: throw IllegalArgumentException("Missing or malformed TermCode")
+                val courseId = call.parameters["courseId"] ?: throw IllegalArgumentException("Missing or malformed courseId")
+                val offerNumber = call.parameters["offerNumber"] ?: throw IllegalArgumentException("Missing or malformed offerNumber")
+                val data = fetchCourseOfferNumber(client, termCode, courseId, offerNumber)
+                call.respond(data)
+            }
+        }
+        route("/{subject}") {
+            handle {
+                val termCode = call.parameters["TermCode"] ?: throw IllegalArgumentException("Missing or malformed TermCode")
+                val subject = call.parameters["subject"] ?: throw IllegalArgumentException("Missing or malformed subject")
+                val data = fetchCoursesBySubject(client, termCode, subject)
+                call.respond(data)
+            }
+        }
+        route("/{subject}/{catalogNumber}") {
+            handle {
+                val termCode = call.parameters["TermCode"] ?: throw IllegalArgumentException("Missing or malformed TermCode")
+                val subject = call.parameters["subject"] ?: throw IllegalArgumentException("Missing or malformed subject")
+                val catalogNumber = call.parameters["catalogNumber"] ?: throw IllegalArgumentException("Missing or malformed catalogNumber")
+                val data = fetchCourseByCatalogNumber(client, termCode, subject, catalogNumber)
+                call.respond(data)
+            }
+        }
     }
+
     // Subjects
     route("/subjects") {
         handle {
@@ -67,6 +103,7 @@ fun Route.courseSchedulesRouting() {
             }
         }
     }
+
     // Terms
     route("/terms") {
         handle {
