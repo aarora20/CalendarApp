@@ -20,6 +20,8 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation("com.arkivanov.decompose:decompose:2.0.0")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0")
 }
 
 compose.desktop {
