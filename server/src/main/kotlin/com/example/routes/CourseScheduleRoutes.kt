@@ -9,13 +9,37 @@ const val apiToken = "C6990FF709E54275BEC5687553B94B51"  // Centralized API toke
 fun Route.courseSchedulesRouting() {
 
     val client = httpClient(apiToken)  // Reuse HttpClient instance
-
-    route("/classSchedules") {
+    // Class Schedules
+    route("/classSchedules/{termCode}") {
         handle {
-            val data = fetchClassSchedules(client)
+            val termCode = call.parameters["termCode"] ?: throw IllegalArgumentException("Missing or malformed termCode")
+            val data = fetchClassSchedule(client, termCode)
             call.respond(data)
         }
+
+        route("/{courseId}") {
+            handle {
+                val termCode = call.parameters["termCode"] ?: throw IllegalArgumentException("Missing or malformed termCode")
+                val courseId = call.parameters["courseId"] ?: throw IllegalArgumentException("Missing or malformed courseId")
+
+                val data = fetchClassScheduleByCourseId(client, termCode, courseId)
+                call.respond(data)
+            }
+        }
+
+        route("/{subject}/{catalogNumber}") {
+            handle {
+                val termCode = call.parameters["termCode"] ?: throw IllegalArgumentException("Missing or malformed termCode")
+                val subject = call.parameters["subject"] ?: throw IllegalArgumentException("Missing or malformed subject")
+                val catalogNumber = call.parameters["catalogNumber"] ?: throw IllegalArgumentException("Missing or malformed catalogNumber")
+
+                val data = fetchClassScheduleBySubjectAndCatalogNumber(client, termCode, subject, catalogNumber)
+                call.respond(data)
+            }
+        }
     }
+
+    // Courses
     route("/courses") {
         handle {
             val data = fetchCourses(client)

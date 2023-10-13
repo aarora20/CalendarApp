@@ -23,10 +23,24 @@ fun httpClient(apiToken: String) = HttpClient(CIO) {
     }
 }
 
-suspend fun fetchClassSchedules(client: HttpClient): ClassSchedules {
-    return client.get("https://openapi.data.uwaterloo.ca/v3/ClassSchedules/1239").body()
+// Class Schedules
+suspend fun fetchClassSchedule(client: HttpClient, termCode: String): ClassScheduleStrings {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/ClassSchedules/$termCode")
+    return response.body<ClassScheduleStrings>()
 }
 
+suspend fun fetchClassScheduleByCourseId(client: HttpClient, termCode: String, courseId: String): ClassSchedules {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/ClassSchedules/$termCode/$courseId")
+    return response.body<ClassSchedules>()
+}
+
+suspend fun fetchClassScheduleBySubjectAndCatalogNumber(client: HttpClient, termCode: String, subject: String, catalogNumber: String): ClassSchedules {
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/ClassSchedules/$termCode/$subject/$catalogNumber")
+    return response.body<ClassSchedules>()
+}
+
+
+// Courses
 suspend fun fetchCourses(client: HttpClient): Courses {
     return client.get("https://openapi.data.uwaterloo.ca/v3/Courses/1239").body()
 }
