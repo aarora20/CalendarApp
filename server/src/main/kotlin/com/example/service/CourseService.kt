@@ -16,6 +16,7 @@ fun httpClient(apiToken: String) = HttpClient(CIO) {
         json(Json {
             prettyPrint = true
             isLenient = true
+            ignoreUnknownKeys = true
         })
     }
     defaultRequest {

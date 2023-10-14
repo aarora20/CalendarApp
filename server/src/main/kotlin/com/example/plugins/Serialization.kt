@@ -14,6 +14,7 @@ fun Application.configureSerialization() {
         json(Json {
             prettyPrint = true
             isLenient = true
+            ignoreUnknownKeys = true
         })
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)
