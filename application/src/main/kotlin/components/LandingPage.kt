@@ -1,16 +1,12 @@
 package components
 
-import CourseSearchScreen
+import components.courseSearch.CourseSearchScreen
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-
 
 @Immutable
 sealed class Screen {
@@ -18,13 +14,14 @@ sealed class Screen {
     object CourseSelection : Screen()
     object CourseSearch : Screen()
 }
+
 @Composable
-fun LandingPage() {
+fun landingPage() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
 
     when (currentScreen) {
         is Screen.Landing -> {
-            LandingScreen(
+            landingScreen(
                 onCourseSelectionClick = {
                     currentScreen = Screen.CourseSelection
                 },
@@ -47,19 +44,19 @@ fun LandingPage() {
 }
 
 @Composable
-fun LandingScreen(
+fun landingScreen(
     onCourseSelectionClick: () -> Unit,
     onCourseSearchClick: () -> Unit
 ) {
-    Column(
+    Row (
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         Button(onClick = onCourseSelectionClick) {
             Text("Course Selection")
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Button(onClick = onCourseSearchClick) {
             Text("Course Search")
         }
@@ -68,12 +65,15 @@ fun LandingScreen(
 
 @Composable
 fun CourseSelectionScreen(onBackClick: () -> Unit) {
+    var text by remember { mutableStateOf("") }
     // Content for Course Selection screen
     Column {
         Text("Course Selection Screen")
         Button(onClick = onBackClick) {
             Text("Back")
         }
+        TextField( value = text,
+            onValueChange = { text = it },)
     }
 }
 
