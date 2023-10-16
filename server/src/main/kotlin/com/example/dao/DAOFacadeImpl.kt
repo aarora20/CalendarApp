@@ -1,9 +1,9 @@
 package com.example.dao
 
-import com.example.models.Course
 import com.example.models.User
 import com.example.models.Users
 import com.example.dao.DatabaseFactory.dbQuery
+import com.example.models.UserCourse
 import com.example.models.UserCourses
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -17,9 +17,13 @@ class DAOFacadeImpl : DAOFacade {
         username = row[Users.username]
     )
 
-    private fun resultRowToCourse(row: ResultRow) = Course(
-        id = row[UserCourses.courseId],
-        times = row[UserCourses.times]
+    private fun resultRowToCourse(row: ResultRow) = UserCourse(
+        courseId = row[UserCourses.courseId],
+        courseName = row[UserCourses.courseName],
+        component = row[UserCourses.component],
+        startTime = row[UserCourses.startTime],
+        endTime = row[UserCourses.endTime],
+        weekPattern = row[UserCourses.weekPattern]
     )
     override suspend fun allUsers(): List<User> = dbQuery {
         Users.selectAll().map(::resultRowToUser)
@@ -42,7 +46,7 @@ class DAOFacadeImpl : DAOFacade {
         Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
     }
 
-    override suspend fun updateUserCourses(userIdArg: String, courses: List<Course>): Boolean = dbQuery {
+    override suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean = dbQuery {
        try {
             transaction {
                 val userExists = Users.select { Users.id eq UUID.fromString(userIdArg)}.count() > 0
@@ -50,12 +54,20 @@ class DAOFacadeImpl : DAOFacade {
                 if (userExists) {
                     UserCourses.deleteWhere { UserCourses.userId eq UUID.fromString(userIdArg) }
                     courses.forEach { it ->
-                        val courseId = it.id
-                        val times = it.times
+                        val courseId = it.courseId
+                        val courseName = it.courseName
+                        val component = it.component
+                        val startTime = it.startTime
+                        val endTime = it.endTime
+                        val weekPattern = it.weekPattern
                         UserCourses.insert {
                             it[UserCourses.userId] = UUID.fromString(userIdArg)
                             it[UserCourses.courseId] = courseId
-                            it[UserCourses.times] = times
+                            it[UserCourses.courseName] = courseName
+                            it[UserCourses.component] = component
+                            it[UserCourses.startTime] = startTime
+                            it[UserCourses.endTime] = endTime
+                            it[UserCourses.weekPattern] = weekPattern
                         }
 
                     }
@@ -71,10 +83,11 @@ class DAOFacadeImpl : DAOFacade {
 
     }
 
-    override suspend fun getAllUserCourses(id: String): List<Course> = dbQuery {
+    override suspend fun getAllUserCourses(id: String): List<UserCourse> = dbQuery {
         try {
             transaction {
-                val userCoursesQuery = (UserCourses innerJoin Users).slice(UserCourses.courseId, UserCourses.times)
+                val userCoursesQuery = (UserCourses innerJoin Users).slice(UserCourses.courseId, UserCourses.component
+                ,UserCourses.courseName, UserCourses.startTime, UserCourses.endTime, UserCourses.weekPattern)
                     .select { Users.id eq UUID.fromString(id) }
 
                 userCoursesQuery.map(::resultRowToCourse)

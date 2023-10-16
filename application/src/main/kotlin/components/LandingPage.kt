@@ -1,5 +1,6 @@
 package components
 
+import APIclient.CourseSchedulesClient
 import components.courseSearch.CourseSearchScreen
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,9 @@ import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import components.calendar.render
+import io.ktor.client.plugins.*
+import kotlinx.coroutines.launch
 
 @Immutable
 sealed class Screen {
@@ -18,6 +22,19 @@ sealed class Screen {
 @Composable
 fun landingPage() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
+    var courseNames by remember { mutableStateOf(emptyList<String>()) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(true) {
+        scope.launch{
+            try {
+                courseNames = CourseSchedulesClient.getCourses().map { "${it.subjectCode}${it.catalogNumber}"}
+
+            }catch (e: ClientRequestException) {
+                println("Error fetching data: ${e.message}")
+            }
+        }
+    }
 
     when (currentScreen) {
         is Screen.Landing -> {
@@ -38,7 +55,7 @@ fun landingPage() {
         is Screen.CourseSearch -> {
             CourseSearchScreen(onBackClick = {
                 currentScreen = Screen.Landing
-            })
+            },  courses = courseNames)
         }
     }
 }
@@ -48,6 +65,7 @@ fun landingScreen(
     onCourseSelectionClick: () -> Unit,
     onCourseSearchClick: () -> Unit
 ) {
+
     Row (
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -68,12 +86,10 @@ fun CourseSelectionScreen(onBackClick: () -> Unit) {
     var text by remember { mutableStateOf("") }
     // Content for Course Selection screen
     Column {
-        Text("Course Selection Screen")
         Button(onClick = onBackClick) {
             Text("Back")
         }
-        TextField( value = text,
-            onValueChange = { text = it },)
+        render()
     }
 }
 

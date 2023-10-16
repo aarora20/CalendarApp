@@ -9,8 +9,8 @@ interface DAOFacade {
 
     suspend fun deleteUser(id: String): Boolean
 
-    suspend fun updateUserCourses(userIdArg: String, courses: List<Course>): Boolean
-    suspend fun getAllUserCourses(id: String): List<Course>
+    suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean
+    suspend fun getAllUserCourses(id: String): List<UserCourse>
 
 
 }
