@@ -26,12 +26,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import androidx.compose.ui.unit.sp
 
 
 data class UniClass(
@@ -109,7 +112,6 @@ val fridayClasses = fakeClasses.filter { it.days.contains("F") }
 val saturdayClasses = fakeClasses.filter { it.days.contains("Sa") }
 val sundayClasses = fakeClasses.filter { it.days.contains("Su") }
 
-
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
 @Composable
@@ -129,10 +131,57 @@ fun oneClass (
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        Text(uniclass.name)
-        Text(uniclass.type + " " + uniclass.typeNum)
-        Text(uniclass.start.format(TimeFormatter) + " - " + uniclass.finish.format(TimeFormatter))
+        Text(uniclass.name,
+            fontSize = 12.sp)
+        Text(uniclass.type + " " + uniclass.typeNum,
+            fontSize = 12.sp)
+        Text(uniclass.start.format(TimeFormatter) + " - " + uniclass.finish.format(TimeFormatter),
+            fontSize = 12.sp)
     }
+}
+
+private val HourFormatter = DateTimeFormatter.ofPattern("h a")
+
+@Composable
+fun BasicSidebarLabel(
+    time: LocalTime,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = time.format(HourFormatter),
+        fontSize = 12.sp,
+        modifier = modifier
+            .fillMaxHeight()
+            .padding(4.dp)
+    )
+}
+
+@Preview
+@Composable
+fun BasicSidebarLabelPreview() {
+    BasicSidebarLabel(time = LocalTime.parse("07:00:00"), Modifier.sizeIn(maxHeight = 80.dp))
+}
+
+@Composable
+fun ScheduleSidebar(
+    hourHeight: Dp,
+    modifier: Modifier = Modifier,
+    label: @Composable (time: LocalTime) -> Unit = { BasicSidebarLabel(time = it) },
+) {
+    Column(modifier = modifier) {
+        val startTime = LocalTime.parse("06:00:00")
+        repeat(15) { i ->
+            Box(modifier = Modifier.height(hourHeight)) {
+                label(startTime.plusHours(i.toLong()))
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ScheduleSidebarPreview() {
+    ScheduleSidebar(hourHeight = 80.dp)
 }
 
 // allows us to attach data to a composable with a modifier
@@ -146,6 +195,7 @@ private class ClassDataModifier(
 
 // add customer modifier to attach data as parentData to composable
 private fun Modifier.classData(uniclass: UniClass) = this.then(ClassDataModifier(uniclass))
+
 
 @Composable
 fun Schedule(
@@ -170,7 +220,7 @@ fun Schedule(
 
     ) { classMeasureables, constraints ->
 
-        val height = hourHeight.roundToPx() * 22
+        val height = hourHeight.roundToPx() * 15
         val placeablesWithClasses = classMeasureables.map { measurable ->
             val uniclass = measurable.parentData as UniClass
             val classDurationMinutes = ChronoUnit.MINUTES.between(uniclass.start, uniclass.finish)
@@ -190,28 +240,30 @@ fun Schedule(
     }
 }
 
+
 @Composable
 fun rendor() {
     Row (
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
+
     ) {
-        Column(
+
+        Column (
             modifier = Modifier
-                .background(Color(0xFFE8DAEF))
                 .weight(1f)
-                .padding(top = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(top = 4.dp)
 
         ) {
-            Text("SUNDAY")
-            Schedule(sundayClasses)
+            Text("TIMES",
+                textAlign = TextAlign.Center)
+            ScheduleSidebarPreview()
         }
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD4E6F1))
+                //.background(Color(0xFFD4E6F1))
                 .weight(1f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -223,7 +275,7 @@ fun rendor() {
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD6EAF8))
+                //.background(Color(0xFFD6EAF8))
                 .weight(1f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -235,7 +287,7 @@ fun rendor() {
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD1F2EB))
+                //.background(Color(0xFFD1F2EB))
                 .weight(1f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -247,7 +299,7 @@ fun rendor() {
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD0ECE7))
+                //.background(Color(0xFFD0ECE7))
                 .weight(1f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -259,7 +311,7 @@ fun rendor() {
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD4EFDF))
+                //.background(Color(0xFFD4EFDF))
                 .weight(1f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -271,8 +323,8 @@ fun rendor() {
 
         Column(
             modifier = Modifier
-                .background(Color(0xFFD5F5E3))
-                .weight(1f)
+                //.background(Color(0xFFD4EFDF))
+                .weight(0.9f)
                 .padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
 
@@ -280,11 +332,24 @@ fun rendor() {
             Text("SATURDAY")
             Schedule(saturdayClasses)
         }
+
+        Column(
+            modifier = Modifier
+                //.background(Color(0xFFD4EFDF))
+                .weight(0.9f)
+                .padding(top = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+
+        ) {
+            Text("SUNDAY")
+            Schedule(sundayClasses)
+        }
     }
 }
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
+        // oneTime(LocalTime.parse("07:00:00"))
         rendor()
     }
 }
