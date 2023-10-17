@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
-
 data class UniClass(
 
     // STAT333
@@ -36,12 +35,6 @@ data class UniClass(
     // color
     val color :Color,
 
-//    // 001, 002 (from LEC 001)
-//    val typeNum :String,
-
-//    // days (M, T, W, Th, ...)
-//    val days :List<String>,
-
     val days: String,
 
     // start time
@@ -51,57 +44,6 @@ data class UniClass(
     // finish time
     val finish :LocalDateTime
 )
-
-//private val fakeClasses = listOf(
-//    UniClass(
-//        name = "STAT 333",
-//        type = "LEC",
-//        typeNum = "001",
-//        days = listOf("M", "W", "F"),
-//        start = LocalDateTime.parse("2002-10-18T13:30:00"),
-//        finish = LocalDateTime.parse("2002-10-18T14:20:00"),
-//        color = Color(0xffffeb46)
-//    ),
-//
-//    UniClass(
-//        name = "STAT 333",
-//        type = "TUT",
-//        typeNum = "001",
-//        days = listOf("F"),
-//        start = LocalDateTime.parse("2002-10-18T15:00:00"),
-//        finish = LocalDateTime.parse("2002-10-18T15:50:00"),
-//        color = Color(0xffffeb46)
-//    ),
-//
-//    UniClass(
-//        name = "CS 346",
-//        type = "LEC",
-//        typeNum = "001",
-//        days = listOf("Tu", "Th"),
-//        start = LocalDateTime.parse("2002-10-18T10:30:00"),
-//        finish = LocalDateTime.parse("2002-10-18T12:20:00"),
-//        color = Color(0xFF9CCC65)
-//    ),
-//
-//    UniClass(
-//        name = "AFM 425",
-//        type = "LEC",
-//        typeNum = "002",
-//        days = listOf("M", "W", "F"),
-//        start = LocalDateTime.parse("2002-10-18T07:00:00"),
-//        finish = LocalDateTime.parse("2002-10-18T08:20:00"),
-//        color = Color(0xFFABEBC6)
-//    )
-//)
-
-//val mondayClasses = fakeClasses.filter { it.days.contains("M") }
-//val tuesdayClasses = fakeClasses.filter { it.days.contains("Tu") }
-//val wednesdayClasses = fakeClasses.filter { it.days.contains("W") }
-//val thursdayClasses = fakeClasses.filter { it.days.contains("Th") }
-//val fridayClasses = fakeClasses.filter { it.days.contains("F") }
-//val saturdayClasses = fakeClasses.filter { it.days.contains("Sa") }
-//val sundayClasses = fakeClasses.filter { it.days.contains("Su") }
-
 
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
