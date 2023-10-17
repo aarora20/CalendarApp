@@ -1,6 +1,5 @@
 package components.courseSearch
 
-import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -44,10 +43,8 @@ fun DropSearch(courses: List<String>) {
                 } else {
                     text
                 }
-                println(searchText)
                 searchedCourses = FuzzySearch.extractTop(searchText.uppercase(Locale.getDefault()), courses, 5)
                     .map { it.toString() }
-                println(searchedCourses)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             }
