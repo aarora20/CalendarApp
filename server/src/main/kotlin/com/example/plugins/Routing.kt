@@ -1,13 +1,15 @@
 package com.example.plugins
 
+import com.example.routes.userRouting
+import com.example.routes.courseSchedulesRouting
 import io.ktor.server.application.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import com.example.routes.userCoursesRouting
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
+        userRouting()
+        userCoursesRouting()
+        courseSchedulesRouting()
     }
 }
