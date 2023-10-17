@@ -204,14 +204,15 @@ fun RowScope.TableCell(
     button: Int
 ) {
     if (button == 1) {
-        var addCoursestr by remember { mutableStateOf("       + Course Schedule           ") }
+        var addCoursestr by remember { mutableStateOf("+ Course Schedule") }
         TextButton(
             onClick = {
                 Modifier
-                    .fillMaxWidth()
+                    //.fillMaxWidth()
+                    .weight(weight)
                     .border(0.dp, Color.Black)
                     .padding(0.dp)
-                addCoursestr = "  Added to Course Schedule!    "
+                addCoursestr = "Added to Course Schedule!"
 
             }
         ) {
