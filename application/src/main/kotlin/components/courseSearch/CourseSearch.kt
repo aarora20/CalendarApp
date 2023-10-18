@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import components.courseInfo.coursePage
 import fuzzySearch.FuzzySearch
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
@@ -52,7 +53,7 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
             }
             is SearchScreen.CourseInfo -> {
                 courseMap[course]?.let {
-                    CourseInfo(onBackClick = {
+                    coursePage(onBackClick = {
                         currentScreen = SearchScreen.Search
                     }, it)
                 }

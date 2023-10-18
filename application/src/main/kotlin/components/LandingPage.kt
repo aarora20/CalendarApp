@@ -1,19 +1,18 @@
 package components
 
 import APIclient.CourseSchedulesClient
-import components.courseSearch.CourseSearchScreen
-import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import components.calendar.render
-import components.selectedCourses.CourseSelectionScreen
+import components.courseSearch.CourseSearchScreen
+import components.selectedCourses.courseSelection
+import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
-import models.Courses
 
 @Immutable
 sealed class Screen {
@@ -51,7 +50,7 @@ fun landingPage() {
             )
         }
         is Screen.CourseSelection -> {
-            CourseSelectionScreen(onBackClick = {
+            selectionScreen(onBackClick = {
                 currentScreen = Screen.Landing
             })
         }
