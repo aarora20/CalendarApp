@@ -286,7 +286,6 @@ fun tableScreen(
 }
 
 fun List<String>.concat() = this.joinToString("/") { it }.takeWhile { it.isDefined() }
-@Composable
 /*
 fun schedule(
     classes: UniCourse,
