@@ -21,25 +21,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import components.courseInfo.coursePage
 import fuzzySearch.FuzzySearch
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
+import models.CourseDetails
 import java.util.*
 
-@Composable
-fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<String>) {
-    // Content for Course Search screen
-    Column {
-        Button(onClick = onBackClick) {
-            Text("Back")
-        }
-        CustomSearchBar(courses)
-    }
+@Immutable
+sealed class SearchScreen {
+    object Search : SearchScreen()
+    object CourseInfo : SearchScreen()
 }
 
 
 @Composable
-fun CustomSearchBar(courses: List<String>) {
+fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
+    val courseNames = courses.map { "${it.subjectCode}${it.catalogNumber}" }
+    val courseMap =courses.associateBy { it.subjectCode + it.catalogNumber }
+    var currentScreen by remember { mutableStateOf<SearchScreen>(SearchScreen.Search) }
+    var course by remember { mutableStateOf("") }
+
+    // Content for Course Search screen
+    Column {
+        when (currentScreen) {
+            is SearchScreen.Search -> {
+                CustomSearchBar(courseNames, onBackClick) {
+                    course = it
+                    currentScreen = SearchScreen.CourseInfo
+                }
+            }
+            is SearchScreen.CourseInfo -> {
+                courseMap[course]?.let {
+                    coursePage(onBackClick = {
+                        currentScreen = SearchScreen.Search
+                    }, it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomSearchBar(courses: List<String>, onBackClick: () -> Unit,
+                    changeToCourseInfo: (course: String) -> Unit,
+                    ) {
     var text by remember { mutableStateOf("") }
 
     var searchedCourses by remember { mutableStateOf(emptyList<String>()) }
@@ -55,8 +81,10 @@ fun CustomSearchBar(courses: List<String>) {
             }
         }
     }
-
     Column {
+        Button(onClick = onBackClick) {
+            Text("Back")
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,7 +92,6 @@ fun CustomSearchBar(courses: List<String>) {
             contentAlignment = Alignment.Center
         ) {
             TextField(
-
                 value = text,
                 onValueChange = { text = it },
                 label = { Text("Search") },
@@ -88,7 +115,7 @@ fun CustomSearchBar(courses: List<String>) {
                         headlineContent = { Text(course) },
                         modifier = Modifier
                             .clickable {
-                                text = course
+                                changeToCourseInfo(course)
                             }
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp)

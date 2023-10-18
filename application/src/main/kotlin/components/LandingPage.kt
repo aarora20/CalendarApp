@@ -1,16 +1,18 @@
 package components
 
 import APIclient.CourseSchedulesClient
-import components.courseSearch.CourseSearchScreen
-import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import components.calendar.render
+import components.courseSearch.CourseSearchScreen
+import components.selectedCourses.courseSelection
+import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
+import models.CourseDetails
 
 @Immutable
 sealed class Screen {
@@ -22,13 +24,13 @@ sealed class Screen {
 @Composable
 fun landingPage() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
-    var courseNames by remember { mutableStateOf(emptyList<String>()) }
+    var courseList by remember { mutableStateOf(emptyList<CourseDetails>()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(true) {
         scope.launch{
             try {
-                courseNames = CourseSchedulesClient.getCourses().map { "${it.subjectCode}${it.catalogNumber}"}
+                courseList = CourseSchedulesClient.getCourses()
 
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
@@ -48,14 +50,14 @@ fun landingPage() {
             )
         }
         is Screen.CourseSelection -> {
-            CourseSelectionScreen(onBackClick = {
+            selectionScreen(onBackClick = {
                 currentScreen = Screen.Landing
             })
         }
         is Screen.CourseSearch -> {
             CourseSearchScreen(onBackClick = {
                 currentScreen = Screen.Landing
-            },  courses = courseNames)
+            },  courses = courseList)
         }
     }
 }
@@ -78,18 +80,6 @@ fun landingScreen(
         Button(onClick = onCourseSearchClick) {
             Text("Course Search")
         }
-    }
-}
-
-@Composable
-fun CourseSelectionScreen(onBackClick: () -> Unit) {
-    var text by remember { mutableStateOf("") }
-    // Content for Course Selection screen
-    Column {
-        Button(onClick = onBackClick) {
-            Text("Back")
-        }
-        render()
     }
 }
 
