@@ -85,8 +85,6 @@ fun courseSelection(
                 Text("Update Calendar")
             }
         }
-        val n = courseList.size
-        val extra = 5 - n
         Row {
             LazyColumn(Modifier.padding(0.dp)) {
                 items(selectedCourses) {
