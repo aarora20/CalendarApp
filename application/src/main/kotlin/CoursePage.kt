@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
@@ -193,7 +194,7 @@ fun coursePage(
                 fontSize = 15.sp,
             )
         }
-        schedule(classes, sections)
+        tableScreen(classes, sections)
     }
 }
 
@@ -201,10 +202,11 @@ fun coursePage(
 fun RowScope.TableCell(
     text: String,
     weight: Float,
-    button: Int
+    button: Int,
+    header: Int
 ) {
     if (button == 1) {
-        var addCoursestr by remember { mutableStateOf("+ Course Schedule") }
+        var addCourseStr by remember { mutableStateOf("        + Course Schedule          ") }
         TextButton(
             onClick = {
                 Modifier
@@ -212,26 +214,36 @@ fun RowScope.TableCell(
                     .weight(weight)
                     .border(0.dp, Color.Black)
                     .padding(0.dp)
-                addCoursestr = "Added to Course Schedule!"
+                addCourseStr = "   Added to Course Schedule!   "
 
             }
         ) {
-            Text(addCoursestr)
+            Text(addCourseStr)
         }
+    } else if (header == 1) {
+        Text(
+            text = text,
+            Modifier
+                //.border(1.dp, Color.Black)
+                .weight(weight)
+                .padding(8.dp),
+            textAlign = TextAlign.Center
+        )
     } else {
         Text(
             text = text,
             Modifier
                 .border(1.dp, Color.Black)
                 .weight(weight)
-                .padding(8.dp)
+                .padding(8.dp),
+            textAlign = TextAlign.Center
         )
     }
 
 }
 
 @Composable
-fun TableScreen(
+fun tableScreen(
     classes: UniCourse,
     sections: List<courseSection>
 ) {
@@ -245,12 +257,15 @@ fun TableScreen(
     LazyColumn(Modifier.fillMaxSize().padding(0.dp)) {
         // Here is the header
         item {
-            Row(Modifier.background(Color.Gray)) {
-                TableCell(text = "Class", weight = classWeight, button = 0)
-                TableCell(text = "Section", weight = sectionWeight, button = 0)
-                TableCell(text = "Time", weight = timeWeight, button = 0)
-                TableCell(text = "Days", weight = dateWeight, button = 0)
-                TableCell(text = "Add to Schedule", weight = buttonWeight, button = 0)
+            Row(
+                Modifier.background(Color.Gray),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TableCell(text = "Class", weight = classWeight, button = 0, header = 1)
+                TableCell(text = "Section", weight = sectionWeight, button = 0, header = 1)
+                TableCell(text = "Time", weight = timeWeight, button = 0, header = 1)
+                TableCell(text = "Days", weight = dateWeight, button = 0, header = 1)
+                TableCell(text = "Add to Course Schedule", weight = buttonWeight, button = 0, header = 1)
             }
         }
         // Here are all the lines of your table.
@@ -260,11 +275,11 @@ fun TableScreen(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TableCell(text = classNum, weight = classWeight, button = 0)
-                TableCell(text = courseComp + " " + sectionNum, weight = sectionWeight, button = 0)
-                TableCell(text = start + " - " + end, weight = timeWeight, button = 0)
-                TableCell(text = date.concat(), weight = dateWeight, button = 0)
-                TableCell(text = "", weight = buttonWeight, button = 1)
+                TableCell(text = classNum, weight = classWeight, button = 0, header = 0)
+                TableCell(text = "$courseComp $sectionNum", weight = sectionWeight, button = 0, header = 0)
+                TableCell(text = "$start - $end", weight = timeWeight, button = 0, header = 0)
+                TableCell(text = date.concat(), weight = dateWeight, button = 0, header = 0)
+                TableCell(text = "", weight = buttonWeight, button = 1, header = 0)
             }
         }
     }
@@ -272,11 +287,12 @@ fun TableScreen(
 
 fun List<String>.concat() = this.joinToString("/") { it }.takeWhile { it.isDefined() }
 @Composable
+/*
 fun schedule(
     classes: UniCourse,
     sections: List<courseSection>
 ) {
-    TableScreen(classes, sections)
+    tableScreen(classes, sections)
     /*
     Row (
         Modifier.fillMaxWidth().padding(vertical = 5.dp),
@@ -355,3 +371,4 @@ fun schedule(
     }
     */
 }
+ */
