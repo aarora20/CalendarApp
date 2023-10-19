@@ -30,8 +30,6 @@ data class UniCourse( // The high-level information required for each course
     val description :String,
     // Prereq: ...
     val requirementsDescription :String,
-    // Has the course been added to schedule ? 1 : 0
-    var courseAdded :Int
 )
 
 private val fakeCourse = UniCourse( // Using CS 346 as a test course
@@ -43,7 +41,6 @@ private val fakeCourse = UniCourse( // Using CS 346 as a test course
             " to design and build complete, working applications and services using standard tools. Topics include " +
             "best-practices in design, development, testing, and deployment.",
     requirementsDescription = "Prereq: CS 246/246E; Computer Science students only",
-    courseAdded = 0
 )
 
 data class courseSection( // information for each course's individual section
@@ -60,8 +57,6 @@ data class courseSection( // information for each course's individual section
     val classMeetingStartTime :String,
     // finish time
     val classMeetingEndTime :String,
-    // If section has been added ? 1 : 0
-    var sectionAdded :Int
 )
 
 private val fakeSections = listOf( // Using CS346's different sections as a test
@@ -72,7 +67,6 @@ private val fakeSections = listOf( // Using CS346's different sections as a test
         days = listOf("W"),
         classMeetingStartTime = "10:30 AM",
         classMeetingEndTime = "12:20 PM",
-        sectionAdded = 0
     ),
     courseSection(
         classNumber = "6905",
@@ -81,7 +75,6 @@ private val fakeSections = listOf( // Using CS346's different sections as a test
         days = listOf("W"),
         classMeetingStartTime = "02:30 PM",
         classMeetingEndTime = "04:20 PM",
-        sectionAdded = 0
     ),
     courseSection(
         classNumber = "6906",
@@ -90,7 +83,6 @@ private val fakeSections = listOf( // Using CS346's different sections as a test
         days = listOf("F"),
         classMeetingStartTime = "10:30 AM",
         classMeetingEndTime = "12:20 PM",
-        sectionAdded = 0
     ),
     courseSection(
         classNumber = "6907",
@@ -99,7 +91,6 @@ private val fakeSections = listOf( // Using CS346's different sections as a test
         days = listOf("F"),
         classMeetingStartTime = "02:30 PM",
         classMeetingEndTime = "04:20 PM",
-        sectionAdded = 0
     )
 )
 
