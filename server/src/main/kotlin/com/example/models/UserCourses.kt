@@ -4,13 +4,14 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.UUIDTable
 
 @Serializable
-data class UserCourse(val courseId: String, val courseName: String, val component: String,
+data class UserCourse(val courseId: String, val courseNum: String, val courseTitle: String, val component: String,
     val startTime: String, val endTime: String, val weekPattern: String)
 
 object UserCourses : UUIDTable() {
     val userId = reference("user_id", Users)
     val courseId = varchar("course_id", 50)
-    val courseName = varchar("course_name", 50)
+    val courseNum = varchar("course_number", 50)
+    val courseTitle = varchar("course_title", 50)
     val component = varchar("component", 50)
     val startTime = varchar("start_time", 50)
     val endTime = varchar("end_time", 50)

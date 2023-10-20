@@ -1,5 +1,6 @@
 package components.courseSearch
 
+import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,21 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
     val courseMap =courses.associateBy { it.subjectCode + it.catalogNumber }
     var currentScreen by remember { mutableStateOf<SearchScreen>(SearchScreen.Search) }
     var course by remember { mutableStateOf("") }
+    var addedCourses by remember { mutableStateOf(emptySet<String>()) }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(true) {
+        scope.launch{
+            try {
+                addedCourses = CourseSchedulesClient.getUserCourses().map { it.courseNum + it.component }.toSet()
+            }catch (e: ClientRequestException) {
+                println("Error fetching data: ${e.message}")
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
 
     // Content for Course Search screen
     Column {
@@ -53,7 +69,7 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
             }
             is SearchScreen.CourseInfo -> {
                 courseMap[course]?.let {
-                    coursePage(onBackClick = {
+                    coursePage(addedCourses, onBackClick = {
                         currentScreen = SearchScreen.Search
                     }, it)
                 }
