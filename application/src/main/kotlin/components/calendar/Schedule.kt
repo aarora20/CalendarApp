@@ -167,10 +167,9 @@ fun Schedule(
 
         layout(constraints.maxWidth, height) {
             placeablesWithClasses.forEach { (placeable, uniclass) ->
-                val eventOffsetMinutes = ChronoUnit.MINUTES.between(LocalTime.MIN, uniclass.start.toLocalTime())
+                val eventOffsetMinutes = ChronoUnit.MINUTES.between(LocalTime.parse("06:00:00"), uniclass.start.toLocalTime())
                 val eventY = ((eventOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
-
-                placeable.place(0, eventY - 700)
+                placeable.place(0, eventY)
             }
         }
     }
