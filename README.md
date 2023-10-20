@@ -20,7 +20,7 @@ with your own ID (e.g. the url is http://0.0.0.0:8080/user/48d99b1a-d963-4686-87
 Replace "48d99..d9f" with your own.
 
 To package the app, simply go the gradle menu on IntelliJ and go to the application folder and then the compose
-desktop folder in which you will find the commandp packageDmg. This will create an installer on your local machine.
+desktop folder in which you will find the command packageDmg. This will create an installer on your local machine.
 
 ## Getting started
 
