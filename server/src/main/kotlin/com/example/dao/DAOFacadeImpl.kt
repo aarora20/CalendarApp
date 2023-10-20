@@ -19,7 +19,8 @@ class DAOFacadeImpl : DAOFacade {
 
     private fun resultRowToCourse(row: ResultRow) = UserCourse(
         courseId = row[UserCourses.courseId],
-        courseName = row[UserCourses.courseName],
+        courseNum = row[UserCourses.courseNum],
+        courseTitle = row[UserCourses.courseTitle],
         component = row[UserCourses.component],
         startTime = row[UserCourses.startTime],
         endTime = row[UserCourses.endTime],
@@ -46,24 +47,60 @@ class DAOFacadeImpl : DAOFacade {
         Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
     }
 
+    override suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse? = dbQuery {
+        try {
+            transaction {
+                val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0
+
+                if (userExists) {
+                    val courseExists = UserCourses.select { (UserCourses.courseNum eq course.courseNum) and
+                            (UserCourses.component eq course.component)}.count() > 0
+
+                    if (!courseExists) {
+                        UserCourses.insert {
+                            it[userId] = UUID.fromString(userIdArg)
+                            it[courseId] = course.courseId
+                            it[courseNum] = course.courseNum
+                            it[courseTitle] = course.courseTitle
+                            it[component] = course.component
+                            it[startTime] = course.startTime
+                            it[endTime] = course.endTime
+                            it[weekPattern] = course.weekPattern
+                        }
+                        course
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     override suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean = dbQuery {
        try {
             transaction {
                 val userExists = Users.select { Users.id eq UUID.fromString(userIdArg)}.count() > 0
 
                 if (userExists) {
-                    UserCourses.deleteWhere { UserCourses.userId eq UUID.fromString(userIdArg) }
+                    UserCourses.deleteWhere { userId eq UUID.fromString(userIdArg) }
                     courses.forEach { it ->
                         val courseId = it.courseId
-                        val courseName = it.courseName
+                        val courseNum = it.courseNum
                         val component = it.component
                         val startTime = it.startTime
                         val endTime = it.endTime
                         val weekPattern = it.weekPattern
+                        val courseTitle = it.courseTitle
                         UserCourses.insert {
-                            it[UserCourses.userId] = UUID.fromString(userIdArg)
+                            it[userId] = UUID.fromString(userIdArg)
                             it[UserCourses.courseId] = courseId
-                            it[UserCourses.courseName] = courseName
+                            it[UserCourses.courseNum] = courseNum
+                            it[UserCourses.courseTitle] = courseTitle
                             it[UserCourses.component] = component
                             it[UserCourses.startTime] = startTime
                             it[UserCourses.endTime] = endTime
@@ -87,7 +124,8 @@ class DAOFacadeImpl : DAOFacade {
         try {
             transaction {
                 val userCoursesQuery = (UserCourses innerJoin Users).slice(UserCourses.courseId, UserCourses.component
-                ,UserCourses.courseName, UserCourses.startTime, UserCourses.endTime, UserCourses.weekPattern)
+                ,UserCourses.courseNum, UserCourses.courseTitle, UserCourses.startTime,
+                    UserCourses.endTime, UserCourses.weekPattern)
                     .select { Users.id eq UUID.fromString(id) }
 
                 userCoursesQuery.map(::resultRowToCourse)

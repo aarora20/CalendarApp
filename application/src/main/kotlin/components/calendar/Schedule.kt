@@ -1,14 +1,14 @@
 package components.calendar
 
-import APIclient.CourseSchedulesClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,8 +19,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.ktor.client.plugins.*
-import kotlinx.coroutines.launch
+import models.UserCourse
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -179,25 +178,10 @@ fun Schedule(
 
 
 @Composable
-fun render() {
-    var selectedCourses by remember { mutableStateOf(emptyList<UniClass>()) }
-
-    val userCourseScope = rememberCoroutineScope()
-
-    LaunchedEffect(true) {
-        userCourseScope.launch{
-            try {
-                selectedCourses = CourseSchedulesClient.getUserCourses().map { UniClass(it.courseName,
-                    it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
-                    LocalDateTime.parse(it.endTime))
-                }
-
-            }catch (e: ClientRequestException) {
-                println("Error fetching data: ${e.message}")
-            } catch (e : Exception) {
-                println("Error parsing data: ${e.message}")
-            }
-        }
+fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
+    val selectedCourses =  courseList.map { UniClass(it.courseNum,
+        it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
+        LocalDateTime.parse(it.endTime))
     }
 
     val mondayClasses = selectedCourses.filter { it.days.contains("M") }
@@ -208,6 +192,9 @@ fun render() {
     val saturdayClasses = selectedCourses.filter { it.days.contains("Sa") }
     val sundayClasses = selectedCourses.filter { it.days.contains("Su") }
 
+    Button(onClick = onBackClick) {
+        Text("Back")
+    }
     Row (
         modifier = Modifier
             .fillMaxWidth()

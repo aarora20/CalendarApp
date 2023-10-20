@@ -13,6 +13,7 @@ import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
+import models.UserCourse
 
 @Immutable
 sealed class Screen {
@@ -31,7 +32,6 @@ fun landingPage() {
         scope.launch{
             try {
                 courseList = CourseSchedulesClient.getCourses()
-
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             }

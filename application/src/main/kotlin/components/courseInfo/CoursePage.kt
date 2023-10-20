@@ -17,106 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.ScheduleData
-
-data class UniCourse( // The high-level information required for each course
-    // Winter 2024
-    val termName :String,
-    // CS
-    val subjectCode :String,
-    // 346
-    val catalogNumber :String,
-    // Application Development
-    val title :String,
-    // course description
-    val description :String,
-    // Prereq: ...
-    val requirementsDescription :String,
-    // Has the course been added to schedule ? 1 : 0
-    var courseAdded :Int
-)
-
-private val fakeCourse = UniCourse( // Using CS 346 as a test course
-    termName = "Fall 2023",
-    subjectCode = "CS",
-    catalogNumber = "346",
-    title = "Application Development",
-    description = "Introduction to full-stack application design and development. Students will work in project teams" +
-            " to design and build complete, working applications and services using standard tools. Topics include " +
-            "best-practices in design, development, testing, and deployment.",
-    requirementsDescription = "Prereq: CS 246/246E; Computer Science students only",
-    courseAdded = 0
-)
-
-data class courseSection( // information for each course's individual section
-    // 6904
-    val classNumber :String,
-    // LEC, TUT, TST, LAB
-    val courseComponent :String,
-    // 001, 002 (from LEC 001)
-    val classSection :String,
-    // days (M, Tu, W, Th, F, Sa, Su ...)
-    val days :List<String>,
-    // start time
-    // "1:30:00"
-    val classMeetingStartTime :String,
-    // finish time
-    val classMeetingEndTime :String,
-    // If section has been added ? 1 : 0
-    var sectionAdded :Int
-)
-
-private val fakeSections = listOf( // Using CS346's different sections as a test
-    courseSection(
-        classNumber = "6904",
-        courseComponent = "LEC",
-        classSection = "001",
-        days = listOf("W"),
-        classMeetingStartTime = "10:30 AM",
-        classMeetingEndTime = "12:20 PM",
-        sectionAdded = 0
-    ),
-    courseSection(
-        classNumber = "6905",
-        courseComponent = "LEC",
-        classSection = "002",
-        days = listOf("W"),
-        classMeetingStartTime = "02:30 PM",
-        classMeetingEndTime = "04:20 PM",
-        sectionAdded = 0
-    ),
-    courseSection(
-        classNumber = "6906",
-        courseComponent = "LAB",
-        classSection = "001",
-        days = listOf("F"),
-        classMeetingStartTime = "10:30 AM",
-        classMeetingEndTime = "12:20 PM",
-        sectionAdded = 0
-    ),
-    courseSection(
-        classNumber = "6907",
-        courseComponent = "LAB",
-        classSection = "002",
-        days = listOf("F"),
-        classMeetingStartTime = "02:30 PM",
-        classMeetingEndTime = "04:20 PM",
-        sectionAdded = 0
-    )
-)
+import models.UserCourse
 
 @Composable
 fun coursePage(
+    addedCourses: Set<String>,
     onBackClick: () -> Unit,
     course: CourseDetails,
-    // accounts for the inputs
-//    classes: UniCourse,
-//    sections: List<courseSection>
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
@@ -127,6 +39,8 @@ fun coursePage(
                 schedules = CourseSchedulesClient.getCourseSchedule(course.courseId)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
+            } catch (e: Exception) {
+                println(e.message)
             }
         }
     }
@@ -209,7 +123,7 @@ fun coursePage(
                 fontSize = 15.sp,
             )
         }
-        tableScreen(course, schedules)
+        tableScreen(course, schedules, scope, addedCourses)
     }
 }
 
@@ -218,7 +132,7 @@ fun RowScope.TableCell(
     text: String,
     weight: Float,
     button: Int,
-    header: Int
+    header: Int,
 ) {
     if (button == 1) {
         var addCourseStr by remember { mutableStateOf("        + Course Schedule          ") }
@@ -230,7 +144,6 @@ fun RowScope.TableCell(
                     .border(0.dp, Color.Black)
                     .padding(0.dp)
                 addCourseStr = "   Added to Course Schedule!   "
-
             }
         ) {
             Text(addCourseStr)
@@ -254,13 +167,76 @@ fun RowScope.TableCell(
             textAlign = TextAlign.Center
         )
     }
+}
 
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float,
+    button: Int,
+    header: Int,
+    scope: CoroutineScope,
+    course: CourseDetails,
+    schedule: ScheduleData,
+) {
+    if (button == 1) {
+        var addCourseStr by remember { mutableStateOf(text) }
+        TextButton(
+            onClick = {
+                if (text == "        + Course Schedule          ") {
+                    Modifier
+                        //.fillMaxWidth()
+                        .weight(weight)
+                        .border(0.dp, Color.Black)
+                        .padding(0.dp)
+                    addCourseStr = "   Added to Course Schedule!   "
+                    scope.launch {
+                        try {
+                            val toAdd = UserCourse(course.courseId,
+                                course.subjectCode + " " + course.catalogNumber,
+                                course.title, schedule.courseComponent + " " + schedule.classSection,
+                                schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                                schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
+                            CourseSchedulesClient.addUserCourse(toAdd)
+                        } catch (e: ClientRequestException) {
+                            println("Error fetching data: ${e.message}")
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
+                    }
+                }
+            }
+        ) {
+            Text(addCourseStr)
+        }
+    } else if (header == 1) {
+        Text(
+            text = text,
+            Modifier
+                //.border(1.dp, Color.Black)
+                .weight(weight)
+                .padding(8.dp),
+            textAlign = TextAlign.Center
+        )
+    } else {
+        Text(
+            text = text,
+            Modifier
+                .border(1.dp, Color.Black)
+                .weight(weight)
+                .padding(8.dp),
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Composable
 fun tableScreen(
     course: CourseDetails,
-    schedules: List<ScheduleData>
+    schedules: List<ScheduleData>,
+    scope: CoroutineScope,
+    addedCourses: Set<String>
 ) {
     // Each cell of a column must have the same weight.
     val sectionWeight = .15f // 15%
@@ -299,7 +275,11 @@ fun tableScreen(
                 TableCell(text = "$courseComp $sectionNum", weight = sectionWeight, button = 0, header = 0)
                 TableCell(text = "$start - $end", weight = timeWeight, button = 0, header = 0)
                 TableCell(text = date, weight = dateWeight, button = 0, header = 0)
-                TableCell(text = "", weight = buttonWeight, button = 1, header = 0)
+                TableCell(text = if (addedCourses.contains(
+                        "${course.subjectCode} ${course.catalogNumber}$courseComp $sectionNum")) {
+                    "   Added to Course Schedule!   " }
+                        else { "        + Course Schedule          "},
+                    weight = buttonWeight, button = 1, header = 0, scope, course, it)
             }
         }
     }
