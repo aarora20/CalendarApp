@@ -2,18 +2,17 @@ package components
 
 import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import components.courseSearch.CourseSearchScreen
-import components.selectedCourses.courseSelection
 import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
-import models.UserCourse
 
 @Immutable
 sealed class Screen {

@@ -5,7 +5,9 @@ import com.example.models.*
 interface DAOFacade {
     suspend fun allUsers(): List<User>
     suspend fun user(id: String): User?
-    suspend fun addNewUser(username: String): User?
+    suspend fun addNewUser(username: String, password: String): User?
+
+    suspend fun findUser(username: String): User?
 
     suspend fun deleteUser(id: String): Boolean
 
