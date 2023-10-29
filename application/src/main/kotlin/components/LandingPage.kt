@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import components.auth.LoginScreen
+import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
 import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
@@ -52,10 +53,18 @@ fun landingPage() {
         is Screen.Login -> {
             LoginScreen(onSuccess = {
                 currentScreen = Screen.Landing
+            }, onRegister = {
+                currentScreen = Screen.SignUp
             })
         }
         is Screen.SignUp -> {
-
+            RegisterScreen(
+                onSuccess = {
+                    currentScreen = Screen.Landing
+                }, onLogin = {
+                    currentScreen = Screen.Login
+                }
+            )
         }
         is Screen.Landing -> {
             landingScreen(

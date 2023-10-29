@@ -23,7 +23,6 @@ class UserService {
         }
     }
 
-
     suspend fun loginUser(username: String, password: String): UserResponse<AuthRes> {
         val user = dao.findUser(username)
         if (user != null) {
