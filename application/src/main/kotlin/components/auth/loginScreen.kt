@@ -1,5 +1,7 @@
 package components.auth
 
+import APIclient.AuthClient
+import APIclient.CourseSchedulesClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,7 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,12 +19,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import components.store
+import io.ktor.client.plugins.*
+import kotlinx.coroutines.launch
+import models.UserCourse
+import models.UserParams
+import store.SetUserID
 
 @Preview
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onSuccess: () -> Unit) {
 
-    var text by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    var errorText by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -44,8 +56,8 @@ fun LoginScreen() {
                 fontWeight = FontWeight.Bold
             ) )
             OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
+                value = username,
+                onValueChange = { username = it },
                 label = { Text("username") },
                 leadingIcon = { Icon(Icons.Filled.AccountBox, contentDescription = null) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -55,8 +67,8 @@ fun LoginScreen() {
                 ),
             )
             OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
+                value = password,
+                onValueChange = { password = it },
                 label = { Text("password") },
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -66,9 +78,29 @@ fun LoginScreen() {
                 ),
             )
 
+            Text(errorText, style = TextStyle(
+                color = Color.Red
+            ) )
+
             Button(
                 onClick = {
-
+                    scope.launch {
+                        try {
+                            val response = AuthClient.loginUser(UserParams(username, password))
+                            if (response != null) {
+                                response.data?.let { SetUserID(it.userId) }?.let { store.dispatch(it) }
+                                onSuccess()
+                            } else {
+                                errorText = "Wrong password or username does not exist"
+                            }
+                        } catch (e: ClientRequestException) {
+                            println("Error fetching data: ${e.message}")
+                            errorText = "Wrong password or username does not exist"
+                        } catch (e: Exception) {
+                            println(e.message)
+                            errorText = "Wrong password or username does not exist"
+                        }
+                    }
                 },
                 modifier = Modifier
                     .width(200.dp),

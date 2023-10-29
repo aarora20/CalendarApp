@@ -9,8 +9,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.util.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import models.Courses
 import models.ScheduleData
 import models.UserCourse
@@ -27,15 +25,15 @@ object CourseSchedulesClient {
         return response.body<Courses>()
     }
 
-    suspend fun getUserCourses(): List<UserCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/48d99b1a-d963-4686-870c-52d6bac6dd9f/courses")
+    suspend fun getUserCourses(userId: String): List<UserCourse> {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/$userId/courses")
         return response.body<List<UserCourse>>()
     }
 
     @OptIn(InternalAPI::class)
-    suspend fun addUserCourse(course: UserCourse): UserCourse? {
+    suspend fun addUserCourse(course: UserCourse, userId: String): UserCourse? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/48d99b1a-d963-4686-870c-52d6bac6dd9f/course") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/course") {
             contentType(ContentType.Application.Json)
             setBody(course)
         }
@@ -48,9 +46,9 @@ object CourseSchedulesClient {
     }
 
     @OptIn(InternalAPI::class)
-    suspend fun updateSchedule(courses: List<UserCourse>): Boolean {
+    suspend fun updateSchedule(courses: List<UserCourse>, userId: String): Boolean {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/48d99b1a-d963-4686-870c-52d6bac6dd9f/courses") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/courses") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
         }

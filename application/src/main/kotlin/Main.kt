@@ -9,8 +9,7 @@ import components.landingPage
 @Composable
 @Preview
 fun App() {
-//    landingPage()
-    LoginScreen()
+    landingPage()
 }
 
 fun main() = application {

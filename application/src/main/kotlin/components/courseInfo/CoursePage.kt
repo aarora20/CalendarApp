@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -198,7 +199,7 @@ fun RowScope.TableCell(
                                 schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
-                            CourseSchedulesClient.addUserCourse(toAdd)
+                            CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
                         } catch (e: ClientRequestException) {
                             println("Error fetching data: ${e.message}")
                         } catch (e: Exception) {
