@@ -2,29 +2,40 @@ package components
 
 import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import components.auth.LoginScreen
+import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
-import components.selectedCourses.courseSelection
 import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
-import models.UserCourse
+import org.reduxkotlin.createThreadSafeStore
+import store.AuthState
+import store.rootReducer
+import store.tokenReducer
 
 @Immutable
 sealed class Screen {
+    object Login: Screen()
+    object SignUp: Screen()
     object Landing : Screen()
     object CourseSelection : Screen()
     object CourseSearch : Screen()
 }
 
+val INITIAL_STATE = AuthState("", "")
+
+val store = createThreadSafeStore(::rootReducer, INITIAL_STATE)
+
 @Composable
 fun landingPage() {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
     var courseList by remember { mutableStateOf(emptyList<CourseDetails>()) }
     val scope = rememberCoroutineScope()
 
@@ -39,6 +50,22 @@ fun landingPage() {
     }
 
     when (currentScreen) {
+        is Screen.Login -> {
+            LoginScreen(onSuccess = {
+                currentScreen = Screen.Landing
+            }, onRegister = {
+                currentScreen = Screen.SignUp
+            })
+        }
+        is Screen.SignUp -> {
+            RegisterScreen(
+                onSuccess = {
+                    currentScreen = Screen.Landing
+                }, onLogin = {
+                    currentScreen = Screen.Login
+                }
+            )
+        }
         is Screen.Landing -> {
             landingScreen(
                 onCourseSelectionClick = {

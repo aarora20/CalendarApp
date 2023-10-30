@@ -2,6 +2,8 @@ package com.example.routes
 
 import com.example.dao.dao
 import com.example.models.User
+import com.example.models.UserParams
+import com.example.service.userService
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -9,6 +11,20 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.userRouting() {
+    route("/auth") {
+        post("/register") {
+            val params = call.receive<UserParams>()
+            val res = userService.registerUser(params.username, params.password)
+            call.respond(res.statusCode, res.data)
+        }
+
+        post("/login") {
+            val params = call.receive<UserParams>()
+            val res = userService.loginUser(params.username, params.password)
+            call.respond(res.statusCode, res.data)
+        }
+    }
+
     route("/user") {
         get("/{id}") {
             val id = call.parameters.getOrFail<String>("id")
@@ -19,16 +35,6 @@ fun Route.userRouting() {
                 call.respond("No user found!")
             }
 
-        }
-
-        post {
-            val user = call.receive<User>()
-            val createdUser = dao.addNewUser(user.username)
-            if (createdUser != null) {
-                call.respond(mapOf("id" to createdUser.id.toString()))
-            } else {
-                call.respond("Creation Failed")
-            }
         }
     }
 

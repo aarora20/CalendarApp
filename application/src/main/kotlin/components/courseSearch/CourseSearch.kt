@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import components.courseInfo.coursePage
+import components.store
 import fuzzySearch.FuzzySearch
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
@@ -49,7 +50,7 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
     LaunchedEffect(true) {
         scope.launch{
             try {
-                addedCourses = CourseSchedulesClient.getUserCourses().map { it.courseNum + it.component }.toSet()
+                addedCourses = CourseSchedulesClient.getUserCourses(store.getState().userId).map { it.courseNum + it.component }.toSet()
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {

@@ -8,13 +8,15 @@ import com.example.models.UserCourses
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.mindrot.jbcrypt.BCrypt
 import java.util.*
 
 class DAOFacadeImpl : DAOFacade {
 
     private fun resultRowToUser(row: ResultRow) = User(
         id = row[Users.id].toString(),
-        username = row[Users.username]
+        username = row[Users.username],
+        password = row[Users.password]
     )
 
     private fun resultRowToCourse(row: ResultRow) = UserCourse(
@@ -36,9 +38,16 @@ class DAOFacadeImpl : DAOFacade {
             .singleOrNull()
     }
 
-    override suspend fun addNewUser(username: String): User? = dbQuery {
+    override suspend fun findUser(username: String): User? = dbQuery {
+        Users.select { Users.username eq username}
+            .map(::resultRowToUser)
+            .singleOrNull()
+    }
+
+    override suspend fun addNewUser(username: String, password: String): User? = dbQuery {
         val insertStatement = Users.insert {
             it[Users.username] = username
+            it[Users.password] = BCrypt.hashpw(password, BCrypt.gensalt()) // to encrypt
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToUser)
     }

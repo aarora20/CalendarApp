@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.calendar.render
+import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.UserCourse
@@ -36,7 +37,7 @@ fun selectionScreen(onBackClick: () -> Unit) {
     LaunchedEffect(true) {
         userCourseScope.launch{
             try {
-                val courses = CourseSchedulesClient.getUserCourses()
+                val courses = CourseSchedulesClient.getUserCourses(store.getState().userId)
                 selectedCourses.addAll(courses)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
@@ -109,7 +110,7 @@ fun courseSelection(
                 onClick = {
                     updateScope.launch {
                         try {
-                            CourseSchedulesClient.updateSchedule(courseList.toList())
+                            CourseSchedulesClient.updateSchedule(courseList.toList(), store.getState().userId)
                         }catch (e: ClientRequestException) {
                             println("Error fetching data: ${e.message}")
                         }
