@@ -11,6 +11,9 @@ data class User(@Transient val id: String = "default", val username: String, val
 data class UserParams(val username: String, val password: String)
 
 @Serializable
+data class UsernameParams(val username: String)
+
+@Serializable
 data class AuthRes(val token: String, val userId: String)
 
 object Users : UUIDTable() {
