@@ -10,13 +10,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -29,6 +36,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import java.awt.Toolkit.getDefaultToolkit
 
 data class UniClass(
 
@@ -67,8 +75,10 @@ private class ClassDataModifier(
 // add customer modifier to attach data as parentData to composable
 private fun Modifier.classData(uniclass: UniClass) = this.then(ClassDataModifier(uniclass))
 
-
 // Global variables for the size of the calendar
+
+
+val hourHeightInt = 60
 val hourHeight = 60.dp
 val startTime = LocalTime.parse("08:00:00")
 val endTime = LocalTime.parse("22:00:00")
@@ -118,8 +128,6 @@ fun ScheduleSidebar(
     label: @Composable (time: LocalTime) -> Unit = { BasicSidebarLabel(time = it) },
 ) {
     Column(modifier = modifier) {
-
-
         repeat(hours) { i ->
             Box(modifier = Modifier.height(hourHeight)) {
                 label(startTime.plusHours(i.toLong()))
@@ -134,15 +142,13 @@ fun ScheduleSidebarPreview() {
     ScheduleSidebar(hourHeight)
 }
 
-
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Schedule(
     classes: List<UniClass>,
     modifier: Modifier = Modifier,
     uniclassContent: @Composable (uniclass: UniClass) -> Unit = { oneClass(uniclass = it) },
 ) {
-
-
 
     Layout(
         content = {
@@ -177,6 +183,7 @@ fun Schedule(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
@@ -198,25 +205,8 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
     val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY",
         "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
-    /*
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val numLines = 10
-            val lineSpacing = (size.height / numLines).roundToInt().toFloat()
-
-            for (i in 0 until numLines) {
-                val y = i * lineSpacing
-                drawLine(Color.Gray, Offset(0f, y), Offset(size.width, y))
-            }
-        }
-    }
-     */
+    // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
+    // print(screenSize.getWidth())
 
     Column (
         modifier = Modifier
@@ -239,6 +229,7 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // TIMES space
+
             Column (
                 modifier = Modifier
                     .width(50.dp)
@@ -266,11 +257,23 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         }
 
         // ACTUAL CALENDAR
+
+        var isScrollingNeeded = false
+        var screenHeight = LocalWindowInfo.current.containerSize.height
+
         Row (
             modifier = Modifier
                 .weight(0.84f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                .onSizeChanged { constraints ->
+                    var contentHeight = constraints.height
+                    print(contentHeight)
+
+                    // Compare contentHeight and screenHeight to determine if scrolling is needed
+                    isScrollingNeeded = contentHeight > screenHeight
+                }
+
                 .drawBehind {
                     val hourHeightHalf = hourHeight / 2
                     val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()
@@ -284,15 +287,25 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                         )
                     }
                 },
-        ) {
 
+        ) {
             Column (
                 modifier = Modifier
+
                     .width(50.dp)
             ) {
                 //Text("", textAlign = TextAlign.Center)
                 ScheduleSidebarPreview()
             }
+
+            var windowHeightScreenXXX = LocalWindowInfo.current.containerSize.height
+            //print(windowHeightScreenXXX)
+            var newHourHeight = hourHeight
+            if (windowHeightScreenXXX > 975) newHourHeight = (windowHeightScreenXXX / hours).dp
+
+            //print(windowHeightScreenXXX.dp)
+            //print(isScrollingNeeded)
+            //print(" ")
 
             for (dayClass in classes) {
                 Column(
@@ -300,11 +313,9 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Schedule(dayClass)
                 }
             }
-
         }
     }
 }
