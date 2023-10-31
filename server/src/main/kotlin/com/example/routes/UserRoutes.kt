@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.dao.dao
 import com.example.models.User
 import com.example.models.UserParams
+import com.example.models.UsernameParams
 import com.example.service.userService
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -34,6 +35,14 @@ fun Route.userRouting() {
             } else {
                 call.respond("No user found!")
             }
+
+        }
+    }
+
+    route("/users") {
+        get() {
+            val params = call.receive<UsernameParams>()
+            call.respond(dao.findSimilarUsers(params.username))
 
         }
     }

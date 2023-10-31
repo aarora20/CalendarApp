@@ -45,6 +45,8 @@ fun landingPage() {
                 courseList = CourseSchedulesClient.getCourses()
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
+            } catch (e: Exception) {
+                println(e.message)
             }
         }
     }

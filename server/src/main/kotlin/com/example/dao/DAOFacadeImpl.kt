@@ -1,14 +1,13 @@
 package com.example.dao
 
-import com.example.models.User
-import com.example.models.Users
 import com.example.dao.DatabaseFactory.dbQuery
-import com.example.models.UserCourse
-import com.example.models.UserCourses
+import com.example.models.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
+import org.postgresql.util.PGobject
 import java.util.*
 
 class DAOFacadeImpl : DAOFacade {
@@ -17,6 +16,12 @@ class DAOFacadeImpl : DAOFacade {
         id = row[Users.id].toString(),
         username = row[Users.username],
         password = row[Users.password]
+    )
+
+    private fun resultRowToFriend(row: ResultRow) = Friend(
+        userId = row[Friends.userId].toString(),
+        friendId = row[Friends.friendId].toString(),
+        status = row[Friends.status]
     )
 
     private fun resultRowToCourse(row: ResultRow) = UserCourse(
@@ -44,6 +49,21 @@ class DAOFacadeImpl : DAOFacade {
             .singleOrNull()
     }
 
+    override suspend fun findSimilarUsers(username: String): List<User> = dbQuery {
+        transaction {
+            val result = mutableListOf<User>()
+            TransactionManager.current().exec("select * from users where SIMILARITY(username, '$username') > 0.4;") { rs ->
+                while (rs.next()) {
+                    exposedLogger.debug((rs.getString("id")))
+                    result.add(User(rs.getString("id"), rs.getString("username"),
+                        rs.getString("password")))
+                }
+            }
+
+            result.toList()
+        }
+    }
+
     override suspend fun addNewUser(username: String, password: String): User? = dbQuery {
         val insertStatement = Users.insert {
             it[Users.username] = username
@@ -54,6 +74,45 @@ class DAOFacadeImpl : DAOFacade {
 
     override suspend fun deleteUser(id: String): Boolean = dbQuery {
         Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
+    }
+
+    override suspend fun addFriend(userId: String, friendId: String): Friend? = dbQuery {
+        val insertStatement = Friends.insert {
+            it[Friends.userId] = UUID.fromString(userId)
+            it[Friends.friendId] = UUID.fromString(friendId)
+            it[Friends.status] = "pending"
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToFriend)
+    }
+
+    override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? = dbQuery {
+        val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }) {
+            it[Friends.status] = "accepted"
+        }
+
+        if (updateStatement > 0) {
+            Friend(userId, friendId, "accepted")
+        } else {
+            null
+        }
+    }
+
+    override suspend fun findFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
+        val friendRequestExists = Friends.select { (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }.count() > 0
+        friendRequestExists
+    }
+
+    override suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
+        val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }
+
+        if (deleted > 0) {
+            true
+        } else {
+            false
+        }
     }
 
     override suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse? = dbQuery {

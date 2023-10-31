@@ -18,7 +18,6 @@ object AuthClient {
             json()
         }
     }
-
     suspend fun loginUser(user: UserParams): UserResponseData<AuthRes>? {
 
         val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/login") {

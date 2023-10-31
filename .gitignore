@@ -43,3 +43,4 @@ bin/
 .DS_Store
 
 server/tmp/
+server/.db/

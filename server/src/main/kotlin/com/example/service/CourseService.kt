@@ -19,6 +19,7 @@ fun httpClient(apiToken: String) = HttpClient(CIO) {
             ignoreUnknownKeys = true
         })
     }
+    install(HttpTimeout)
     defaultRequest {
         header("x-api-key", apiToken)
     }
@@ -43,7 +44,12 @@ suspend fun fetchClassScheduleBySubjectAndCatalogNumber(client: HttpClient, term
 
 // Courses
 suspend fun fetchCourses(client: HttpClient, termCode: String): Courses {
-    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode")
+    val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/Courses/$termCode") {
+        timeout {
+            requestTimeoutMillis = 30000
+        }
+    }
+
     return response.body<Courses>()
 }
 

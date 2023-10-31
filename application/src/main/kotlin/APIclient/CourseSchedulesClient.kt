@@ -19,7 +19,6 @@ object CourseSchedulesClient {
             json()
         }
     }
-
     suspend fun getCourses(): Courses {
         val response: HttpResponse = client.get("http://0.0.0.0:8080/courses/1239")
         return response.body<Courses>()

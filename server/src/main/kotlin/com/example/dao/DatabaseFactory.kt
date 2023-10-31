@@ -11,6 +11,7 @@ object DatabaseFactory {
     fun init() {
         val driverClassName = "org.postgresql.Driver"
         val jdbcURL = "jdbc:postgresql://db:5432/calendarApp?user=postgres"
+//        val jdbcURL = "jdbc:postgresql://localhost:5432/calendarApp"
         val database = Database.connect(createHikariDataSource(jdbcURL, driverClassName))
 
         transaction(database) {

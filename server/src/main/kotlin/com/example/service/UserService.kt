@@ -2,7 +2,6 @@ package com.example.service
 
 import com.example.dao.dao
 import com.example.models.AuthRes
-import com.example.models.User
 import com.example.util.UserResponse
 import com.example.util.UserResponseData
 import io.ktor.http.*
@@ -12,7 +11,6 @@ class UserService {
     suspend fun registerUser(username: String, password: String): UserResponse<AuthRes> {
         return if (userExists(username)) {
             UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "username already exists"))
-
         } else {
             val user = dao.addNewUser(username, password)
             if (user != null) {
