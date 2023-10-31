@@ -18,6 +18,12 @@ class DAOFacadeImpl : DAOFacade {
         password = row[Users.password]
     )
 
+    private fun resultRowToFriend(row: ResultRow) = Friend(
+        userId = row[Friends.userId].toString(),
+        friendId = row[Friends.friendId].toString(),
+        status = row[Friends.status]
+    )
+
     private fun resultRowToCourse(row: ResultRow) = UserCourse(
         courseId = row[UserCourses.courseId],
         courseNum = row[UserCourses.courseNum],
@@ -45,12 +51,6 @@ class DAOFacadeImpl : DAOFacade {
 
     override suspend fun findSimilarUsers(username: String): List<User> = dbQuery {
         transaction {
-//            val conn = TransactionManager.current().connection
-//            val query = "select * from users where SIMILARITY(username, $username) > 0.4"
-//            val statement = conn.prepareStatement(query, false)
-//            statement.fillParameters(listOf(Pair(VarCharColumnType(), "Laura"),
-//                Pair(IntegerColumnType(), 3)));
-//            statement.executeUpdate()
             val result = mutableListOf<User>()
             TransactionManager.current().exec("select * from users where SIMILARITY(username, '$username') > 0.4;") { rs ->
                 while (rs.next()) {
@@ -61,8 +61,6 @@ class DAOFacadeImpl : DAOFacade {
             }
 
             result.toList()
-//            emptyList()
-
         }
     }
 
@@ -78,20 +76,43 @@ class DAOFacadeImpl : DAOFacade {
         Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
     }
 
-    override suspend fun addFriend(userId: String, friendId: String): Friend? {
-        TODO("Not yet implemented")
+    override suspend fun addFriend(userId: String, friendId: String): Friend? = dbQuery {
+        val insertStatement = Friends.insert {
+            it[Friends.userId] = UUID.fromString(userId)
+            it[Friends.friendId] = UUID.fromString(friendId)
+            it[Friends.status] = "pending"
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToFriend)
     }
 
-    override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? {
-        TODO("Not yet implemented")
+    override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? = dbQuery {
+        val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }) {
+            it[Friends.status] = "accepted"
+        }
+
+        if (updateStatement > 0) {
+            Friend(userId, friendId, "accepted")
+        } else {
+            null
+        }
     }
 
-    override suspend fun findFriendRequest(userId: String, friendId: String): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun findFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
+        val friendRequestExists = Friends.select { (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }.count() > 0
+        friendRequestExists
     }
 
-    override suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
+        val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(userId)
+                and (Friends.friendId eq UUID.fromString(friendId))) }
+
+        if (deleted > 0) {
+            true
+        } else {
+            false
+        }
     }
 
     override suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse? = dbQuery {

@@ -11,7 +11,6 @@ class UserService {
     suspend fun registerUser(username: String, password: String): UserResponse<AuthRes> {
         return if (userExists(username)) {
             UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "username already exists"))
-
         } else {
             val user = dao.addNewUser(username, password)
             if (user != null) {
