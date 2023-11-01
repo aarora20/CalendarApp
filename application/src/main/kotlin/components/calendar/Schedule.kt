@@ -76,10 +76,7 @@ private class ClassDataModifier(
 private fun Modifier.classData(uniclass: UniClass) = this.then(ClassDataModifier(uniclass))
 
 // Global variables for the size of the calendar
-
-
-val hourHeightInt = 60
-val hourHeight = 60.dp
+var hourHeight = 60.dp
 val startTime = LocalTime.parse("08:00:00")
 val endTime = LocalTime.parse("22:00:00")
 val hours = ChronoUnit.HOURS.between(startTime, endTime).toInt()
@@ -123,24 +120,19 @@ fun BasicSidebarLabel(
 
 @Composable
 fun ScheduleSidebar(
-    hourHeight: Dp,
+    hoursHeigh: Dp,
     modifier: Modifier = Modifier,
     label: @Composable (time: LocalTime) -> Unit = { BasicSidebarLabel(time = it) },
 ) {
     Column(modifier = modifier) {
         repeat(hours) { i ->
-            Box(modifier = Modifier.height(hourHeight)) {
+            Box(modifier = Modifier.height(hoursHeigh)) {
                 label(startTime.plusHours(i.toLong()))
             }
         }
     }
 }
 
-@Preview
-@Composable
-fun ScheduleSidebarPreview() {
-    ScheduleSidebar(hourHeight)
-}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -186,6 +178,7 @@ fun Schedule(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
+
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
@@ -257,9 +250,8 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         }
 
         // ACTUAL CALENDAR
-
-        var isScrollingNeeded = false
         var screenHeight = LocalWindowInfo.current.containerSize.height
+        var contentHeight = 800
 
         Row (
             modifier = Modifier
@@ -267,11 +259,13 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .onSizeChanged { constraints ->
-                    var contentHeight = constraints.height
+                    contentHeight = constraints.height
+                    print("contentHeight: ")
                     print(contentHeight)
-
-                    // Compare contentHeight and screenHeight to determine if scrolling is needed
-                    isScrollingNeeded = contentHeight > screenHeight
+                    print(" ")
+                    print("screenHeight: ")
+                    print(screenHeight)
+                    print(" ")
                 }
 
                 .drawBehind {
@@ -280,32 +274,29 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
 
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 77f, y = it * hourHeightHalfPx),
+                            start = Offset(x = 100f, y = it * hourHeightHalfPx),
                             end = Offset(x = size.width, y = it * hourHeightHalfPx),
-                            strokeWidth = 0.5.dp.toPx(),
+                            strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
                         )
                     }
                 },
 
         ) {
+
+            // make hourHeight adapt to changes in screenSize
+            hourHeight = (screenHeight / hours).dp
+            if (hourHeight < 40.dp) {
+                hourHeight = 40.dp
+            }
+
             Column (
                 modifier = Modifier
-
                     .width(50.dp)
             ) {
                 //Text("", textAlign = TextAlign.Center)
-                ScheduleSidebarPreview()
+                ScheduleSidebar(hourHeight)
             }
-
-            var windowHeightScreenXXX = LocalWindowInfo.current.containerSize.height
-            //print(windowHeightScreenXXX)
-            var newHourHeight = hourHeight
-            if (windowHeightScreenXXX > 975) newHourHeight = (windowHeightScreenXXX / hours).dp
-
-            //print(windowHeightScreenXXX.dp)
-            //print(isScrollingNeeded)
-            //print(" ")
 
             for (dayClass in classes) {
                 Column(
