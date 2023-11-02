@@ -1,11 +1,14 @@
 package com.example.dao
-import com.example.models.*
+import com.example.models.UserCourses
+import com.example.models.Users
+import com.example.models.Wishlists
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.*
-import org.jetbrains.exposed.sql.transactions.experimental.*
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
     fun init() {
@@ -18,6 +21,7 @@ object DatabaseFactory {
             // create tables if not already created
             SchemaUtils.create(Users);
             SchemaUtils.create(UserCourses);
+            SchemaUtils.create(Wishlists)
             SchemaUtils.create(Friends)
         }
     }
