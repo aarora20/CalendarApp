@@ -104,23 +104,40 @@ class DAOFacadeImpl : DAOFacade {
     }
 
 
-    // Find all pending friend requests
+    // Find all pending and accepted friend requests
     override suspend fun findAllRequests(userId: String): List<Friend> = dbQuery {
-        Friends.select { (Friends.friendId eq UUID.fromString(userId)) and
-                (Friends.status eq "pending")}
+        Friends.select { Friends.userId eq UUID.fromString(userId)}
             .map(::resultRowToFriend)
     }
 
+    // find all pending requests
+    override suspend fun findAllPending(userId: String): List<User> = dbQuery {
+        try {
+            transaction {
+                val friendIds =  Friends.select { (Friends.friendId eq UUID.fromString(userId)) and
+                        (Friends.status eq "pending")}
+                    .map { it[Friends.userId] }
+
+                val pending =  Users.select {Users.id inList friendIds }
+
+                pending.map(::resultRowToUser)
+
+            }
+        } catch (e: Exception) {
+            listOf()
+        }
+    }
+
     override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? = dbQuery {
-        val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(userId)
-                and (Friends.friendId eq UUID.fromString(friendId))) }) {
+        val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(friendId)
+                and (Friends.friendId eq UUID.fromString(userId))) }) {
             it[Friends.status] = "accepted"
         }
 
         if (updateStatement > 0) {
             val addInverse = Friends.insert {
-                it[Friends.userId] = UUID.fromString(friendId)
-                it[Friends.friendId] = UUID.fromString(userId)
+                it[Friends.userId] = UUID.fromString(userId)
+                it[Friends.friendId] = UUID.fromString(friendId)
                 it[Friends.status] = "accepted"
             }
             addInverse.resultedValues?.singleOrNull()?.let(::resultRowToFriend)

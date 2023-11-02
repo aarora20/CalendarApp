@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.dao.dao
 import com.example.models.FriendParams
 import com.example.models.UsernameParams
+import com.example.service.friendService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -15,7 +16,7 @@ fun Route.friendsRouting() {
     route("/friends") {
         post("/send") {
             val params = call.receive<FriendParams>();
-            val request = dao.addFriend(params.userId, params.friendId);
+            val request = friendService.sendFriendRequest(params.userId, params.friendId);
             if (request != null) {
                 call.respond(request)
             } else {
@@ -30,7 +31,7 @@ fun Route.friendsRouting() {
 
         get("/requests/pending/{id}") {
             val id = call.parameters.getOrFail<String>("id")
-            call.respond(dao.findAllRequests(id))
+            call.respond(dao.findAllPending(id))
         }
 
         post("/requests/accept") {

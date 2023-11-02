@@ -50,13 +50,13 @@ object FriendsClient {
     }
 
     suspend fun getPendingList(userId: String): List<User> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/friends/pending/$userId") {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/friends/requests/pending/$userId") {
         }
         return response.body()
     }
 
     suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/friends/accept") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/friends/requests/accept") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
         }
@@ -69,7 +69,7 @@ object FriendsClient {
     }
 
     suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/friends/reject") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/friends/requests/reject") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
         }

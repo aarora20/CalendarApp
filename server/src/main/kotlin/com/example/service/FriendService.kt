@@ -1,6 +1,7 @@
 package com.example.service
 
 import com.example.dao.dao
+import com.example.models.Friend
 import com.example.models.User
 
 class FriendService {
@@ -15,6 +16,15 @@ class FriendService {
         }
 
         return freshUsers
+    }
+
+    suspend fun sendFriendRequest(userId: String, friendId: String): Friend? {
+        val requestExists = dao.findFriendRequest(friendId, userId)
+        return if (requestExists) {
+            null
+        } else {
+            dao.addFriend(userId, friendId)
+        }
     }
 
 }

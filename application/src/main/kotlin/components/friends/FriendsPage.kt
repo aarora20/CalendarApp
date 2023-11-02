@@ -1,47 +1,22 @@
 package components.friends
 
-import APIclient.AuthClient
-import APIclient.CourseSchedulesClient
-import APIclient.FriendsClient
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Icon
+import androidx.compose.material.NavigationRail
+import androidx.compose.material.NavigationRailItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import components.Screen
-import components.auth.LoginScreen
-import components.auth.RegisterScreen
-import components.common.DividerComposable
-import components.courseSearch.CourseSearchScreen
-import components.landingScreen
-import components.selectedCourses.selectionScreen
-import components.store
 import compose.icons.TablerIcons
-import compose.icons.tablericons.*
-import io.ktor.client.plugins.*
-import kotlinx.coroutines.launch
-import models.CourseDetails
-import models.User
-import models.UserParams
-import store.SetUserID
+import compose.icons.tablericons.CalendarStats
+import compose.icons.tablericons.Clock
+import compose.icons.tablericons.Search
+import compose.icons.tablericons.Users
 
 
 @Immutable
@@ -55,6 +30,7 @@ sealed class FriendScreen {
 @Composable
 fun FriendsPage(onBackClick: () -> Unit) {
     var currentScreen by remember { mutableStateOf<FriendScreen>(FriendScreen.Search) }
+    var compareScreen by remember { mutableStateOf<CompareScreen>(CompareScreen.Select) }
 
     Row {
         NavigationRailSidebar(
@@ -73,10 +49,13 @@ fun FriendsPage(onBackClick: () -> Unit) {
                     FriendListPage()
                 }
                 is FriendScreen.CompareCalendar -> {
-                    FriendCompare()
+                    FriendCompare(compareScreen,
+                        onSelect = {compareScreen = CompareScreen.Select},
+                        onCompare = { compareScreen = CompareScreen.Compare}
+                        )
                 }
                 is FriendScreen.Notification -> {
-//                    FriendNotification()
+                    FriendNotification()
                 }
             }
         }

@@ -23,6 +23,8 @@ interface DAOFacade {
 
     suspend fun findAllRequests(userId: String): List<Friend>
 
+    suspend fun findAllPending(userId: String): List<User>
+
     suspend fun acceptFriendRequest(userId: String, friendId: String): Friend?
 
     suspend fun findFriendRequest(userId: String, friendId: String): Boolean

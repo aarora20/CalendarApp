@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,16 +25,19 @@ import compose.icons.tablericons.Check
 import compose.icons.tablericons.Trash
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
+import models.Friend
 import models.User
 
 @Composable
-fun FriendNotification() {
+fun FriendNotification(
+
+) {
     var notificationScope = rememberCoroutineScope()
-    var pendingList by remember { mutableStateOf(emptyList<User>()) }
+    var pendingList = remember { mutableStateListOf<User>() }
     LaunchedEffect(true) {
         notificationScope.launch{
             try {
-                pendingList = FriendsClient.getPendingList(store.getState().userId)
+                pendingList.addAll(FriendsClient.getPendingList(store.getState().userId))
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {
@@ -49,15 +53,18 @@ fun FriendNotification() {
 
         LazyColumn {
             items(pendingList) {
-                NotificationItem(it)
+                NotificationItem(it, pendingList)
             }
         }
     }
 }
 
 @Composable
-fun NotificationItem(user: User) {
-    val notifScope = rememberCoroutineScope()
+fun NotificationItem(
+    user: User,
+    requests: SnapshotStateList<User>
+) {
+    val requestScope = rememberCoroutineScope()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,7 +83,18 @@ fun NotificationItem(user: User) {
 
         IconButton(
             onClick = {
-
+                requestScope.launch {
+                    try {
+                        val friend = FriendsClient.acceptFriendRequest(store.getState().userId, user.id)
+                        if (friend != null) {
+                            requests.remove(user)
+                        }
+                    }catch (e: ClientRequestException) {
+                        println("Error fetching data: ${e.message}")
+                    } catch (e: Exception) {
+                        println(e.message)
+                    }
+                }
             }
         ) {
             Icon(
@@ -85,7 +103,18 @@ fun NotificationItem(user: User) {
         }
         IconButton(
                 onClick = {
-
+                    requestScope.launch {
+                        try {
+                            val rejectStatus = FriendsClient.rejectFriendRequest(store.getState().userId, user.id)
+                            if (rejectStatus) {
+                                requests.remove(user)
+                            }
+                        }catch (e: ClientRequestException) {
+                            println("Error fetching data: ${e.message}")
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
+                    }
                 }
                 ) {
             Icon(
