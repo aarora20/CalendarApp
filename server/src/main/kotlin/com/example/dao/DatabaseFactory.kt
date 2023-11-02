@@ -22,6 +22,7 @@ object DatabaseFactory {
             SchemaUtils.create(Users);
             SchemaUtils.create(UserCourses);
             SchemaUtils.create(Wishlists)
+            SchemaUtils.create(Friends)
         }
     }
 

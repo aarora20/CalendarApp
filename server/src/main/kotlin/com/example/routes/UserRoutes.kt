@@ -4,6 +4,7 @@ import com.example.dao.dao
 import com.example.models.User
 import com.example.models.UserParams
 import com.example.models.UsernameParams
+import com.example.service.friendService
 import com.example.service.userService
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -39,11 +40,11 @@ fun Route.userRouting() {
         }
     }
 
-    route("/users") {
+    route("/users/{id}") {
         get() {
+            val id = call.parameters.getOrFail<String>("id")
             val params = call.receive<UsernameParams>()
-            call.respond(dao.findSimilarUsers(params.username))
-
+            call.respond(friendService.searchUsers(id, params.username))
         }
     }
 

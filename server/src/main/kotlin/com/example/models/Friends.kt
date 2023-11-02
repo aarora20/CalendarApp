@@ -10,6 +10,9 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 @Serializable
 data class Friend(val userId: String, val friendId: String, val status: String)
 
+@Serializable
+data class FriendParams(val userId: String, val friendId: String)
+
 
 object Friends : UUIDTable() {
     val userId = reference("user_id", Users)
