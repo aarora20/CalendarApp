@@ -1,6 +1,9 @@
 package com.example.dao
 
-import com.example.models.*
+import com.example.models.Friend
+import com.example.models.User
+import com.example.models.UserCourse
+import com.example.models.WishlistCourse
 
 interface DAOFacade {
 
@@ -30,5 +33,12 @@ interface DAOFacade {
     suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean
     suspend fun getAllUserCourses(id: String): List<UserCourse>
 
+    // Wishlist
+    suspend fun addCourseToWishlist(userIdArg: String, wishlistCourse: WishlistCourse): WishlistCourse?
+    suspend fun removeCourseFromWishlist(userIdArg: String, courseId: String): Boolean
+    suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse>
+
 
 }
+
+

@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
-import org.postgresql.util.PGobject
 import java.util.*
 
 class DAOFacadeImpl : DAOFacade {
@@ -200,6 +199,65 @@ class DAOFacadeImpl : DAOFacade {
 
             }
         } catch (e: Exception) {
+            listOf()
+        }
+    }
+
+    override suspend fun addCourseToWishlist(userIdArg: String, wishlistCourse: WishlistCourse): WishlistCourse? = dbQuery {
+        try {
+            transaction {
+                val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0
+
+                if (userExists) {
+                    val wishlistCourseExists = Wishlists.select { (Wishlists.courseId eq wishlistCourse.courseId) and
+                            (Wishlists.userId eq UUID.fromString(userIdArg))}.count() > 0
+
+                    if (!wishlistCourseExists) {
+                        Wishlists.insert {
+                            it[userId] = UUID.fromString(userIdArg)
+                            it[courseId] = wishlistCourse.courseId
+                            it[courseTitle] = wishlistCourse.courseTitle
+                        }
+                        wishlistCourse
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+    override suspend fun removeCourseFromWishlist(userIdArg: String, courseId: String): Boolean = dbQuery {
+        try {
+            transaction {
+                val deletedRowCount = Wishlists.deleteWhere {
+                    (Wishlists.userId eq UUID.fromString(userIdArg)) and (Wishlists.courseId eq courseId)
+                }
+                deletedRowCount > 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse> = dbQuery {
+        try {
+            transaction {
+                Wishlists.select { Wishlists.userId eq UUID.fromString(userIdArg) }
+                    .map {
+                        WishlistCourse(
+                            courseId = it[Wishlists.courseId],
+                            courseTitle = it[Wishlists.courseTitle]
+                        )
+                    }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
             listOf()
         }
     }
