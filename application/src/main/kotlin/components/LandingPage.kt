@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
+import components.friends.FriendsPage
 import components.selectedCourses.selectionScreen
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
@@ -27,6 +28,8 @@ sealed class Screen {
     object Landing : Screen()
     object CourseSelection : Screen()
     object CourseSearch : Screen()
+
+    object FriendsPage : Screen()
 }
 
 val INITIAL_STATE = AuthState("", "")
@@ -75,6 +78,9 @@ fun landingPage() {
                 },
                 onCourseSearchClick = {
                     currentScreen = Screen.CourseSearch
+                },
+                onFriendsClick = {
+                    currentScreen = Screen.FriendsPage
                 }
             )
         }
@@ -88,13 +94,20 @@ fun landingPage() {
                 currentScreen = Screen.Landing
             },  courses = courseList)
         }
+
+        is Screen.FriendsPage -> {
+            FriendsPage(onBackClick = {
+                currentScreen = Screen.Landing
+            })
+        }
     }
 }
 
 @Composable
 fun landingScreen(
     onCourseSelectionClick: () -> Unit,
-    onCourseSearchClick: () -> Unit
+    onCourseSearchClick: () -> Unit,
+    onFriendsClick: () -> Unit
 ) {
 
     Row (
@@ -108,6 +121,10 @@ fun landingScreen(
         Spacer(modifier = Modifier.width(16.dp))
         Button(onClick = onCourseSearchClick) {
             Text("Course Search")
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Button(onClick = onFriendsClick) {
+            Text("Friends")
         }
     }
 }

@@ -20,8 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.common.DividerComposable
 import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
@@ -46,7 +49,6 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .background(
                     color = MaterialTheme.colors.surface
-
                 )
                 .padding(
                     top = 16.dp,
@@ -78,6 +80,11 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
                     focusedLabelColor = Color(0xFF92A3FD),
                     cursorColor = Color(0xFF92A3FD)
                 ),
+                visualTransformation = if (password.isEmpty()) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                }
             )
 
             Text(errorText, style = TextStyle(
@@ -120,28 +127,10 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
                     Text(text = "Login", color = Color.White)
                 }
             }
-            DividerComposable()
+            DividerComposable("or")
             ClickableTextComposable("Are you a new user?", "register", onRegister)
         }
     }
-}
-
-
-@Composable
-fun DividerComposable() {
-    Row(modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Divider(modifier = Modifier.fillMaxWidth()
-            .weight(1f),
-            color = Color.LightGray,
-            thickness = 1.dp)
-        Text(text = "or", fontSize = 14.sp, modifier = Modifier.padding(8.dp))
-        Divider(modifier = Modifier.fillMaxWidth().weight(1f),
-            color = Color.LightGray,
-            thickness = 1.dp)
-    }
-
 }
 
 @Composable

@@ -18,6 +18,7 @@ object DatabaseFactory {
             // create tables if not already created
             SchemaUtils.create(Users);
             SchemaUtils.create(UserCourses);
+            SchemaUtils.create(Friends)
         }
     }
 

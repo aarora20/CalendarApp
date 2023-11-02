@@ -2,35 +2,35 @@ package com.example.service
 
 import com.example.dao.dao
 import com.example.models.AuthRes
-import com.example.util.UserResponse
-import com.example.util.UserResponseData
+import com.example.util.Response
+import com.example.util.ResponseData
 import io.ktor.http.*
 import org.mindrot.jbcrypt.BCrypt
 
 class UserService {
-    suspend fun registerUser(username: String, password: String): UserResponse<AuthRes> {
+    suspend fun registerUser(username: String, password: String): Response<AuthRes> {
         return if (userExists(username)) {
-            UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "username already exists"))
+            Response(HttpStatusCode.BadRequest, data = ResponseData(message = "username already exists"))
         } else {
             val user = dao.addNewUser(username, password)
             if (user != null) {
-                UserResponse(data = UserResponseData(data = AuthRes("", user.id), message = "success"))
+                Response(data = ResponseData(data = AuthRes("", user.id), message = "success"))
             } else {
-                UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "fail to register"))
+                Response(HttpStatusCode.BadRequest, data = ResponseData(message = "fail to register"))
             }
         }
     }
 
-    suspend fun loginUser(username: String, password: String): UserResponse<AuthRes> {
+    suspend fun loginUser(username: String, password: String): Response<AuthRes> {
         val user = dao.findUser(username)
         if (user != null) {
             if (BCrypt.checkpw(password, user.password)) {
-                return UserResponse(data = UserResponseData(data = AuthRes("", user.id), message = "success"))
+                return Response(data = ResponseData(data = AuthRes("", user.id), message = "success"))
             } else {
-                return UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "wrong password"))
+                return Response(HttpStatusCode.BadRequest, data = ResponseData(message = "wrong password"))
             }
         } else {
-            return UserResponse(HttpStatusCode.BadRequest, data = UserResponseData(message = "user does not exists"))
+            return Response(HttpStatusCode.BadRequest, data = ResponseData(message = "user does not exists"))
         }
     }
 

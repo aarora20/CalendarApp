@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import components.common.DividerComposable
 import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
@@ -119,7 +120,7 @@ fun RegisterScreen(onSuccess: () -> Unit, onLogin: () -> Unit) {
                     Text(text = "Register", color = Color.White)
                 }
             }
-            DividerComposable()
+            DividerComposable("or")
             ClickableTextComposable("Already have an account?", "login", onLogin)
         }
     }
