@@ -1,7 +1,6 @@
 package components.auth
 
 import APIclient.AuthClient
-import APIclient.CourseSchedulesClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,7 +23,6 @@ import components.common.DividerComposable
 import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
-import models.UserCourse
 import models.UserParams
 import store.SetUserID
 

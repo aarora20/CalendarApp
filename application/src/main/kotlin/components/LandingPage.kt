@@ -13,13 +13,34 @@ import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
 import components.selectedCourses.selectionScreen
+import components.wishlist.wishCourses
+import components.wishlist.wishSelection
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.rootReducer
-import store.tokenReducer
+
+// fake data for now for wishlist
+// Should replace with api get results
+private val listOfWishCourses = listOf(
+    wishCourses(
+        subjectCode = "CS",
+        catalogNumber = "346",
+        title = "Application Development"
+    ),
+    wishCourses(
+        subjectCode = "CS",
+        catalogNumber = "240",
+        title = "Data Structures and Data Management"
+    ),
+    wishCourses(
+        subjectCode = "STAT",
+        catalogNumber = "373",
+        title = "Regression and Forecasting Methods in Finance"
+    )
+)
 
 @Immutable
 sealed class Screen {
@@ -28,8 +49,8 @@ sealed class Screen {
     object Landing : Screen()
     object CourseSelection : Screen()
     object CourseSearch : Screen()
-
     object FriendsPage : Screen()
+    object Wishlish : Screen()
 }
 
 val INITIAL_STATE = AuthState("", "")
@@ -81,6 +102,9 @@ fun landingPage() {
                 },
                 onFriendsClick = {
                     currentScreen = Screen.FriendsPage
+                },
+                onWishlistClick = {
+                    currentScreen = Screen.Wishlish
                 }
             )
         }
@@ -100,6 +124,10 @@ fun landingPage() {
                 currentScreen = Screen.Landing
             })
         }
+        // when click on wishlist, it will prompt to this screen
+        is Screen.Wishlish -> {
+            wishSelection(listOfWishCourses)
+        }
     }
 }
 
@@ -107,7 +135,8 @@ fun landingPage() {
 fun landingScreen(
     onCourseSelectionClick: () -> Unit,
     onCourseSearchClick: () -> Unit,
-    onFriendsClick: () -> Unit
+    onFriendsClick: () -> Unit,
+    onWishlistClick: () -> Unit
 ) {
 
     Row (
@@ -121,6 +150,10 @@ fun landingScreen(
         Spacer(modifier = Modifier.width(16.dp))
         Button(onClick = onCourseSearchClick) {
             Text("Course Search")
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Button(onClick = onWishlistClick) {
+            Text("Wishlist")
         }
         Spacer(modifier = Modifier.width(16.dp))
         Button(onClick = onFriendsClick) {

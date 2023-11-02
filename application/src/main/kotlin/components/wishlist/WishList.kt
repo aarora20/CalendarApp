@@ -1,3 +1,4 @@
+package components.wishlist
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
 
 data class wishCourses(
     // CS
@@ -25,33 +24,6 @@ data class wishCourses(
     // Application Development
     val title :String,
 )
-
-private val listOfWishCourses = listOf(
-    wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "346",
-        title = "Application Development"
-    ),
-    wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "240",
-        title = "Data Structures and Data Management"
-    ),
-    wishCourses(
-        subjectCode = "STAT",
-        catalogNumber = "373",
-        title = "Regression and Forecasting Methods in Finance"
-    )
-)
-fun main() = application {
-    Window(
-        title = "Wish List",
-        onCloseRequest = ::exitApplication
-    ) {
-        // takes courses and its sections as inputs to display the course page
-        wishSelection(listOfWishCourses)
-    }
-}
 
 @Composable
 fun wishSelection(
