@@ -102,9 +102,8 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
         }
 
         // ACTUAL CALENDAR
-
-        var isScrollingNeeded = false
         var screenHeight = LocalWindowInfo.current.containerSize.height
+        var contentHeight = 800
 
         Row (
             modifier = Modifier
@@ -112,11 +111,13 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .onSizeChanged { constraints ->
-                    var contentHeight = constraints.height
+                    contentHeight = constraints.height
+                    print("contentHeight: ")
                     print(contentHeight)
-
-                    // Compare contentHeight and screenHeight to determine if scrolling is needed
-                    isScrollingNeeded = contentHeight > screenHeight
+                    print(" ")
+                    print("screenHeight: ")
+                    print(screenHeight)
+                    print(" ")
                 }
 
                 .drawBehind {
@@ -125,32 +126,29 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
 
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 77f, y = it * hourHeightHalfPx),
+                            start = Offset(x = 100f, y = it * hourHeightHalfPx),
                             end = Offset(x = size.width, y = it * hourHeightHalfPx),
-                            strokeWidth = 0.5.dp.toPx(),
+                            strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
                         )
                     }
                 },
 
             ) {
+
+            // make hourHeight adapt to changes in screenSize
+            hourHeight = (screenHeight / hours).dp
+            if (hourHeight < 40.dp) {
+                hourHeight = 40.dp
+            }
+
             Column (
                 modifier = Modifier
-
                     .width(50.dp)
             ) {
                 //Text("", textAlign = TextAlign.Center)
-                ScheduleSidebarPreview()
+                ScheduleSidebar(hourHeight)
             }
-
-            var windowHeightScreenXXX = LocalWindowInfo.current.containerSize.height
-            //print(windowHeightScreenXXX)
-            var newHourHeight = hourHeight
-            if (windowHeightScreenXXX > 975) newHourHeight = (windowHeightScreenXXX / hours).dp
-
-            //print(windowHeightScreenXXX.dp)
-            //print(isScrollingNeeded)
-            //print(" ")
 
             for (dayClass in classes) {
                 Column(
