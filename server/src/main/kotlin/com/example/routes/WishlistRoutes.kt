@@ -22,10 +22,11 @@ fun Route.wishlistRouting() {
             }
         }
 
-        delete("/{id}/wishlist/{courseId}") {
+        delete("/{id}/wishlist/{subjectCode}/{catalogNumber}") {
             val id = call.parameters.getOrFail<String>("id")
-            val courseId = call.parameters.getOrFail<String>("courseId")
-            if (wishlistService.removeFromWishlist(id, courseId)) {
+            val subjectCode = call.parameters.getOrFail<String>("subjectCode")
+            val catalogNumber = call.parameters.getOrFail<String>("catalogNumber")
+            if (wishlistService.removeFromWishlist(id, subjectCode, catalogNumber)) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Failed to remove course from wishlist")

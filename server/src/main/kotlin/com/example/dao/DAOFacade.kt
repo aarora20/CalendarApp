@@ -35,7 +35,7 @@ interface DAOFacade {
 
     // Wishlist
     suspend fun addCourseToWishlist(userIdArg: String, wishlistCourse: WishlistCourse): WishlistCourse?
-    suspend fun removeCourseFromWishlist(userIdArg: String, courseId: String): Boolean
+    suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String): Boolean
     suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse>
 
 

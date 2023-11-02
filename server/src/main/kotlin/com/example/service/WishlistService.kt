@@ -8,8 +8,8 @@ class WishlistService {
         return dao.addCourseToWishlist(userId, course)
     }
 
-    suspend fun removeFromWishlist(userId: String, courseId: String): Boolean {
-        return dao.removeCourseFromWishlist(userId, courseId)
+    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
+        return dao.removeCourseFromWishlist(userId, subjectCode, catalogNumber)
     }
 
     suspend fun getUserWishlist(userId: String): List<WishlistCourse> {

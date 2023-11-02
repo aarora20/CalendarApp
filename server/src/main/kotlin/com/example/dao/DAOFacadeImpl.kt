@@ -209,13 +209,17 @@ class DAOFacadeImpl : DAOFacade {
                 val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0
 
                 if (userExists) {
-                    val wishlistCourseExists = Wishlists.select { (Wishlists.courseId eq wishlistCourse.courseId) and
-                            (Wishlists.userId eq UUID.fromString(userIdArg))}.count() > 0
+                    val wishlistCourseExists = Wishlists.select {
+                        (Wishlists.subjectCode eq wishlistCourse.subjectCode) and
+                                (Wishlists.catalogNumber eq wishlistCourse.catalogNumber) and
+                                (Wishlists.userId eq UUID.fromString(userIdArg))
+                    }.count() > 0
 
                     if (!wishlistCourseExists) {
                         Wishlists.insert {
                             it[userId] = UUID.fromString(userIdArg)
-                            it[courseId] = wishlistCourse.courseId
+                            it[subjectCode] = wishlistCourse.subjectCode
+                            it[catalogNumber] = wishlistCourse.catalogNumber
                             it[courseTitle] = wishlistCourse.courseTitle
                         }
                         wishlistCourse
@@ -231,11 +235,13 @@ class DAOFacadeImpl : DAOFacade {
             null
         }
     }
-    override suspend fun removeCourseFromWishlist(userIdArg: String, courseId: String): Boolean = dbQuery {
+    override suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String): Boolean = dbQuery {
         try {
             transaction {
                 val deletedRowCount = Wishlists.deleteWhere {
-                    (Wishlists.userId eq UUID.fromString(userIdArg)) and (Wishlists.courseId eq courseId)
+                    (Wishlists.userId eq UUID.fromString(userIdArg)) and
+                            (Wishlists.subjectCode eq subjectCode) and
+                            (Wishlists.catalogNumber eq catalogNumber)
                 }
                 deletedRowCount > 0
             }
@@ -251,7 +257,8 @@ class DAOFacadeImpl : DAOFacade {
                 Wishlists.select { Wishlists.userId eq UUID.fromString(userIdArg) }
                     .map {
                         WishlistCourse(
-                            courseId = it[Wishlists.courseId],
+                            subjectCode = it[Wishlists.subjectCode],
+                            catalogNumber = it[Wishlists.catalogNumber],
                             courseTitle = it[Wishlists.courseTitle]
                         )
                     }
