@@ -1,4 +1,5 @@
 package com.example.dao
+import com.example.models.Friends
 import com.example.models.UserCourses
 import com.example.models.Users
 import com.example.models.Wishlists
