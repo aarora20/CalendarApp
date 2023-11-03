@@ -1,6 +1,7 @@
 package components.courseInfo
 
 import APIclient.CourseSchedulesClient
+import APIclient.CourseSchedulesClient.addToWishlist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
+import models.WishCourses
 
 @Composable
 fun coursePage(
@@ -78,10 +80,17 @@ fun coursePage(
             // wish list option
             var wishList by remember { mutableStateOf("+ Wish List") }
             Button(
-                //modifier = Modifier.align(Alignment.CenterVertically),
                 onClick = {
                     wishList = "Added to Wish List!"
-                },
+                    scope.launch {
+                        val toAdd = WishCourses(course.subjectCode,course.catalogNumber,course.title)
+                        val success = addToWishlist(store.getState().userId, toAdd)
+                        if (!success) {
+                            println("Error adding course to wishlist.")
+                            wishList = "+ Wish List"  // Revert button text on failure
+                        }
+                    }
+                }
             ) {
                 Text(wishList)
             }

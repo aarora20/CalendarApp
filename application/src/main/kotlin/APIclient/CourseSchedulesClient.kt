@@ -3,6 +3,7 @@ package APIclient
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -12,6 +13,7 @@ import io.ktor.util.*
 import models.Courses
 import models.ScheduleData
 import models.UserCourse
+import models.WishCourses
 
 object CourseSchedulesClient {
     private val client = HttpClient(CIO) {
@@ -58,5 +60,34 @@ object CourseSchedulesClient {
     suspend fun getCourseSchedule(courseId: String): List<ScheduleData> {
         val response: HttpResponse = client.get("http://0.0.0.0:8080/classSchedules/1239/${courseId}")
         return response.body<List<ScheduleData>>()
+    }
+
+    @OptIn(InternalAPI::class)
+    suspend fun addToWishlist(userId: String, course: WishCourses): Boolean {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/wishlist") {
+            contentType(ContentType.Application.Json)
+            setBody(course)
+        }
+
+        // Print the response for debugging
+        println("Response status: ${response.status}")
+        println("Response body: ${response.bodyAsText()}")
+
+        return response.status == HttpStatusCode.OK
+    }
+
+    suspend fun getWishlist(userId: String): List<WishCourses> {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/$userId/wishlist")
+        return response.body<List<WishCourses>>()
+    }
+
+    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
+        return try {
+            val response: HttpResponse = client.delete("http://0.0.0.0:8080/user/$userId/wishlist/$subjectCode/$catalogNumber")
+            response.status == HttpStatusCode.NoContent
+        } catch (e: ClientRequestException) {
+            println("Error in request: ${e.message}")
+            false
+        }
     }
 }
