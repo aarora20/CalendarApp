@@ -126,7 +126,7 @@ fun landingPage() {
         }
         // when click on wishlist, it will prompt to this screen
         is Screen.Wishlish -> {
-            wishSelection(listOfWishCourses)
+            wishSelection(onBackClick = { currentScreen = Screen.Landing })
         }
     }
 }

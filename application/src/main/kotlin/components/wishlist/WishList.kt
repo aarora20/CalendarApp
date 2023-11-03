@@ -1,5 +1,6 @@
 package components.wishlist
 
+import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,29 +8,43 @@ import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.store
+import io.ktor.client.plugins.*
+import kotlinx.coroutines.launch
+import models.WishCourses
 
 data class wishCourses(
     // CS
-    val subjectCode :String,
+    val subjectCode: String,
     // 346
-    val catalogNumber :String,
+    val catalogNumber: String,
     // Application Development
-    val title :String,
+    val title: String,
 )
 
 @Composable
-fun wishSelection(
-    courseList: List<wishCourses>
-) {
-    var selectedCourses = remember { mutableStateListOf<wishCourses>().apply{addAll(courseList)} }
+fun wishSelection(onBackClick: () -> Unit) {
+    val userId = store.getState().userId // replace this with the user ID
+    var selectedCourses by remember { mutableStateOf(emptyList<WishCourses>()) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(userId) {
+        scope.launch {
+            try {
+                selectedCourses = CourseSchedulesClient.getWishlist(userId)
+            } catch (e: ClientRequestException) {
+                println("Error fetching data: ${e.message}")
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
     // sets the page as a column
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -55,7 +70,7 @@ fun wishSelection(
             Button(
                 //modifier = Modifier.align(Alignment.CenterVertically),
                 onClick = {
-                    // Go back
+                    onBackClick()
                 },
             ) {
                 Text("Back")
@@ -63,8 +78,8 @@ fun wishSelection(
         }
         Row {
             LazyColumn(Modifier.padding(0.dp)) {
-                items(selectedCourses) {
-                    val (code, number, title) = it
+                items(selectedCourses) { course ->
+                    val (code, number, title) = course
                     val name = "$code $number: $title"
                     Row(
                         Modifier.fillMaxWidth().padding(10.dp),
@@ -81,7 +96,18 @@ fun wishSelection(
                         }
                         Button(
                             onClick = {
-                                selectedCourses.remove(it)
+                                scope.launch {
+                                    val userId = store.getState().userId
+                                    val success = CourseSchedulesClient.removeFromWishlist(userId, course.subjectCode, course.catalogNumber)
+                                    if (success) {
+                                        // Update local state after successful removal
+                                        selectedCourses = selectedCourses.toMutableList().also { list ->
+                                            list.remove(course)
+                                        }
+                                    } else {
+                                        println("Error removing course from wishlist.")
+                                    }
+                                }
                             }
                         ) {
                             Text("Remove from Wish List")
