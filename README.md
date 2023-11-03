@@ -3,7 +3,7 @@
 Project Proposal: https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Project-Proposal
 
 ## Building and Running the App
-As user authentication is not yet implemented, here are the instructions to get the app running
+v0.1: As user authentication is not yet implemented, here are the instructions to get the app running
 1. First, run the server code by clicking on Run in the main function in the Application file of
 the server directory
 2. Since the user of the current database is hardcoded on Cedric's local machine's database, the UI will crash
@@ -18,6 +18,13 @@ directory, copy that ID to the application/src/main/kotlin/APIclient/CourseSched
 different places. In the function addUserCourse and updateSchedule, replace the hardcoded ID in the URL
 with your own ID (e.g. the url is http://0.0.0.0:8080/user/48d99b1a-d963-4686-870c-52d6bac6dd9f/course).
 Replace "48d99..d9f" with your own.
+
+v0.2:
+To build the server, first run "./gradlew :server:buildFatJar" from the root of the application or directly from IntelliJ
+Then, cd into the server directory and run "Docker compose up --build" if it's the first time. On subsequent runs of the server,
+you can omit the "--build". However, if the server code has been changed, then you will need to rebuild the jar file and
+rebuild Docker as while. I recommend using a GUI interface to see the contents of the database. Postico 2 works well, but you might 
+need to download Postgres.
 
 To package the app, simply go the gradle menu on IntelliJ and go to the application folder and then the compose
 desktop folder in which you will find the command packageDmg. This will create an installer on your local machine.
