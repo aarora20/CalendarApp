@@ -1,5 +1,6 @@
 package components.courseSearch
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,10 +9,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DockedSearchBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.*
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -26,7 +25,10 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropSearch(courses: List<String>) {
+fun DropSearch(
+    courses: List<String>,
+    onClickCourse: (String) -> Unit
+) {
     var text by rememberSaveable { mutableStateOf("") }
     var active by rememberSaveable { mutableStateOf(false) }
 
@@ -45,13 +47,14 @@ fun DropSearch(courses: List<String>) {
                 }
                 searchedCourses = FuzzySearch.extractTop(searchText.uppercase(Locale.getDefault()), courses, 5)
                     .map { it.toString() }
+                println(searchedCourses)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             }
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         DockedSearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -65,24 +68,23 @@ fun DropSearch(courses: List<String>) {
             },
             colors = SearchBarDefaults.colors(Color.LightGray),
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-//            trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
         ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                searchedCourses.take(5).map { course ->
-                    ListItem(
-                        headlineContent = { Text(course) },
-                        modifier = Modifier
-                            .clickable {
-                                text = course
-                            }
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
+            searchedCourses.take(5).map { course ->
+                ListItem(
+                    headlineContent = { Text(course) },
+                    modifier = Modifier
+                        .clickable {
+                            println("clicked")
+                            text = ""
+                            onClickCourse(course)
+                            println(course)
+                            active = false
+                        }
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    colors = ListItemDefaults.colors(Color.LightGray)
+                )
             }
-
         }
     }
 }

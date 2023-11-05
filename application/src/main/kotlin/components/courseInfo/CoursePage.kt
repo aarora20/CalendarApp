@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import components.courseSearch.DropSearch
 import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
@@ -26,114 +28,144 @@ import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
 import models.WishCourses
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun coursePage(
+    courseNames: List<String>,
     addedCourses: Set<String>,
     onBackClick: () -> Unit,
     course: CourseDetails,
+    onChangeCourse: (course: String) -> Unit
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(true) {
+    LaunchedEffect(course) {
         scope.launch{
-            try {
-                schedules = CourseSchedulesClient.getCourseSchedule(course.courseId)
+            schedules = try {
+                CourseSchedulesClient.getCourseSchedule(course.courseId)
+                    .sortedWith(compareBy(
+                        { it.courseComponent != "LEC" }, // First, order by whether termcode is not "LEC" (false first)
+                        { it.courseComponent != "TUT" }, // Second, order by whether termcode is not "TUT" (false first)
+                        { it.courseComponent != "TST" }, // Third, order by whether termcode is not "TST" (false first)
+                        { it.courseComponent }
+                    )).sortedBy { it.classSection }
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
+                emptyList()
             } catch (e: Exception) {
                 println(e.message)
+                emptyList()
             }
         }
     }
     // sets the page as a column
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-    ) {
-        Button(onClick = onBackClick) {
-            Text("Back")
-        }
-        // set the header of the page letting the user know this will provide course info
-        Text(
-            text = "Course Information",
-            color = Color.Black,
-            fontSize = 30.sp,
-            maxLines = 1
-        )
-
-        // subsequent row provides the course code and its name
-        // also provides the user an option to add the course to their wish list
-        Row (
-            Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Box (modifier = Modifier.fillMaxSize()) {
+        Box (
+            modifier = Modifier.zIndex(1f)
         ) {
-
-            // provides the course code and name ie CS346: Application Development
-            Text(
-                text = course.subjectCode + course.catalogNumber + ": " + course.title,
-                style = MaterialTheme.typography.h6
-            )
-
-            // wish list option
-            var wishList by remember { mutableStateOf("+ Wish List") }
-            Button(
-                onClick = {
-                    wishList = "Added to Wish List!"
-                    scope.launch {
-                        val toAdd = WishCourses(course.subjectCode,course.catalogNumber,course.title)
-                        val success = addToWishlist(store.getState().userId, toAdd)
-                        if (!success) {
-                            println("Error adding course to wishlist.")
-                            wishList = "+ Wish List"  // Revert button text on failure
-                        }
+            Row (
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+            ) {
+                Row (modifier = Modifier.weight(1f), verticalAlignment = Alignment.Top) {
+                    Button(onClick = onBackClick) {
+                        Text("Back")
                     }
                 }
+
+                Box (modifier = Modifier.weight(5f)){
+                    DropSearch(courseNames) { onChangeCourse(it) }
+                }
+            }
+        }
+        Box (modifier = Modifier.padding(top = 80.dp).padding(horizontal = 16.dp).fillMaxSize()) {
+            Column(
+                modifier = Modifier.padding(bottom = 10.dp).fillMaxSize().fillMaxWidth(),
+                verticalArrangement = Arrangement.Top,
             ) {
-                Text(wishList)
-            }
-        }
-
-        // provides the description of the course
-        Row (
-            Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = course.description,
-                fontSize = 15.sp,
-            )
-        }
-
-        // provides the prereqs of the course
-        Row (
-            Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            course.requirementsDescription?.let {
+                // set the header of the page letting the user know this will provide course info
                 Text(
-                    text = it,
-                    fontSize = 15.sp,
+                    text = "Course Information",
+                    color = Color.Black,
+                    fontSize = 30.sp,
+                    maxLines = 1
                 )
+
+                // subsequent row provides the course code and its name
+                // also provides the user an option to add the course to their wish list
+                Row (
+                    Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    // provides the course code and name ie CS346: Application Development
+                    Text(
+                        text = course.subjectCode + course.catalogNumber + ": " + course.title,
+                        style = MaterialTheme.typography.h6
+                    )
+
+                    // wish list option
+                    var wishList by remember { mutableStateOf("+ Wish List") }
+                    Button(
+                        onClick = {
+                            wishList = "Added to Wish List!"
+                            scope.launch {
+                                val toAdd = WishCourses(course.subjectCode,course.catalogNumber,course.title)
+                                val success = addToWishlist(store.getState().userId, toAdd)
+                                if (!success) {
+                                    println("Error adding course to wishlist.")
+                                    wishList = "+ Wish List"  // Revert button text on failure
+                                }
+                            }
+                        }
+                    ) {
+                        Text(wishList)
+                    }
+                }
+
+                // provides the description of the course
+                Row (
+                    Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = course.description,
+                        fontSize = 15.sp,
+                    )
+                }
+
+                // provides the prereqs of the course
+                Row (
+                    Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    course.requirementsDescription?.let {
+                        Text(
+                            text = it,
+                            fontSize = 15.sp,
+                        )
+                    }
+                }
+
+                // lets the user know that below this row is the schedule for the selected couse
+                Row (
+                    Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Schedule for " + course.termName + ":",
+                        fontSize = 15.sp,
+                    )
+                }
+                tableScreen(course, schedules, scope, addedCourses)
             }
         }
-
-        // lets the user know that below this row is the schedule for the selected couse
-        Row (
-            Modifier.fillMaxWidth().padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Schedule for " + course.termName + ":",
-                fontSize = 15.sp,
-            )
-        }
-        tableScreen(course, schedules, scope, addedCourses)
     }
 }
 
@@ -141,29 +173,13 @@ fun coursePage(
 fun RowScope.TableCell(
     text: String,
     weight: Float,
-    button: Int,
     header: Int,
 ) {
-    if (button == 1) {
-        var addCourseStr by remember { mutableStateOf("        + Course Schedule          ") }
-        TextButton(
-            onClick = {
-                Modifier
-                    //.fillMaxWidth()
-                    .weight(weight)
-                    .border(0.dp, Color.Black)
-                    .padding(0.dp)
-                addCourseStr = "   Added to Course Schedule!   "
-            }
-        ) {
-            Text(addCourseStr)
-        }
-    } else if (header == 1) {
+    if (header == 1) {
         Text(
             text = text,
             Modifier
-                //.border(1.dp, Color.Black)
-                .weight(weight)
+                .weight(weight, fill = true)
                 .padding(8.dp),
             textAlign = TextAlign.Center
         )
@@ -171,8 +187,7 @@ fun RowScope.TableCell(
         Text(
             text = text,
             Modifier
-                .border(1.dp, Color.Black)
-                .weight(weight)
+                .weight(weight, fill = true)
                 .padding(8.dp),
             textAlign = TextAlign.Center
         )
@@ -183,61 +198,39 @@ fun RowScope.TableCell(
 fun RowScope.TableCell(
     text: String,
     weight: Float,
-    button: Int,
-    header: Int,
     scope: CoroutineScope,
     course: CourseDetails,
     schedule: ScheduleData,
 ) {
-    if (button == 1) {
-        var addCourseStr by remember { mutableStateOf(text) }
-        TextButton(
-            onClick = {
-                if (text == "        + Course Schedule          ") {
-                    Modifier
-                        //.fillMaxWidth()
-                        .weight(weight)
-                        .border(0.dp, Color.Black)
-                        .padding(0.dp)
-                    addCourseStr = "   Added to Course Schedule!   "
-                    scope.launch {
-                        try {
-                            val toAdd = UserCourse(course.courseId,
-                                course.subjectCode + " " + course.catalogNumber,
-                                course.title, schedule.courseComponent + " " + schedule.classSection,
-                                schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
-                                schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
-                                schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
-                            CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
-                        } catch (e: ClientRequestException) {
-                            println("Error fetching data: ${e.message}")
-                        } catch (e: Exception) {
-                            println(e.message)
-                        }
+    var addCourseStr by remember { mutableStateOf(text) }
+    TextButton(
+        modifier = Modifier
+            .weight(weight, fill = true)
+            .padding(8.dp),
+        onClick = {
+            if (text == "+ Course Schedule") {
+                addCourseStr = "Added to Course Schedule!"
+                scope.launch {
+                    try {
+                        val toAdd = UserCourse(course.courseId,
+                            course.subjectCode + " " + course.catalogNumber,
+                            course.title, schedule.courseComponent + " " + schedule.classSection,
+                            schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                            schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                            schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
+                        CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
+                    } catch (e: ClientRequestException) {
+                        println("Error fetching data: ${e.message}")
+                    } catch (e: Exception) {
+                        println(e.message)
                     }
                 }
             }
-        ) {
-            Text(addCourseStr)
         }
-    } else if (header == 1) {
-        Text(
-            text = text,
-            Modifier
-                //.border(1.dp, Color.Black)
-                .weight(weight)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
-    } else {
-        Text(
-            text = text,
-            Modifier
-                .border(1.dp, Color.Black)
-                .weight(weight)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+    ) {
+        Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Text(addCourseStr, textAlign = TextAlign.Center)
+        }
     }
 }
 
@@ -262,11 +255,11 @@ fun tableScreen(
                 Modifier.background(Color.Gray),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TableCell(text = "Class", weight = classWeight, button = 0, header = 1)
-                TableCell(text = "Section", weight = sectionWeight, button = 0, header = 1)
-                TableCell(text = "Time", weight = timeWeight, button = 0, header = 1)
-                TableCell(text = "Days", weight = dateWeight, button = 0, header = 1)
-                TableCell(text = "Add to Course Schedule", weight = buttonWeight, button = 0, header = 1)
+                TableCell(text = "Class", weight = classWeight, header = 1)
+                TableCell(text = "Section", weight = sectionWeight, header = 1)
+                TableCell(text = "Time", weight = timeWeight, header = 1)
+                TableCell(text = "Days", weight = dateWeight, header = 1)
+                TableCell(text = "Add to Course Schedule", weight = buttonWeight, header = 1)
             }
         }
         // Here are all the lines of your table.
@@ -274,110 +267,25 @@ fun tableScreen(
             val classNum  = it.classNumber
             val courseComp = it.courseComponent
             val sectionNum = it.classSection
-            val start = it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty()
-            val end = it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty()
+            val start = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
+            val end = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
             val date = it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier.fillMaxWidth().border(0.dp, Color.Black),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TableCell(text = classNum.toString(), weight = classWeight, button = 0, header = 0)
-                TableCell(text = "$courseComp $sectionNum", weight = sectionWeight, button = 0, header = 0)
-                TableCell(text = "$start - $end", weight = timeWeight, button = 0, header = 0)
-                TableCell(text = date, weight = dateWeight, button = 0, header = 0)
+                TableCell(text = classNum.toString(), weight = classWeight, header = 0)
+                TableCell(text = "$courseComp $sectionNum", weight = sectionWeight, header = 0)
+                TableCell(text = "$start - $end", weight = timeWeight, header = 0)
+                TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(
                         "${course.subjectCode} ${course.catalogNumber}$courseComp $sectionNum")) {
-                    "   Added to Course Schedule!   " }
-                        else { "        + Course Schedule          "},
-                    weight = buttonWeight, button = 1, header = 0, scope, course, it)
+                    "Added to Course Schedule!" }
+                        else { "+ Course Schedule"},
+                    weight = buttonWeight, scope, course, it)
             }
         }
     }
 }
-
-fun List<String>.concat() = this.joinToString("/") { it }.takeWhile { it.isDefined() }
-/*
-fun schedule(
-    classes: UniCourse,
-    sections: List<courseSection>
-) {
-    tableScreen(classes, sections)
-    /*
-    Row (
-        Modifier.fillMaxWidth().padding(vertical = 5.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Section",
-            fontSize = 15.sp,
-            //style = MaterialTheme.typography.h6
-        )
-        Text(
-            text = "Class",
-            fontSize = 15.sp,
-            //style = MaterialTheme.typography.h6
-        )
-        Text(
-            text = "Time",
-            fontSize = 15.sp,
-            //style = MaterialTheme.typography.h6
-        )
-        Text(
-            text = "Date",
-            fontSize = 15.sp,
-            //style = MaterialTheme.typography.h6
-        )
-        Text(
-            text = "",
-            fontSize = 15.sp,
-            //style = MaterialTheme.typography.h6
-        )
-    }
-    var added = 0
-    for (section in sections) {
-        Row (
-            Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = section.courseComponent + " " + section.classSection,
-                fontSize = 15.sp,
-                //style = MaterialTheme.typography.h6
-            )
-            Text(
-                text = section.classNumber,
-                fontSize = 15.sp,
-                //style = MaterialTheme.typography.h6
-            )
-            Text(
-                text = section.classMeetingStartTime + " - " + section.classMeetingEndTime,
-                fontSize = 15.sp,
-                //style = MaterialTheme.typography.h6
-            )
-            Text(
-                text = section.classNumber,
-                fontSize = 15.sp,
-                //style = MaterialTheme.typography.h6
-            )
-            var addCoursestr by remember { mutableStateOf("+ Course Schedule") }
-            var courseAdded = "Course Added"
-            Button(
-                //modifier = Modifier.align(Alignment.CenterVertically),
-                onClick = {
-                    addCoursestr = "Added to Course Schedule!"
-                    added = 1
-                }
-            ) {
-                if (added == 0) {
-                    Text(addCoursestr)
-                } else {
-                    Text(courseAdded)
-                }
-            }
-        }
-    }
-    */
-}
- */
