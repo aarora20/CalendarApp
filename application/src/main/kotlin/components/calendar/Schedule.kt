@@ -170,7 +170,7 @@ fun Schedule(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
+fun render(courseList: List<UserCourse>) {
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
@@ -200,12 +200,12 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
     ) {
 
         // BACK BUTTON
-        Button(onClick = onBackClick,
-            modifier = Modifier
-                .padding(0.dp)
-                .height(45.dp)) {
-            Text("Back")
-        }
+//        Button(onClick = onBackClick,
+//            modifier = Modifier
+//                .padding(0.dp)
+//                .height(45.dp)) {
+//            Text("Back")
+//        }
 
         // TITLES
         Row (
