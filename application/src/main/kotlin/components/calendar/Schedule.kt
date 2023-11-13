@@ -191,21 +191,10 @@ fun render(courseList: List<UserCourse>) {
     val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY",
         "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
-    // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
-    // print(screenSize.getWidth())
-
     Column (
         modifier = Modifier
             .fillMaxWidth()
     ) {
-
-        // BACK BUTTON
-//        Button(onClick = onBackClick,
-//            modifier = Modifier
-//                .padding(0.dp)
-//                .height(45.dp)) {
-//            Text("Back")
-//        }
 
         // TITLES
         Row (
@@ -253,14 +242,7 @@ fun render(courseList: List<UserCourse>) {
                 .verticalScroll(rememberScrollState())
                 .onSizeChanged { constraints ->
                     contentHeight = constraints.height
-                    print("contentHeight: ")
-                    print(contentHeight)
-                    print(" ")
-                    print("screenHeight: ")
-                    print(screenHeight)
-                    print(" ")
                 }
-
                 .drawBehind {
                     val hourHeightHalf = hourHeight / 2
                     val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()

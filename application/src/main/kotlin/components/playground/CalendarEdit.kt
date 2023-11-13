@@ -1,13 +1,12 @@
 package components.playground
 
-import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,16 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
 import components.calendar.render
-import components.courseInfo.TableCell
-import components.store
-import io.ktor.client.plugins.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import models.CourseDetails
-import models.ScheduleData
 import models.UserCourse
 
 
@@ -42,21 +32,22 @@ val FakeData = listOf(
 
 @Composable
 fun CalendarEditView() {
+    var isSheetOpen by remember { mutableStateOf(false) }
     Draggable(modifier = Modifier.fillMaxSize()) {
-        Row {
-            ScheduleSideSheet()
-            ScheduleTarget()
+        Row (modifier = Modifier.fillMaxSize()) {
+            ScheduleTarget(isSheetOpen) { isSheetOpen = !isSheetOpen }
+            if (isSheetOpen) {
+                ScheduleSideSheet()
+            }
         }
     }
 }
 
-
 @Composable
 fun ScheduleSideSheet() {
     Column (
-        modifier = Modifier.fillMaxWidth(0.3f)
+        modifier = Modifier.fillMaxSize()
     ) {
-
         LazyColumn(modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -106,11 +97,11 @@ fun RowScope.ScheduleCell(
 }
 
 @Composable
-fun ScheduleTarget() {
+fun ScheduleTarget(isSheetOpen: Boolean, toggleSideSheet: () -> Unit) {
     val listOfClasses = remember { mutableStateListOf<UserCourse>() }
 
     DropTarget<UserCourse>(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})
     ) {
         isInBound, course ->
         course?.let {
@@ -119,16 +110,13 @@ fun ScheduleTarget() {
             }
 
         }
-        render(listOfClasses)
-    }
-}
+        Button(
+            onClick = toggleSideSheet
+        ) {
+            Text("Open")
+        }
 
-fun main() = application {
-    Window(
-        title = "",
-        onCloseRequest = ::exitApplication
-    ) {
-        CalendarEditView()
+        render(listOfClasses)
     }
 }
 
