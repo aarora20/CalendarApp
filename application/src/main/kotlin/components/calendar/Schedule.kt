@@ -9,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -25,11 +27,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.UserCourse
+import java.security.KeyStore.TrustedCertificateEntry
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import java.text.SimpleDateFormat
+import java.util.*
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 
 data class UniClass(
 
@@ -53,7 +61,8 @@ data class UniClass(
 )
 
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mma")
-private val HourFormatter = DateTimeFormatter.ofPattern("h a")
+val HourFormatter = DateTimeFormatter.ofPattern("h a")
+val DateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
 
 
 // allows us to attach data to a composable with a modifier
@@ -177,19 +186,131 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         LocalDateTime.parse(it.endTime))
     }
 
-    val mondayClasses = selectedCourses.filter { it.days.contains("M") }
-    val tuesdayClasses = selectedCourses.filter { it.days.contains("T") }
-    val wednesdayClasses = selectedCourses.filter { it.days.contains("W") }
-    val thursdayClasses = selectedCourses.filter { it.days.contains("R") }
-    val fridayClasses = selectedCourses.filter { it.days.contains("F") }
-    val saturdayClasses = selectedCourses.filter { it.days.contains("Sa") }
-    val sundayClasses = selectedCourses.filter { it.days.contains("Su") }
+    val term_start = LocalDateTime.parse("2023-09-10T00:00:00")
+    val term_end = LocalDateTime.parse("2023-12-06T00:00:00")
+    val today = remember { mutableStateOf(LocalDateTime.now()) }
+    val dayOfWeek = today.value.dayOfWeek
+
+    val weekDayNumberMap: MutableMap<String, Int> = mutableMapOf()
+    weekDayNumberMap["MONDAY"] = 1
+    weekDayNumberMap["TUESDAY"] = 2
+    weekDayNumberMap["WEDNESDAY"] = 3
+    weekDayNumberMap["THURSDAY"] = 4
+    weekDayNumberMap["FRIDAY"] = 5
+    weekDayNumberMap["SATURDAY"] = 6
+    weekDayNumberMap["SUNDAY"] = 7
+
+    val dayOfWeekNumber = weekDayNumberMap[dayOfWeek.toString()]
+    val dayOfWeekNumberNonNull = dayOfWeekNumber ?: 0
+    val monDate = today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+
+    val tuesDate = if (2 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.TUESDAY))
+    }
+
+    val wedDate = if (3 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
+    }
+
+    val thursDate = if (4 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.THURSDAY))
+    }
+
+    val friDate = if (5 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY))
+    }
+
+    val satDate = if (6 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+    }
+
+    val sunDate = if (7 > dayOfWeekNumberNonNull) {
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+    } else {
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+    }
+
+
+
+    val mondayClasses = if (term_start <= monDate && monDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("M") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("M") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val tuesdayClasses = if (term_start <= tuesDate && tuesDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("T") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("T") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val wednesdayClasses = if (term_start <= wedDate && wedDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("W") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("W") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val thursdayClasses = if (term_start <= thursDate && thursDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("R") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("R") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val fridayClasses = if (term_start <= friDate && friDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("F") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("F") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val saturdayClasses = if (term_start <= satDate && satDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("Sa") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("Sa") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
+
+    val sundayClasses = if (term_start <= sunDate && sunDate <= term_end) {
+        selectedCourses.filter {(it.days.contains("Su") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("Su") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
+        }
+    } else {
+        emptyList()
+    }
 
     val classes = listOf(mondayClasses, tuesdayClasses, wednesdayClasses,
         thursdayClasses, fridayClasses, saturdayClasses, sundayClasses)
 
-    val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY",
-        "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
+    val monDateString = monDate.format(DateFormatter)
+    val tuesDateString = tuesDate.format(DateFormatter)
+    val wedDateString = wedDate.format(DateFormatter)
+    val thursDateString = thursDate.format(DateFormatter)
+    val friDateString = friDate.format(DateFormatter)
+    val satDateString = satDate.format(DateFormatter)
+    val sunDateString = sunDate.format(DateFormatter)
+
+    val days = listOf(monDateString, tuesDateString, wedDateString,
+        thursDateString, friDateString, satDateString, sunDateString)
 
     // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
     // print(screenSize.getWidth())
@@ -216,12 +337,43 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         ) {
             // TIMES space
 
-            Column (
+            Row (
                 modifier = Modifier
-                    .width(50.dp)
-                    .fillMaxSize()
+                    .width(70.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("")
+
+                Button(
+                    onClick = {
+                        // Move a week backward
+                        today.value = today.value.minusDays(7)
+                    },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(1.dp)
+                ) {
+                    Text(
+                        text = "<",
+                        style = TextStyle(color = Color.Black, fontSize = 2.sp)
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        // Move a week backward
+                        today.value = today.value.plusDays(7)
+                    },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(1.dp)
+                ) {
+                    Text(
+                        text = ">",
+                        style = TextStyle(color = Color.Black, fontSize = 2.sp)
+                    )
+                }
             }
 
             // DAYS OF THE WEEK
@@ -234,10 +386,9 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = text,
-                        style = TextStyle(color = Color.Black, fontSize = 14.sp)
-                    )
+                    Text(text = text)
+                        //style = TextStyle(color = Color.Black, fontSize = 12.sp)
+
                 }
             }
         }
@@ -267,7 +418,7 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
 
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 100f, y = it * hourHeightHalfPx),
+                            start = Offset(x = 70f, y = it * hourHeightHalfPx),
                             end = Offset(x = size.width, y = it * hourHeightHalfPx),
                             strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
@@ -303,4 +454,5 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         }
     }
 }
+
 
