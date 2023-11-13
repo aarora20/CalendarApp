@@ -70,9 +70,9 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
             }
             is SearchScreen.CourseInfo -> {
                 courseMap[course]?.let {
-                    coursePage(addedCourses, onBackClick = {
+                    coursePage(courseNames, addedCourses, onBackClick = {
                         currentScreen = SearchScreen.Search
-                    }, it)
+                    }, it, { newCourse: String -> course = newCourse})
                 }
             }
         }
@@ -99,8 +99,10 @@ fun CustomSearchBar(courses: List<String>, onBackClick: () -> Unit,
         }
     }
     Column {
-        Button(onClick = onBackClick) {
-            Text("Back")
+        Column (modifier = Modifier.padding(horizontal = 12.dp)) {
+            Button(onClick = onBackClick) {
+                Text("Back")
+            }
         }
         Box(
             modifier = Modifier

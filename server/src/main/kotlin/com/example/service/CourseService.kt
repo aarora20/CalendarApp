@@ -8,6 +8,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
@@ -33,6 +34,10 @@ suspend fun fetchClassSchedule(client: HttpClient, termCode: String): ClassSched
 
 suspend fun fetchClassScheduleByCourseId(client: HttpClient, termCode: String, courseId: String): ClassSchedules {
     val response: HttpResponse = client.get("https://openapi.data.uwaterloo.ca/v3/ClassSchedules/$termCode/$courseId")
+
+    if (response.status == HttpStatusCode.NotFound) {
+        return emptyList()
+    }
     return response.body<ClassSchedules>()
 }
 
