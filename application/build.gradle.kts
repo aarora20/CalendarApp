@@ -31,6 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     implementation("org.reduxkotlin:redux-kotlin-threadsafe:0.5.5")
     implementation("br.com.devsrsouza.compose.icons:tabler-icons:1.1.0")
+    implementation(project(mapOf("path" to ":server")))
 }
 
 compose.desktop {
