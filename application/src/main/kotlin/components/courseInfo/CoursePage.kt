@@ -194,6 +194,35 @@ fun RowScope.TableCell(
     }
 }
 
+fun detectTimeConflict(userCourses: List<UserCourse>, addStartTime: String, addEndTime: String): Boolean {
+
+    val startTime = LocalDateTime.parse(addStartTime)
+    val endTime = LocalDateTime.parse(addEndTime)
+
+    var courseStartTime: LocalDateTime
+    var courseEndTime: LocalDateTime
+
+    for (course in userCourses) {
+        courseStartTime = LocalDateTime.parse(course.startTime)
+        courseEndTime = LocalDateTime.parse(course.endTime)
+
+        // println("picked course start time" + startTime)
+        // println("picked course end time" + endTime)
+        // println("loop course start time" + startTime)
+        // println("loop course end time" + startTime)
+
+        val overlapStart = maxOf(startTime, courseStartTime)
+        val overlapEnd = minOf(endTime, courseEndTime)
+
+        if (overlapStart.isBefore(overlapEnd)) {
+            return true
+        }
+    }
+    return false
+}
+
+
+
 @Composable
 fun RowScope.TableCell(
     text: String,
@@ -218,6 +247,9 @@ fun RowScope.TableCell(
                             schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                             schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                             schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
+                        val userCourses = CourseSchedulesClient.getUserCourses(store.getState().userId)
+                        val isTimeConflict = detectTimeConflict(userCourses, schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(), schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
+                        println(isTimeConflict)
                         CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
                     } catch (e: ClientRequestException) {
                         println("Error fetching data: ${e.message}")

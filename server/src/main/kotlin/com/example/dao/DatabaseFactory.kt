@@ -1,8 +1,5 @@
 package com.example.dao
-import com.example.models.Friends
-import com.example.models.UserCourses
-import com.example.models.Users
-import com.example.models.Wishlists
+import com.example.models.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +21,8 @@ object DatabaseFactory {
             SchemaUtils.create(UserCourses);
             SchemaUtils.create(Wishlists)
             SchemaUtils.create(Friends)
+            SchemaUtils.create(CustomCalendars)
+            SchemaUtils.create(UserCalendarCourses)
         }
     }
 
