@@ -9,7 +9,6 @@ data class Response<T>(
     val data: ResponseData<T>
 ) {
 
-
 }
 
 @Serializable
