@@ -27,9 +27,8 @@ import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
-import models.WishCourses
+import models.WishCourse
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun coursePage(
@@ -113,7 +112,7 @@ fun coursePage(
                         onClick = {
                             wishList = "Added to Wish List!"
                             scope.launch {
-                                val toAdd = WishCourses(course.subjectCode,course.catalogNumber,course.title)
+                                val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
                                 val success = addToWishlist(store.getState().userId, toAdd)
                                 if (!success) {
                                     println("Error adding course to wishlist.")

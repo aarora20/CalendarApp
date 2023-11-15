@@ -13,7 +13,7 @@ import io.ktor.util.*
 import models.Courses
 import models.ScheduleData
 import models.UserCourse
-import models.WishCourses
+import models.WishCourse
 
 object CourseSchedulesClient {
     private val client = HttpClient(CIO) {
@@ -63,7 +63,7 @@ object CourseSchedulesClient {
     }
 
     @OptIn(InternalAPI::class)
-    suspend fun addToWishlist(userId: String, course: WishCourses): Boolean {
+    suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
         val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/wishlist") {
             contentType(ContentType.Application.Json)
             setBody(course)
@@ -76,9 +76,9 @@ object CourseSchedulesClient {
         return response.status == HttpStatusCode.OK
     }
 
-    suspend fun getWishlist(userId: String): List<WishCourses> {
+    suspend fun getWishlist(userId: String): List<WishCourse> {
         val response: HttpResponse = client.get("http://0.0.0.0:8080/user/$userId/wishlist")
-        return response.body<List<WishCourses>>()
+        return response.body<List<WishCourse>>()
     }
 
     suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
