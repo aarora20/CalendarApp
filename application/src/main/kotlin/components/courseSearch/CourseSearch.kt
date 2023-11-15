@@ -34,7 +34,7 @@ sealed class SearchScreen {
 }
 
 @Composable
-fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
+fun CourseSearchScreen(/*onBackClick: () -> Unit,*/courses: List<CourseDetails>) {
     val courseNames = courses.map { "${it.subjectCode}${it.catalogNumber}" }
     val courseMap = courses.associateBy { it.subjectCode + it.catalogNumber }
     var currentScreen by remember { mutableStateOf<SearchScreen>(SearchScreen.Search) }
@@ -56,7 +56,7 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
     Column {
         when (val screen = currentScreen) {  // Use a local immutable copy of currentScreen
             is SearchScreen.Search -> {
-                CustomSearchBar(courseNames, onBackClick, changeToCourseInfo = { selectedCourse ->
+                CustomSearchBar(courseNames, /*onBackClick, */changeToCourseInfo = { selectedCourse ->
                     course = selectedCourse
                     currentScreen = SearchScreen.CourseInfo
                 }, exploreCourses = { subjectCode ->
@@ -83,7 +83,7 @@ fun CourseSearchScreen(onBackClick: () -> Unit, courses: List<CourseDetails>) {
 }
 
 @Composable
-fun CustomSearchBar(courses: List<String>, onBackClick: () -> Unit,
+fun CustomSearchBar(courses: List<String>, //onBackClick: () -> Unit,
                     changeToCourseInfo: (course: String) -> Unit,
                     exploreCourses: (subjectCode: String) -> Unit) {
     var text by remember { mutableStateOf("") }
@@ -99,11 +99,11 @@ fun CustomSearchBar(courses: List<String>, onBackClick: () -> Unit,
     }
 
     Column {
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-            Button(onClick = onBackClick) {
-                Text("Back")
-            }
-        }
+        //Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+            //Button(onClick = onBackClick) {
+                //Text("Back")
+            //}
+        //}
         Box(
             modifier = Modifier
                 .fillMaxWidth()
