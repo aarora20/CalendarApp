@@ -34,13 +34,13 @@ class DAOFacadeImpl : DAOFacade {
     )
 
     private fun resultRowToCalendarCourse(row: ResultRow) = UserCalendarCourse(
-        courseId = row[UserCourses.courseId],
-        courseNum = row[UserCourses.courseNum],
-        courseTitle = row[UserCourses.courseTitle],
-        component = row[UserCourses.component],
-        startTime = row[UserCourses.startTime],
-        endTime = row[UserCourses.endTime],
-        weekPattern = row[UserCourses.weekPattern]
+        courseId = row[UserCalendarCourses.courseId],
+        courseNum = row[UserCalendarCourses.courseNum],
+        courseTitle = row[UserCalendarCourses.courseTitle],
+        component = row[UserCalendarCourses.component],
+        startTime = row[UserCalendarCourses.startTime],
+        endTime = row[UserCalendarCourses.endTime],
+        weekPattern = row[UserCalendarCourses.weekPattern]
     )
 
     private fun resultRowToCalendar(row: ResultRow) = CustomCalendar(
@@ -416,21 +416,23 @@ class DAOFacadeImpl : DAOFacade {
             List<UserCalendarCourse> = dbQuery {
         try {
             transaction {
-                val userCoursesQuery = (UserCalendarCourses innerJoin Users innerJoin CustomCalendars)
+                val userCalendarCoursesQuery = (Users innerJoin UserCalendarCourses)
+                    .innerJoin(CustomCalendars, { UserCalendarCourses.calendarId}, {CustomCalendars.id})
                     .slice(UserCalendarCourses.courseId, UserCalendarCourses.component
                     ,UserCalendarCourses.courseNum, UserCalendarCourses.courseTitle, UserCalendarCourses.startTime,
                     UserCalendarCourses.endTime, UserCalendarCourses.weekPattern)
-                    .select { (Users.id eq UUID.fromString(userId)) and
-                            (CustomCalendars.id eq UUID.fromString(calendarId)) }
+                    .select { (CustomCalendars.id eq UUID.fromString(calendarId)) and
+                    (Users.id eq UUID.fromString(userId))}
 
-                userCoursesQuery.map(::resultRowToCalendarCourse)
+                userCalendarCoursesQuery.map(::resultRowToCalendarCourse)
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             listOf()
         }
     }
 
-    override suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendar): CustomCalendar? = dbQuery {
+    override suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendarParams): CustomCalendar? = dbQuery {
         try {
             transaction {
                 val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0

@@ -8,6 +8,9 @@ import org.jetbrains.exposed.sql.ReferenceOption
 data class UserCalendarCourse(val courseId: String, val courseNum: String, val courseTitle: String, val component: String,
                       val startTime: String, val endTime: String, val weekPattern: String)
 
+@Serializable
+data class UserCalendarCourseList(val courses: List<UserCalendarCourse>)
+
 // Entry will be delete whenever parent row gets deleted (Custom Calendar)
 object UserCalendarCourses : UUIDTable() {
     val userId = reference("user_id", Users)

@@ -47,7 +47,7 @@ interface DAOFacade {
     suspend fun updateUserCalendarCourses(userIdArg: String, calendarIdArg: String, courses: List<UserCalendarCourse>): Boolean
     suspend fun getAllUserCalendarCourses(userId: String, calendarId: String): List<UserCalendarCourse>
 
-    suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendar): CustomCalendar?
+    suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendarParams): CustomCalendar?
 
     suspend fun deleteCustomCalendar(userIdArg: String, calendarId: String): Boolean
 
