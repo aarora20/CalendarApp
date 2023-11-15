@@ -32,6 +32,22 @@ class DAOFacadeImpl : DAOFacade {
         endTime = row[UserCourses.endTime],
         weekPattern = row[UserCourses.weekPattern]
     )
+
+    private fun resultRowToCalendarCourse(row: ResultRow) = UserCalendarCourse(
+        courseId = row[UserCalendarCourses.courseId],
+        courseNum = row[UserCalendarCourses.courseNum],
+        courseTitle = row[UserCalendarCourses.courseTitle],
+        component = row[UserCalendarCourses.component],
+        startTime = row[UserCalendarCourses.startTime],
+        endTime = row[UserCalendarCourses.endTime],
+        weekPattern = row[UserCalendarCourses.weekPattern]
+    )
+
+    private fun resultRowToCalendar(row: ResultRow) = CustomCalendar(
+        id = row[CustomCalendars.id].toString(),
+        name = row[CustomCalendars.name]
+    )
+
     override suspend fun allUsers(): List<User> = dbQuery {
         Users.selectAll().map(::resultRowToUser)
     }
@@ -53,7 +69,6 @@ class DAOFacadeImpl : DAOFacade {
             val result = mutableListOf<User>()
             TransactionManager.current().exec("select * from users where SIMILARITY(username, '$username') > 0.4;") { rs ->
                 while (rs.next()) {
-                    exposedLogger.debug((rs.getString("id")))
                     result.add(User(rs.getString("id"), rs.getString("username"),
                         rs.getString("password")))
                 }
@@ -232,7 +247,6 @@ class DAOFacadeImpl : DAOFacade {
             e.printStackTrace()
             false
         }
-
     }
 
     override suspend fun getAllUserCourses(id: String): List<UserCourse> = dbQuery {
@@ -315,6 +329,146 @@ class DAOFacadeImpl : DAOFacade {
             e.printStackTrace()
             listOf()
         }
+    }
+
+    override suspend fun addUserCalendarCourse(userIdArg: String, calendarIdArg: String, course: UserCalendarCourse):
+            UserCalendarCourse? = dbQuery {
+        try {
+            transaction {
+                val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0
+
+                val calendarExists = CustomCalendars.select { CustomCalendars.id eq UUID.fromString(calendarIdArg) }
+                    .count() > 0
+
+                if (userExists && calendarExists) {
+                    val courseExists = UserCalendarCourses.select { (UserCalendarCourses.courseNum eq course.courseNum) and
+                            (UserCalendarCourses.component eq course.component) and
+                            (UserCalendarCourses.userId eq UUID.fromString(userIdArg)) and
+                            (UserCalendarCourses.calendarId eq UUID.fromString(calendarIdArg))}.count() > 0
+
+                    if (!courseExists) {
+                        UserCalendarCourses.insert {
+                            it[userId] = UUID.fromString(userIdArg)
+                            it[calendarId] = UUID.fromString(calendarIdArg)
+                            it[courseId] = course.courseId
+                            it[courseNum] = course.courseNum
+                            it[courseTitle] = course.courseTitle
+                            it[component] = course.component
+                            it[startTime] = course.startTime
+                            it[endTime] = course.endTime
+                            it[weekPattern] = course.weekPattern
+                        }
+                        course
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun updateUserCalendarCourses(userIdArg: String, calendarIdArg: String, courses: List<UserCalendarCourse>):
+            Boolean = dbQuery {
+        try {
+            transaction {
+                val userExists = Users.select { Users.id eq UUID.fromString(userIdArg)}.count() > 0
+
+                if (userExists) {
+                    UserCalendarCourses.deleteWhere { (userId eq UUID.fromString(userIdArg)) and
+                            (calendarId eq UUID.fromString(calendarIdArg)) }
+                    courses.forEach { it ->
+                        val courseId = it.courseId
+                        val courseNum = it.courseNum
+                        val component = it.component
+                        val startTime = it.startTime
+                        val endTime = it.endTime
+                        val weekPattern = it.weekPattern
+                        val courseTitle = it.courseTitle
+                        UserCalendarCourses.insert {
+                            it[userId] = UUID.fromString(userIdArg)
+                            it[calendarId] = UUID.fromString(calendarIdArg)
+                            it[UserCourses.courseId] = courseId
+                            it[UserCourses.courseNum] = courseNum
+                            it[UserCourses.courseTitle] = courseTitle
+                            it[UserCourses.component] = component
+                            it[UserCourses.startTime] = startTime
+                            it[UserCourses.endTime] = endTime
+                            it[UserCourses.weekPattern] = weekPattern
+                        }
+                    }
+                } else {
+                    false
+                }
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    override suspend fun getAllUserCalendarCourses(userId: String, calendarId: String):
+            List<UserCalendarCourse> = dbQuery {
+        try {
+            transaction {
+                val userCalendarCoursesQuery = (Users innerJoin UserCalendarCourses)
+                    .innerJoin(CustomCalendars, { UserCalendarCourses.calendarId}, {CustomCalendars.id})
+                    .slice(UserCalendarCourses.courseId, UserCalendarCourses.component
+                    ,UserCalendarCourses.courseNum, UserCalendarCourses.courseTitle, UserCalendarCourses.startTime,
+                    UserCalendarCourses.endTime, UserCalendarCourses.weekPattern)
+                    .select { (CustomCalendars.id eq UUID.fromString(calendarId)) and
+                    (Users.id eq UUID.fromString(userId))}
+
+                userCalendarCoursesQuery.map(::resultRowToCalendarCourse)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            listOf()
+        }
+    }
+
+    override suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendarParams): CustomCalendar? = dbQuery {
+        try {
+            transaction {
+                val userExists = Users.select { Users.id eq UUID.fromString(userIdArg) }.count() > 0
+
+                if (userExists) {
+                    val calendarExists = CustomCalendars.select {
+                        (CustomCalendars.userId eq UUID.fromString(userIdArg) and (
+                            CustomCalendars.name eq calendar.name
+                        ))
+                    }.count() > 0
+
+                    if (!calendarExists) {
+                        CustomCalendars.insert {
+                            it[userId] = UUID.fromString(userIdArg)
+                            it[name] = calendar.name
+                        }.resultedValues?.singleOrNull()?.let(::resultRowToCalendar)
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun deleteCustomCalendar(userIdArg: String, calendarId: String): Boolean = dbQuery {
+        CustomCalendars.deleteWhere { (userId eq UUID.fromString(userIdArg)) and
+                (id eq UUID.fromString(calendarId))} > 0
+    }
+
+    override suspend fun getCustomCalendars(userIdArg: String): List<CustomCalendar> = dbQuery {
+        CustomCalendars.select { CustomCalendars.userId eq UUID.fromString(userIdArg)}.map (::resultRowToCalendar)
     }
 }
 

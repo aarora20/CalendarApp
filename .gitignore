@@ -44,3 +44,6 @@ bin/
 
 server/tmp/
 server/.db/
+
+### Dotenv file ###
+.env
