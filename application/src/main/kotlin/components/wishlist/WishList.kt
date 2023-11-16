@@ -29,7 +29,7 @@ data class wishCourses(
 )
 
 @Composable
-fun wishSelection(onBackClick: () -> Unit) {
+fun wishSelection(/*onBackClick: () -> Unit*/) {
     val userId = store.getState().userId // replace this with the user ID
     var selectedCourses by remember { mutableStateOf(emptyList<WishCourses>()) }
     val scope = rememberCoroutineScope()
@@ -67,14 +67,14 @@ fun wishSelection(onBackClick: () -> Unit) {
                 text = "Wish List of Courses (Click Course Name for More Info)"
             )
             // wish list option
-            Button(
+            //Button(
                 //modifier = Modifier.align(Alignment.CenterVertically),
-                onClick = {
-                    onBackClick()
-                },
-            ) {
-                Text("Back")
-            }
+                //onClick = {
+                    //onBackClick()
+                //},
+            //) {
+                //Text("Back")
+            //}
         }
         Row {
             LazyColumn(Modifier.padding(0.dp)) {

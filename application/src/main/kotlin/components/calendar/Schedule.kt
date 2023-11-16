@@ -4,11 +4,15 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,6 +43,10 @@ import java.util.*
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
 
+import compose.icons.TablerIcons
+import compose.icons.tablericons.CaretRight
+import compose.icons.tablericons.CaretLeft
+
 data class UniClass(
 
     // STAT333
@@ -62,8 +70,7 @@ data class UniClass(
 
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mma")
 val HourFormatter = DateTimeFormatter.ofPattern("h a")
-val DateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
-
+val DateFormatter = DateTimeFormatter.ofPattern("MMM dd")
 
 // allows us to attach data to a composable with a modifier
 // read data from a measurable within a layout
@@ -177,9 +184,9 @@ fun Schedule(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
+fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
@@ -309,8 +316,9 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
     val satDateString = satDate.format(DateFormatter)
     val sunDateString = sunDate.format(DateFormatter)
 
-    val days = listOf(monDateString, tuesDateString, wedDateString,
-        thursDateString, friDateString, satDateString, sunDateString)
+    val days = listOf(("M | " + monDateString),
+        ("Tu | " + tuesDateString), ("W | " + wedDateString), ("Th | " + thursDateString),
+        ("F | " + friDateString), ("Sa | " + satDateString), ("Su | " + sunDateString))
 
     // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
     // print(screenSize.getWidth())
@@ -320,6 +328,7 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
             .fillMaxWidth()
     ) {
 
+        /*
         // BACK BUTTON
         Button(onClick = onBackClick,
             modifier = Modifier
@@ -327,11 +336,12 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                 .height(45.dp)) {
             Text("Back")
         }
+         */
 
         // TITLES
         Row (
             modifier = Modifier
-                .height(50.dp)
+                .height(70.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -345,6 +355,7 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
 
+                /*
                 Button(
                     onClick = {
                         // Move a week backward
@@ -352,28 +363,81 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                     },
                     modifier = Modifier
                         .size(35.dp)
-                        .padding(1.dp)
                 ) {
-                    Text(
-                        text = "<",
-                        style = TextStyle(color = Color.Black, fontSize = 2.sp)
-                    )
+                    Icon(imageVector = TablerIcons.CaretLeft, "Left")
+                }
+                 */
+
+                Box (
+                    //modifier = Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
+                ) {
+                    PlainTooltipBox(
+                        tooltip = {Text("Next Week", color = Color.White)}
+                    ) {
+                        CompositionLocalProvider(
+                            LocalMinimumInteractiveComponentEnforcement provides false
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    today.value = today.value.minusDays(7)
+
+                                },
+                                modifier = Modifier
+                                    .then(Modifier.size(20.dp))
+                                    .statusBarsPadding()
+                                    .background(
+                                        color = Color.LightGray,
+                                        shape = CircleShape
+                                    ).tooltipAnchor(),
+                                ) {
+                                Icon(
+                                    imageVector = (TablerIcons.CaretLeft),
+                                    contentDescription = "Right",
+                                    modifier = Modifier.size(10.dp)
+                                )
+                            }
+                        }
+                    }
                 }
 
-                Button(
-                    onClick = {
-                        // Move a week backward
-                        today.value = today.value.plusDays(7)
-                    },
-                    modifier = Modifier
-                        .size(35.dp)
-                        .padding(1.dp)
+
+
+                Box (
+                    //modifier = Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
                 ) {
-                    Text(
-                        text = ">",
-                        style = TextStyle(color = Color.Black, fontSize = 2.sp)
-                    )
+                    PlainTooltipBox(
+                        tooltip = {Text("Previous Week", color = Color.White)}
+                    ) {
+                        CompositionLocalProvider(
+                            LocalMinimumInteractiveComponentEnforcement provides false
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    today.value = today.value.plusDays(7)
+
+                                },
+                                modifier = Modifier
+                                    .then(Modifier.size(20.dp))
+                                    .statusBarsPadding()
+                                    .background(
+                                        color = Color.LightGray,
+                                        shape = CircleShape
+                                    ).tooltipAnchor(),
+
+                                ) {
+                                Icon(
+                                    imageVector = (TablerIcons.CaretRight),
+                                    contentDescription = "Right",
+                                    modifier = Modifier.size(10.dp)
+                                )
+                            }
+                        }
+                    }
                 }
+
+
+
+
             }
 
             // DAYS OF THE WEEK
@@ -410,15 +474,30 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
                     print("screenHeight: ")
                     print(screenHeight)
                     print(" ")
+
+                    // make hourHeight adapt to changes in screenSize
+                    if ((screenHeight / hours) % 2 == 0) {
+                        hourHeight = (screenHeight / hours).dp
+                    } else {
+                        hourHeight = (screenHeight / hours - 1).dp
+                    }
+
+                    if (hourHeight < 40.dp) {
+                        hourHeight = 40.dp
+                    }
+
                 }
 
                 .drawBehind {
                     val hourHeightHalf = hourHeight / 2
                     val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()
 
+                    println("hourHeightHalf: " + hourHeightHalf)
+                    println("hourHeightHalfPx: " + hourHeightHalfPx)
+
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 70f, y = it * hourHeightHalfPx),
+                            start = Offset(x = 0f, y = it * hourHeightHalfPx),
                             end = Offset(x = size.width, y = it * hourHeightHalfPx),
                             strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
@@ -429,14 +508,10 @@ fun render(courseList: List<UserCourse>, onBackClick: () -> Unit) {
         ) {
 
             // make hourHeight adapt to changes in screenSize
-            hourHeight = (screenHeight / hours).dp
-            if (hourHeight < 40.dp) {
-                hourHeight = 40.dp
-            }
 
             Column (
                 modifier = Modifier
-                    .width(50.dp)
+                    .width(70.dp)
             ) {
                 //Text("", textAlign = TextAlign.Center)
                 ScheduleSidebar(hourHeight)

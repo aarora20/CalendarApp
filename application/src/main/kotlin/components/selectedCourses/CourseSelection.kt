@@ -27,7 +27,7 @@ sealed class SelectionScreen {
 }
 
 @Composable
-fun selectionScreen(onBackClick: () -> Unit) {
+fun selectionScreen(/*onBackClick: () -> Unit*/) {
     var currentScreen by remember { mutableStateOf<SelectionScreen>(SelectionScreen.CourseSelection) }
 
     val selectedCourses = remember { mutableStateListOf<UserCourse>()}
@@ -50,14 +50,12 @@ fun selectionScreen(onBackClick: () -> Unit) {
     Column {
         when (currentScreen) {
             is SelectionScreen.CourseSelection -> {
-                courseSelection(selectedCourses, onBackClick) {
+                courseSelection(selectedCourses /*, onBackClick*/) {
                     currentScreen = SelectionScreen.Calendar
                 }
             }
             is SelectionScreen.Calendar -> {
-                render(selectedCourses) {
-                    currentScreen = SelectionScreen.CourseSelection
-                }
+                render(selectedCourses)
 
             }
         }
@@ -67,15 +65,15 @@ fun selectionScreen(onBackClick: () -> Unit) {
 @Composable
 fun courseSelection(
     courseList: SnapshotStateList<UserCourse>,
-    onBackClick: () -> Unit,
+    //onBackClick: () -> Unit,
     onCalendarClick: () -> Unit,
 ) {
 
     val updateScope = rememberCoroutineScope()
     // sets the page as a column
-    Button(onClick = onBackClick) {
-        Text("Back")
-    }
+    //Button(onClick = onBackClick) {
+        //Text("Back")
+    //}
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Top,
