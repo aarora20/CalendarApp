@@ -17,7 +17,7 @@ fun App() {
 fun main() = application {
     val state = rememberWindowState(placement = WindowPlacement.Maximized)
     Window(onCloseRequest = ::exitApplication, state) {
-        window.minimumSize = Dimension(1500, 600)
+        window.minimumSize = Dimension(1000, 600)
         App()
     }
 }

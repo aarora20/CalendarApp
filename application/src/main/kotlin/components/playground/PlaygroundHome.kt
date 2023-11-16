@@ -15,15 +15,16 @@ sealed class PlaygroundScreen {
 }
 
 @Composable
-fun PlaygroundHome(allCourses:  List<CourseDetails>) {
+fun PlaygroundHome(allCourses:  List<CourseDetails>, calendarList: List<CustomCalendar>) {
     var currentScreen by remember { mutableStateOf<PlaygroundScreen>(PlaygroundScreen.Home) }
     val userCalendarCourseScope = rememberCoroutineScope()
     var courseList by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
-    var selectedCalendar by remember { mutableStateOf<CustomCalendar>(CustomCalendar("", "")) }
+    var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
 
     when (currentScreen) {
         is PlaygroundScreen.Home -> {
             PlaygroundCalendarsPage(
+                calendarList,
                 onClickCalendar = { calendar ->
                     userCalendarCourseScope.launch {
                         try {
