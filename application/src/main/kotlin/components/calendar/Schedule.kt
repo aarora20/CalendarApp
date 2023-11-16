@@ -183,7 +183,7 @@ fun Schedule(
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
+fun CalendarRender(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
