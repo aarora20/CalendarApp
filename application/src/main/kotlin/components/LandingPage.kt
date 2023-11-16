@@ -247,7 +247,7 @@ fun landingScreen(courseList: List<CourseDetails>) {
                 }
 
                 is AppScreen.CourseSelection -> {
-                    selectionScreen()
+                    selectionScreen(courses = courseList)
                 }
 
                 is AppScreen.CourseSearch -> {

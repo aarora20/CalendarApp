@@ -6,11 +6,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +22,7 @@ import androidx.compose.ui.unit.sp
 import components.common.CustomIconButton
 import components.store
 import compose.icons.TablerIcons
-import compose.icons.tablericons.DeviceFloppy
-import compose.icons.tablericons.Plus
-import compose.icons.tablericons.Trash
+import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.UserCourse
@@ -33,7 +32,8 @@ import models.UserCourse
 fun courseSelection(
     courseList: SnapshotStateList<UserCourse>,
     onCalendarClick: () -> Unit,
-    removeCourse: (c : UserCourse) -> Unit
+    removeCourse: (c : UserCourse) -> Unit,
+    openSideSheet: () -> Unit
 ) {
     val courseMap = courseList.groupBy { "${it.courseNum} - ${it.courseTitle}" }
     val updateScope = rememberCoroutineScope()
@@ -68,8 +68,22 @@ fun courseSelection(
                     fontSize = 25.sp,
                     maxLines = 1
                 )
-                Button(onClick = onCalendarClick) {
-                    Text("Calendar View")
+                Button (
+                    onClick = onCalendarClick,
+                    modifier = Modifier.width(180.dp)
+                ) {
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = TablerIcons.Calendar,
+                            contentDescription = "Calendar View",
+                            tint = Color.White
+                        )
+                        Text("Calendar View")
+                    }
                 }
             }
 
@@ -108,7 +122,7 @@ fun courseSelection(
                         icon = TablerIcons.DeviceFloppy
                     )
                     CustomIconButton(
-                        onClick= {},
+                        onClick= openSideSheet,
                         modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                         tooltipText= "Add Course",
                         buttonRadius= 36.dp,
@@ -121,8 +135,6 @@ fun courseSelection(
             Row {
                 LazyColumn(Modifier.padding(0.dp)) {
                     items(courseMap.keys.toList()) {
-                        print(it)
-                        println(courseMap)
                         courseMap[it]?.let { it1 -> CourseCluster(it1, it, removeCourse)}
                         Spacer(modifier = Modifier.height(10.dp))
                     }
@@ -130,9 +142,6 @@ fun courseSelection(
             }
         }
     }
-
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
