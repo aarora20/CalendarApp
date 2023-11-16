@@ -2,22 +2,24 @@ package components
 
 import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import components.Home.HomeScreen
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
+import components.calendar.CalendarRender
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
-import components.Home.HomeScreen
-import components.calendar.render
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
-import components.calendar.Schedule
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
@@ -25,29 +27,6 @@ import models.UserCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.rootReducer
-import androidx.compose.material3.*
-
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.PermanentNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 
 // fake data for now for wishlist
 // Should replace with api get results
@@ -300,7 +279,7 @@ fun landingScreen(courseList: List<CourseDetails>) {
                         }
                     }
 
-                    render(courseList = selectedCourses)
+                    CalendarRender(courseList = selectedCourses)
                 }
             }
         }
