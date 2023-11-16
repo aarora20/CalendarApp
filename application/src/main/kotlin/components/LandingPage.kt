@@ -17,7 +17,6 @@ import components.auth.RegisterScreen
 import components.calendar.CalendarRender
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
-import components.playground.PlaygroundHome
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
@@ -27,6 +26,7 @@ import models.CourseDetails
 import models.UserCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
+import store.LogoutUser
 import store.rootReducer
 
 // fake data for now for wishlist
@@ -101,7 +101,8 @@ fun landingPage() {
         }
         is Screen.Landing -> {
             landingScreen(
-                courseList = courseList)
+                courseList = courseList,
+                onLogout = { currentScreen = Screen.Login })
 
                         /*
                 onCourseSelectionClick = {
@@ -165,7 +166,7 @@ sealed class AppScreen {
 
 
 @Composable
-fun landingScreen(courseList: List<CourseDetails>) {
+fun landingScreen(courseList: List<CourseDetails>, onLogout: () -> Unit) {
 
 
 
@@ -233,8 +234,21 @@ fun landingScreen(courseList: List<CourseDetails>) {
                         )
 
                         Divider()
-                    }
+                        Spacer(Modifier.weight(1f))
+                        Divider()
+                        NavigationDrawerItem(
+                            label = { Text(text = "Logout") },
+                            selected = false,
+                            onClick = {
+                                // Dispatch LogoutUser action
+                                store.dispatch(LogoutUser())
+                                // Navigate to Login Screen or perform other necessary cleanup
+                                onLogout()
+                            }
+                        )
 
+                        Divider()
+                    }
 
 
                     // ...other drawer items
