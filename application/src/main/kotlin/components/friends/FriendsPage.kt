@@ -1,5 +1,4 @@
 package components.friends
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,13 +27,13 @@ sealed class FriendScreen {
 }
 
 @Composable
-fun FriendsPage(onBackClick: () -> Unit) {
+fun FriendsPage(/*onBackClick: () -> Unit*/) {
     var currentScreen by remember { mutableStateOf<FriendScreen>(FriendScreen.Search) }
     var compareScreen by remember { mutableStateOf<CompareScreen>(CompareScreen.Select) }
 
     Row {
         NavigationRailSidebar(
-            onBackClick = onBackClick,
+            //onBackClick = onBackClick,
             onSearch = {currentScreen = FriendScreen.Search},
             onNotif = {currentScreen = FriendScreen.Notification },
             onList = { currentScreen = FriendScreen.FriendList},
@@ -64,19 +63,20 @@ fun FriendsPage(onBackClick: () -> Unit) {
 
 @Composable
 fun NavigationRailSidebar(
-    onBackClick: () -> Unit,
+    //onBackClick: () -> Unit,
     onSearch : () -> Unit,
     onList : () -> Unit,
     onNotif: () -> Unit,
     onCompare: () -> Unit
 ) {
     NavigationRail() {
-        NavigationRailItem(
-            selected = false,
-            onClick = onBackClick,
-            icon = { Icon(Icons.Default.Home, "home")}
-        )
+        //NavigationRailItem(
+            //selected = false,
+            //onClick = onBackClick,
+            //icon = { Icon(Icons.Default.Home, "home")}
+        //)
         Spacer(modifier = Modifier.height(60.dp))
+
         NavigationRailItem(
             selected = false,
             onClick = onSearch,

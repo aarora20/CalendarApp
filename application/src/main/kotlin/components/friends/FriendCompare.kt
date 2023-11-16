@@ -127,7 +127,6 @@ fun CompareCalendar(
         }
         CalendarCompareScreen(checkedUserList, checkedFriendList, onSelect)
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

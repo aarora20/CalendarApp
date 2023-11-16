@@ -3,6 +3,7 @@ package components.calendar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.UserCalendarCourse
+import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
@@ -42,13 +44,17 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
     val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY",
         "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
-    // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
-    // print(screenSize.getWidth())
+    var screenHeight = LocalWindowInfo.current.containerSize.height
+    var hourHeight = (screenHeight / hours).dp
+    if (hourHeight < 40.dp) {
+        hourHeight = 40.dp
+    }
 
     Column (
         modifier = Modifier
             .fillMaxWidth()
     ) {
+
         // TITLES
         Row (
             modifier = Modifier
@@ -84,27 +90,18 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
             }
         }
 
-        // ACTUAL CALENDAR
-        var screenHeight = LocalWindowInfo.current.containerSize.height
-        var contentHeight = 800
-
         Row (
             modifier = Modifier
                 .weight(0.84f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .onSizeChanged { constraints ->
-                    contentHeight = constraints.height
-                }
+
 
                 .drawBehind {
-                    val hourHeightHalf = hourHeight / 2
-                    val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()
-
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 100f, y = it * hourHeightHalfPx),
-                            end = Offset(x = size.width, y = it * hourHeightHalfPx),
+                            start = Offset(x = 0f, y = it * (hourHeight / 2).toPx().toFloat()),
+                            end = Offset(x = size.width, y = it * (hourHeight / 2).toPx().toFloat()),
                             strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
                         )
@@ -113,11 +110,6 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
 
             ) {
 
-            // make hourHeight adapt to changes in screenSize
-            hourHeight = (screenHeight / hours).dp
-            if (hourHeight < 40.dp) {
-                hourHeight = 40.dp
-            }
 
             Column (
                 modifier = Modifier
@@ -133,7 +125,7 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Schedule(dayClass)
+                    Schedule(hourHeight = hourHeight, classes = dayClass)
                 }
             }
         }
