@@ -18,7 +18,7 @@ internal class DragTargetInfo {
     var dragPosition by mutableStateOf(Offset.Zero)
     var dragOffset by mutableStateOf(Offset.Zero)
     var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
-    var dataToDrop by mutableStateOf<Any?>(null)
+    var dataToDrop by mutableStateOf<Any?>(null )
 }
 
 @Composable
@@ -77,6 +77,8 @@ fun <T> DragTarget(
             // detect DragGestures After Press
             detectDragGestures(onDragStart = {
                 currentState.dataToDrop = dataToDrop
+                println("data to drop")
+                println(dataToDrop)
                 currentState.isDragging = true
                 currentState.dragPosition = currentPosition + it
                 currentState.draggableComposable = content

@@ -73,7 +73,6 @@ fun DropSearch(
                     headlineContent = { Text(course) },
                     modifier = Modifier
                         .clickable {
-                            println("clicked")
                             text = ""
                             onClickCourse(course)
                             println(course)

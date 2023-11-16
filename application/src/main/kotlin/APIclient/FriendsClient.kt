@@ -29,8 +29,6 @@ object FriendsClient {
     }
 
     suspend fun sendFriendRequest(userId: String, friendId: String): Friend? {
-//        println(userId)
-//        println(friendId)
         val response: HttpResponse = client.post("http://0.0.0.0:8080/friends/send") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))

@@ -1,17 +1,16 @@
 package APIclient
 
-import com.example.models.UserCalendarCourse
+import models.UserCalendarCourse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
-import models.*
+import models.CustomCalendar
+import models.CustomCalendarParams
 
 object CustomCalendarClient {
     private val client = HttpClient(CIO) {
@@ -20,13 +19,9 @@ object CustomCalendarClient {
         }
     }
 
-    suspend fun getCalendars(userId: String): CustomCalendar? {
+    suspend fun getCalendars(userId: String): List<CustomCalendar> {
         val response: HttpResponse = client.get("http://0.0.0.0:8080/user/${userId}/calendars")
-        return if (response.status == HttpStatusCode.BadRequest) {
-            null
-        } else {
-            response.body<CustomCalendar>()
-        }
+        return response.body()
     }
 
     suspend fun addCalendar(userId: String, calendarParams: CustomCalendarParams): CustomCalendar? {

@@ -205,11 +205,6 @@ fun detectTimeConflict(userCourses: List<UserCourse>, addStartTime: String, addE
         courseStartTime = LocalDateTime.parse(course.startTime)
         courseEndTime = LocalDateTime.parse(course.endTime)
 
-        // println("picked course start time" + startTime)
-        // println("picked course end time" + endTime)
-        // println("loop course start time" + startTime)
-        // println("loop course end time" + startTime)
-
         val overlapStart = maxOf(startTime, courseStartTime)
         val overlapEnd = minOf(endTime, courseEndTime)
 

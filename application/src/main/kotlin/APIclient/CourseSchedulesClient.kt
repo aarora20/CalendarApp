@@ -69,10 +69,6 @@ object CourseSchedulesClient {
             setBody(course)
         }
 
-        // Print the response for debugging
-        println("Response status: ${response.status}")
-        println("Response body: ${response.bodyAsText()}")
-
         return response.status == HttpStatusCode.OK
     }
 
