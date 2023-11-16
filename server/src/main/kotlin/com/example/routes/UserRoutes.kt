@@ -47,5 +47,4 @@ fun Route.userRouting() {
             call.respond(friendService.searchUsers(id, params.username))
         }
     }
-
 }

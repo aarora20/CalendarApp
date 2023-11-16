@@ -124,8 +124,6 @@ fun CompareCalendar(
                     colors = CheckboxDefaults.colors()
                 )
             }
-
-
         }
         CalendarCompareScreen(checkedUserList, checkedFriendList, onSelect)
     }
@@ -138,7 +136,7 @@ fun SelectCompare(
     onCompare: () -> Unit,
     onSelectFriend: (friend: User) -> Unit
 ) {
-    var selectedUser by remember { mutableStateOf<User>(User("", "", "")) }
+    var selectedUser by remember { mutableStateOf(User("", "", "")) }
     var userList by remember { mutableStateOf(emptyList<User>()) }
     val userScope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }

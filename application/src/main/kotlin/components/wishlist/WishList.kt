@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import components.store
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
-import models.WishCourses
+import models.WishCourse
 
 data class wishCourses(
     // CS
@@ -31,7 +31,7 @@ data class wishCourses(
 @Composable
 fun wishSelection(/*onBackClick: () -> Unit*/) {
     val userId = store.getState().userId // replace this with the user ID
-    var selectedCourses by remember { mutableStateOf(emptyList<WishCourses>()) }
+    var selectedCourses by remember { mutableStateOf(emptyList<WishCourse>()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(userId) {

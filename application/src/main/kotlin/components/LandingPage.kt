@@ -17,6 +17,7 @@ import components.auth.RegisterScreen
 import components.calendar.CalendarRender
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
+import components.playground.PlaygroundHome
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
@@ -123,9 +124,10 @@ fun landingPage() {
 
         /*
         is Screen.CourseSelection -> {
-            selectionScreen(onBackClick = {
-                currentScreen = Screen.Landing
-            })
+//            selectionScreen(onBackClick = {
+//                currentScreen = Screen.Landing
+//            })
+            PlaygroundHome(courseList)
         }
         is Screen.CourseSearch -> {
             CourseSearchScreen(onBackClick = {

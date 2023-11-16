@@ -183,7 +183,7 @@ fun Schedule(
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun CalendarRender(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
+fun CalendarRender(courseList: List<UserCourse>) {
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
@@ -327,24 +327,10 @@ fun CalendarRender(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
     print("hourheight: " + hourHeight + "\n")
 
 
-    // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
-    // print(screenSize.getWidth())
-
-
     Column (
         modifier = Modifier
             .fillMaxWidth()
     ) {
-
-        /*
-        // BACK BUTTON
-        Button(onClick = onBackClick,
-            modifier = Modifier
-                .padding(0.dp)
-                .height(45.dp)) {
-            Text("Back")
-        }
-         */
 
         // TITLES
         Row (

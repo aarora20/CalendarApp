@@ -187,7 +187,7 @@ fun AddableScheduleItem(schedule: ScheduleData, addCourse: (schedule: ScheduleDa
         ScheduleCell(text = "${
             LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
             .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
-                LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
+                LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
             , weight = 0.4f)
