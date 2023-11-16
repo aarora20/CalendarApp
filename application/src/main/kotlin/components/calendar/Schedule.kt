@@ -11,10 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltipBox
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -85,7 +82,6 @@ private class ClassDataModifier(
 private fun Modifier.classData(uniclass: UniClass) = this.then(ClassDataModifier(uniclass))
 
 // Global variables for the size of the calendar
-var hourHeight = 60.dp
 val startTime = LocalTime.parse("08:00:00")
 val endTime = LocalTime.parse("22:00:00")
 val hours = ChronoUnit.HOURS.between(startTime, endTime).toInt()
@@ -146,6 +142,7 @@ fun ScheduleSidebar(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Schedule(
+    hourHeight: Dp,
     classes: List<UniClass>,
     modifier: Modifier = Modifier,
     uniclassContent: @Composable (uniclass: UniClass) -> Unit = { oneClass(uniclass = it) },
@@ -320,8 +317,19 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
         ("Tu | " + tuesDateString), ("W | " + wedDateString), ("Th | " + thursDateString),
         ("F | " + friDateString), ("Sa | " + satDateString), ("Su | " + sunDateString))
 
+    var screenHeight = LocalWindowInfo.current.containerSize.height
+    var hourHeight = (screenHeight / hours).dp
+    if (hourHeight < 40.dp) {
+        hourHeight = 40.dp
+    }
+
+    print("hourHeight modified \n")
+    print("hourheight: " + hourHeight + "\n")
+
+
     // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
     // print(screenSize.getWidth())
+
 
     Column (
         modifier = Modifier
@@ -341,7 +349,7 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
         // TITLES
         Row (
             modifier = Modifier
-                .height(70.dp)
+                .height(50.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -434,10 +442,6 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
                         }
                     }
                 }
-
-
-
-
             }
 
             // DAYS OF THE WEEK
@@ -452,53 +456,24 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
                 ) {
                     Text(text = text)
                         //style = TextStyle(color = Color.Black, fontSize = 12.sp)
-
                 }
             }
         }
 
         // ACTUAL CALENDAR
-        var screenHeight = LocalWindowInfo.current.containerSize.height
-        var contentHeight = 800
 
         Row (
             modifier = Modifier
                 .weight(0.84f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .onSizeChanged { constraints ->
-                    contentHeight = constraints.height
-                    print("contentHeight: ")
-                    print(contentHeight)
-                    print(" ")
-                    print("screenHeight: ")
-                    print(screenHeight)
-                    print(" ")
-
-                    // make hourHeight adapt to changes in screenSize
-                    if ((screenHeight / hours) % 2 == 0) {
-                        hourHeight = (screenHeight / hours).dp
-                    } else {
-                        hourHeight = (screenHeight / hours - 1).dp
-                    }
-
-                    if (hourHeight < 40.dp) {
-                        hourHeight = 40.dp
-                    }
-
-                }
-
                 .drawBehind {
-                    val hourHeightHalf = hourHeight / 2
-                    val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()
-
-                    println("hourHeightHalf: " + hourHeightHalf)
-                    println("hourHeightHalfPx: " + hourHeightHalfPx)
-
+                    print("DRAWBEHIND ENTERED \n")
+                    print("hourHeight in draw: " + hourHeight + "\n")
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 0f, y = it * hourHeightHalfPx),
-                            end = Offset(x = size.width, y = it * hourHeightHalfPx),
+                            start = Offset(x = 0f, y = it * (hourHeight / 2).toPx().toFloat()),
+                            end = Offset(x = size.width, y = it * (hourHeight / 2).toPx().toFloat()),
                             strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
                         )
@@ -508,12 +483,14 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
         ) {
 
             // make hourHeight adapt to changes in screenSize
+            // make hourHeight adapt to changes in screenSize
 
             Column (
                 modifier = Modifier
                     .width(70.dp)
             ) {
-                //Text("", textAlign = TextAlign.Center)
+                print("ScheduleSidebar run \n")
+                print("hourHeight into schedule" + hourHeight + "\n")
                 ScheduleSidebar(hourHeight)
             }
 
@@ -523,7 +500,7 @@ fun render(courseList: List<UserCourse>, /*onBackClick: () -> Unit*/) {
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Schedule(dayClass)
+                    Schedule(hourHeight = hourHeight, classes = dayClass)
                 }
             }
         }
