@@ -1,11 +1,12 @@
 package components.wishlist
 
 import APIclient.CourseSchedulesClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
@@ -66,15 +67,6 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
             Text(
                 text = "Wish List of Courses (Click Course Name for More Info)"
             )
-            // wish list option
-            //Button(
-                //modifier = Modifier.align(Alignment.CenterVertically),
-                //onClick = {
-                    //onBackClick()
-                //},
-            //) {
-                //Text("Back")
-            //}
         }
         Row {
             LazyColumn(Modifier.padding(0.dp)) {
@@ -82,19 +74,21 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                     val (code, number, title) = course
                     val name = "$code $number: $title"
                     Row(
-                        Modifier.fillMaxWidth().padding(10.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                            //.clickable { changeToCourseInfo("${course.subjectCode}${course.catalogNumber}") }
+                            .background(Color.White, RoundedCornerShape(8.dp)),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        //Text(name)
+                        Text(
+                            name,
+                            modifier = Modifier.padding(16.dp),
+                            fontSize = 16.sp
+                        )
                         TextButton(
-                            onClick = {
-                                // Go to course info page
-                            }
-                        ) {
-                            Text(name)
-                        }
-                        Button(
                             onClick = {
                                 scope.launch {
                                     val userId = store.getState().userId
@@ -110,10 +104,9 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                                 }
                             }
                         ) {
-                            Text("Remove from Wish List")
+                            Text("Remove from Wish List",Modifier.padding(end = 5.dp))
                         }
                     }
-                    Divider(color = Color.Black, thickness = 1.dp)
                 }
             }
         }
