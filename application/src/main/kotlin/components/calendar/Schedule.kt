@@ -300,8 +300,6 @@ fun CalendarRender(courseList: List<UserCourse>) {
         emptyList()
     }
 
-    print(mondayClasses)
-
     val classes = listOf(mondayClasses, tuesdayClasses, wednesdayClasses,
         thursdayClasses, fridayClasses, saturdayClasses, sundayClasses)
 
@@ -348,20 +346,6 @@ fun CalendarRender(courseList: List<UserCourse>) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-
-                /*
-                Button(
-                    onClick = {
-                        // Move a week backward
-                        today.value = today.value.minusDays(7)
-                    },
-                    modifier = Modifier
-                        .size(35.dp)
-                ) {
-                    Icon(imageVector = TablerIcons.CaretLeft, "Left")
-                }
-                 */
-
                 Box (
                     //modifier = Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
                 ) {

@@ -14,19 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import components.home.HomeScreen
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
+import components.home.HomeScreen
 import components.playground.CalendarEditView
 import components.playground.PlaygroundHome
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
 import compose.icons.TablerIcons
-import compose.icons.tablericons.Home
-import compose.icons.tablericons.Search
+import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
@@ -212,7 +211,13 @@ fun landingScreen(
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
                         ) {
                             NavigationDrawerItem(
-                                label = { Text(text = "Friends") },
+                                label = { Row (
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(imageVector = TablerIcons.Users, contentDescription = "Friends")
+                                    Text(text = "Friends", modifier = Modifier.padding(start = 8.dp))
+                                } },
                                 selected = showInNav == AppScreen.FriendsPage,
                                 onClick = {showInNav = AppScreen.FriendsPage},
                                 colors = NavigationDrawerItemDefaults.colors(
@@ -223,7 +228,14 @@ fun landingScreen(
                             )
 
                             NavigationDrawerItem(
-                                label = { Text(text = "Wishlist") },
+                                label = {
+                                    Row (
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(imageVector = TablerIcons.Star, contentDescription = "Wishlist")
+                                        Text(text = "Wishlist", modifier = Modifier.padding(start = 8.dp))
+                                    } },
                                 selected = showInNav == AppScreen.Wishlist,
                                 onClick = {showInNav = AppScreen.Wishlist},
                                 colors = NavigationDrawerItemDefaults.colors(
@@ -239,7 +251,15 @@ fun landingScreen(
                                 .fillMaxHeight(0.85f)
                         ) {
                             NavigationDrawerItem(
-                                label = { Text(text = "My Calendars") },
+                                label = {
+                                    Row (
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(imageVector = TablerIcons.Calendar, contentDescription = "Calendars")
+                                        Text(text = "My Calendars", modifier = Modifier.padding(start = 8.dp))
+                                    }
+                                    },
                                 selected = showInNav == AppScreen.Playground,
                                 onClick = {showInNav = AppScreen.Playground},
                                 colors = NavigationDrawerItemDefaults.colors(
@@ -330,7 +350,17 @@ fun landingScreen(
             when (showInNav) {
 
                 is AppScreen.Home -> {
-                    HomeScreen()
+                    HomeScreen {
+                        if (it == "Course Search") {
+                            showInNav = AppScreen.CourseSearch
+                        } else if (it == "Friends") {
+                            showInNav = AppScreen.FriendsPage
+                        } else if (it == "Wishlist") {
+                            showInNav = AppScreen.Wishlist
+                        } else {
+                            showInNav = AppScreen.Playground
+                        }
+                    }
                 }
 
                 is AppScreen.CourseSelection -> {
@@ -350,11 +380,30 @@ fun landingScreen(
                 }
 
                 is AppScreen.Playground -> {
-                    PlaygroundHome(courseList, customCalendars)
+                    PlaygroundHome(customCalendars,
+                        {
+                          showInNav = AppScreen.CourseSelection
+                        },
+                        {
+                        selectedCalendar = it
+                        showInNav = AppScreen.AlternateSchedule
+                    }) {
+                        calendarScope.launch {
+                            try {
+                                customCalendars = CustomCalendarClient.getCalendars(
+                                    store.getState().userId)
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar)
+                        CalendarEditView(userCourses, courseList, selectedCalendar) {
+                            showInNav = AppScreen.Playground
+                        }
                     }
                 }
             }

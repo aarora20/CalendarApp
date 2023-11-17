@@ -13,6 +13,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import components.calendar.CalendarCompareScreen
 import components.store
@@ -83,12 +84,13 @@ fun CompareCalendar(
 
     Row {
         Column (
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier.fillMaxHeight().fillMaxWidth(0.1f),
             verticalArrangement = Arrangement.Center
         ) {
             Row (
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(4.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(4.dp).fillMaxWidth(),
             ) {
                 Text ("me")
                 Checkbox(
@@ -108,9 +110,14 @@ fun CompareCalendar(
 
             Row (
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(4.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(4.dp).fillMaxWidth()
             ) {
-                Text(friend.username)
+                Row (
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                ) {
+                    Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
                 Checkbox(
                     checked = isChecked2,
                     onCheckedChange = { isChecked2 = it

@@ -46,7 +46,6 @@ fun DropSearch(
                 }
                 searchedCourses = FuzzySearch.extractTop(searchText.uppercase(Locale.getDefault()), courses, 5)
                     .map { it.toString() }
-                println(searchedCourses)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             }
@@ -75,7 +74,6 @@ fun DropSearch(
                         .clickable {
                             text = ""
                             onClickCourse(course)
-                            println(course)
                             active = false
                         }
                         .fillMaxWidth()

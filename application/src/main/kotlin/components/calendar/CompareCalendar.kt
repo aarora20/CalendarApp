@@ -17,6 +17,9 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.common.CustomIconButton
+import compose.icons.TablerIcons
+import compose.icons.tablericons.ChevronLeft
 import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
@@ -61,13 +64,15 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
             .fillMaxWidth()
     ) {
 
-        // BACK BUTTON
-        Button(onClick = onBackClick,
-            modifier = Modifier
-                .padding(0.dp)
-                .height(45.dp)) {
-            Text("Back")
-        }
+        CustomIconButton(
+            onClick= onBackClick,
+            modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            tooltipText= "Go Back",
+            buttonRadius= 36.dp,
+            buttonSize= 15.dp,
+            backgroundColor = Color.LightGray,
+            icon = TablerIcons.ChevronLeft
+        )
 
         // TITLES
         Row (

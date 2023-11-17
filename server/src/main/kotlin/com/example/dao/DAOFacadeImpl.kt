@@ -230,8 +230,7 @@ class DAOFacadeImpl : DAOFacade {
                             it[startTime] = course.startTime
                             it[endTime] = course.endTime
                             it[weekPattern] = course.weekPattern
-                        }
-                        course
+                        }.resultedValues?.singleOrNull()?.let(::resultRowToCourse)
                     } else {
                         null
                     }
@@ -391,8 +390,7 @@ class DAOFacadeImpl : DAOFacade {
                             it[startTime] = course.startTime
                             it[endTime] = course.endTime
                             it[weekPattern] = course.weekPattern
-                        }
-                        course
+                        }.resultedValues?.singleOrNull()?.let(::resultRowToCalendarCourse)
                     } else {
                         null
                     }

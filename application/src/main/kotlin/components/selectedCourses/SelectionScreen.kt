@@ -218,7 +218,6 @@ fun AddableScheduleItem(schedule: ScheduleData, addCourse: (schedule: ScheduleDa
                 .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
                 LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
-                    .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
             , weight = 0.4f)
         ScheduleCell(text = schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
@@ -254,6 +253,6 @@ fun RowScope.ScheduleCell(
             .weight(weight, fill = true)
             .padding(8.dp),
         textAlign = TextAlign.Center,
-        fontSize = 8.sp
+        fontSize = 10.sp
     )
 }
