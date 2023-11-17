@@ -8,14 +8,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.common.CustomIconButton
 import components.store
+import compose.icons.TablerIcons
+import compose.icons.tablericons.Minus
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.WishCourse
@@ -88,6 +90,29 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                             modifier = Modifier.padding(16.dp),
                             fontSize = 16.sp
                         )
+                        CustomIconButton(
+                            onClick = {
+                                scope.launch {
+                                    val userId = store.getState().userId
+                                    val success = CourseSchedulesClient.removeFromWishlist(userId, course.subjectCode, course.catalogNumber)
+                                    if (success) {
+                                        // Update local state after successful removal
+                                        selectedCourses = selectedCourses.toMutableList().also { list ->
+                                            list.remove(course)
+                                        }
+                                    } else {
+                                        println("Error removing course from wishlist.")
+                                    }
+                                }
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                            tooltipText = "Remove",
+                            buttonRadius =  36.dp,
+                            buttonSize = 15.dp,
+                            backgroundColor = Color.LightGray,
+                            icon = TablerIcons.Minus
+                        )
+                        /*
                         TextButton(
                             onClick = {
                                 scope.launch {
@@ -106,6 +131,8 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                         ) {
                             Text("Remove from Wish List",Modifier.padding(end = 5.dp))
                         }
+
+                         */
                     }
                 }
             }
