@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.wishlistRouting() {
-    route("/user") {
+    route("/users") {
         post("/{id}/wishlist") {
             val course = call.receive<WishlistCourse>()
             val id = call.parameters.getOrFail<String>("id")

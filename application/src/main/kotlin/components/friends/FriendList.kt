@@ -27,11 +27,11 @@ import models.User
 @Composable
 fun FriendListPage() {
     var listScope = rememberCoroutineScope()
-    var friendList by remember { mutableStateOf(emptyList<User>()) }
+    var friendList = remember { mutableStateListOf<User>() }
     LaunchedEffect(true) {
         listScope.launch{
             try {
-               friendList = FriendsClient.getFriendList(store.getState().userId)
+               friendList.addAll(FriendsClient.getFriendList(store.getState().userId))
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {
@@ -47,14 +47,18 @@ fun FriendListPage() {
 
         LazyColumn {
             items(friendList) {
-                FriendItem(it)
+                FriendItem(it) {
+                    friendList.remove(it)
+                }
+
             }
         }
     }
 }
 
 @Composable
-fun FriendItem(user: User) {
+fun FriendItem(user: User, removeFriend: (user: User) -> Unit) {
+    val friendScope = rememberCoroutineScope()
     var openAlertDialog by remember {  mutableStateOf(false) }
     Row(
         modifier = Modifier
@@ -85,9 +89,19 @@ fun FriendItem(user: User) {
 
     when {
         openAlertDialog -> {
-            AlertDialogExample(
+            UnfriendDialog(
                 onDismissRequest = { openAlertDialog = false },
                 onConfirmation = {
+                    friendScope.launch {
+                        try {
+                            val unfriendStatus = FriendsClient.unfriend(store.getState().userId, user.id)
+                            if (unfriendStatus) {
+                                removeFriend(user)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
                     openAlertDialog = false
                 },
                 dialogTitle = "Warning",
@@ -101,7 +115,7 @@ fun FriendItem(user: User) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlertDialogExample(
+fun UnfriendDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
@@ -110,7 +124,7 @@ fun AlertDialogExample(
 ) {
     AlertDialog(
         icon = {
-            Icon(icon, contentDescription = "Example Icon")
+            Icon(icon, contentDescription = "Warning")
         },
         title = {
             Text(text = dialogTitle)
@@ -136,7 +150,7 @@ fun AlertDialogExample(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text("Cancel")
             }
         }
     )

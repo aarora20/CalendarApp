@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.common.DividerComposable
 import components.store
+import compose.icons.TablerIcons
+import compose.icons.tablericons.Clock
+import compose.icons.tablericons.Plus
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.User
@@ -148,9 +151,9 @@ fun FriendSearchItem(user: User) {
         ) {
             Icon(
                 if (added) {
-                    Icons.Default.Check
+                    TablerIcons.Clock
                 } else {
-                    Icons.Default.Add
+                    TablerIcons.Plus
                 }, "add user"
             )
         }

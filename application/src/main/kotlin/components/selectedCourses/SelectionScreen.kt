@@ -82,7 +82,6 @@ fun selectionScreen(
             }
         }
     }
-
 }
 
 @Composable
@@ -133,13 +132,11 @@ fun AddCourseSideSheet(courseNames: List<String>,
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
-
                         }
                     })
-
                 }
             }
-            Box(modifier = Modifier.padding(top = 80.dp, bottom = 4.dp).padding(horizontal = 16.dp).fillMaxSize()) {
+            Box(modifier = Modifier.padding(top = 80.dp, bottom = 4.dp).padding(horizontal = 8.dp).fillMaxSize()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 10.dp),
@@ -180,7 +177,7 @@ fun AddCourseSideSheet(courseNames: List<String>,
 @Composable
 fun AddableScheduleItem(schedule: ScheduleData, addCourse: (schedule: ScheduleData) -> Unit) {
     Row(
-        Modifier.background(Color.LightGray).border(0.dp, Color.Black).fillMaxHeight().heightIn(max=100.dp),
+        Modifier.background(Color.LightGray).border(0.dp, Color.Black).heightIn(max=80.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ScheduleCell(text = schedule.courseComponent + schedule.classSection, weight = 0.2f)
@@ -228,6 +225,3 @@ fun RowScope.ScheduleCell(
         fontSize = 8.sp
     )
 }
-
-
-

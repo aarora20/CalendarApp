@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.userCalendarCourseRouting() {
-    route("/user/{id}/calendars/{calendarId}") {
+    route("/users/{id}/calendars/{calendarId}") {
         put("/calendarCourses/all") {
             val calendar = call.receive<UserCalendarCourseList>()
             val id = call.parameters.getOrFail<String>("id")

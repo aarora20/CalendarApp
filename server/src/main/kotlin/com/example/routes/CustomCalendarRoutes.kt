@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.customCalendarRouting() {
-    route("/user/{id}/calendars") {
+    route("/users/{id}/calendars") {
         post {
             val calendarParams = call.receive<CustomCalendarParams>()
             val id = call.parameters.getOrFail<String>("id")

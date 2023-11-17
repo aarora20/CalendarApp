@@ -144,7 +144,6 @@ fun courseSelection(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseCluster(components: List<UserCourse>, name: String, removeCourse: (c: UserCourse) -> Unit) {
     Column (

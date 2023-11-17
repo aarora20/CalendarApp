@@ -20,12 +20,12 @@ object CustomCalendarClient {
     }
 
     suspend fun getCalendars(userId: String): List<CustomCalendar> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/${userId}/calendars")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/${userId}/calendars")
         return response.body()
     }
 
     suspend fun addCalendar(userId: String, calendarParams: CustomCalendarParams): CustomCalendar? {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/calendars") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/calendars") {
             contentType(ContentType.Application.Json)
             setBody(calendarParams)
         }
@@ -38,20 +38,20 @@ object CustomCalendarClient {
     }
 
     suspend fun deleteCalendar(userId: String, calendarId: String): Boolean {
-        val response: HttpResponse = client.delete("http://0.0.0.0:8080/user/$userId/calendars/$calendarId")
+        val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/calendars/$calendarId")
         return response.status != HttpStatusCode.BadRequest
     }
 
 
     suspend fun getCalendarCourses(userId: String, calendarId: String): List<UserCalendarCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080//user/$userId/calendars/$calendarId/calendarCourses")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080//users/$userId/calendars/$calendarId/calendarCourses")
         return response.body<List<UserCalendarCourse>>()
     }
 
 
     suspend fun addCalendarCourse(userId: String, calendarId: String, course: UserCalendarCourse): UserCalendarCourse? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/calendars/$calendarId/calendarCourses") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/calendars/$calendarId/calendarCourses") {
             contentType(ContentType.Application.Json)
             setBody(course)
         }
@@ -65,7 +65,7 @@ object CustomCalendarClient {
 
     suspend fun updateCalendar(userId: String, calendarId: String, courses: List<UserCalendarCourse>): Boolean {
 
-        val response: HttpResponse = client.put("http://0.0.0.0:8080/user/$userId/calendars/$calendarId/" +
+        val response: HttpResponse = client.put("http://0.0.0.0:8080/users/$userId/calendars/$calendarId/" +
                 "calendarCourses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
