@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltipBox
@@ -176,10 +177,12 @@ fun coursePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = course.description,
-                            fontSize = 15.sp,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = course.description,
+                                fontSize = 15.sp,
+                            )
+                        }
                     }
 
                     // provides the prereqs of the course
