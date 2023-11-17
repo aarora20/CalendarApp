@@ -52,6 +52,7 @@ fun CourseSearchScreen(courses: List<CourseDetails>) {
 
     val onBackClick: () -> Unit = {
         currentScreen = previousScreen ?: SearchScreen.Search
+        previousScreen = null // Reset the previous screen
     }
 
     LaunchedEffect(true) {
