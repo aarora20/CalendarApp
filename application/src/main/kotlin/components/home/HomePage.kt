@@ -33,7 +33,7 @@ fun HomeScreen(
         horizontalArrangement = Arrangement.Start
     ) {
         val currentDate = LocalDate.now()
-        val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EE MMMM dd, yyyy"))
+        val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EEEE MMMM dd, yyyy"))
         Column {
             Text(
                 text = formattedDate,
@@ -51,7 +51,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text ="Welcome!", fontFamily = FontFamily.Cursive, fontSize = 40.sp)
-            Text(text ="Click on one of the features below to get started!")
+            Text(text ="Click on one of the features below to get started:")
             Row (
                 modifier = Modifier.padding(vertical = 20.dp),
                 horizontalArrangement = Arrangement.Center
