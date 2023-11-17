@@ -244,8 +244,6 @@ fun CalendarRender(courseList: List<UserCourse>) {
         today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
     }
 
-
-
     val mondayClasses = if (term_start <= monDate && monDate <= term_end) {
         selectedCourses.filter {(it.days.contains("M") && it.type.substring(0 ,3) != "TST")
                 || (it.days.contains("M") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
@@ -302,6 +300,8 @@ fun CalendarRender(courseList: List<UserCourse>) {
         emptyList()
     }
 
+    print(mondayClasses)
+
     val classes = listOf(mondayClasses, tuesdayClasses, wednesdayClasses,
         thursdayClasses, fridayClasses, saturdayClasses, sundayClasses)
 
@@ -323,8 +323,8 @@ fun CalendarRender(courseList: List<UserCourse>) {
         hourHeight = 40.dp
     }
 
-    print("hourHeight modified \n")
-    print("hourheight: " + hourHeight + "\n")
+    //print("hourHeight modified \n")
+    //print("hourheight: " + hourHeight + "\n")
 
 
     Column (
@@ -394,8 +394,6 @@ fun CalendarRender(courseList: List<UserCourse>) {
                     }
                 }
 
-
-
                 Box (
                     //modifier = Modifier.padding(horizontal = 1.dp, vertical = 1.dp)
                 ) {
@@ -454,8 +452,8 @@ fun CalendarRender(courseList: List<UserCourse>) {
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .drawBehind {
-                    print("DRAWBEHIND ENTERED \n")
-                    print("hourHeight in draw: " + hourHeight + "\n")
+                    //print("DRAWBEHIND ENTERED \n")
+                    //print("hourHeight in draw: " + hourHeight + "\n")
                     repeat(hours * 2) {
                         drawLine(
                             start = Offset(x = 0f, y = it * (hourHeight / 2).toPx().toFloat()),
@@ -475,8 +473,8 @@ fun CalendarRender(courseList: List<UserCourse>) {
                 modifier = Modifier
                     .width(70.dp)
             ) {
-                print("ScheduleSidebar run \n")
-                print("hourHeight into schedule" + hourHeight + "\n")
+                //print("ScheduleSidebar run \n")
+                //print("hourHeight into schedule" + hourHeight + "\n")
                 ScheduleSidebar(hourHeight)
             }
 
