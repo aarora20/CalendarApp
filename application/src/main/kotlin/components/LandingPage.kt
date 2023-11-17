@@ -31,6 +31,7 @@ import models.CustomCalendar
 import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
+import store.LogoutUser
 import store.rootReducer
 
 // fake data for now for wishlist

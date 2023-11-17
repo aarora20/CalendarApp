@@ -14,7 +14,10 @@ fun idReducer(state: String, action: Any): String =
     }
 
 
-fun rootReducer(state: AuthState, action: Any) = AuthState(
-    token = tokenReducer(state.token, action),
-    userId = idReducer(state.userId, action)
-)
+fun rootReducer(state: AuthState, action: Any) = when (action) {
+    is LogoutUser -> AuthState() // Resets to default state
+    else -> AuthState(
+        token = tokenReducer(state.token, action),
+        userId = idReducer(state.userId, action)
+    )
+}
