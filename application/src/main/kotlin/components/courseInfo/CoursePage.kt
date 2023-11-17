@@ -7,11 +7,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
@@ -22,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import components.common.CustomIconButton
 import components.courseSearch.DropSearch
 import components.courseSearch.SearchScreen
 import components.store
@@ -98,39 +97,23 @@ fun coursePage(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                 ) {
                     Row (modifier = Modifier.weight(1f), verticalAlignment = Alignment.Top) {
-                        Box (
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
-                        ) {
-                            PlainTooltipBox(
-                                tooltip = {Text("Back", color = Color.White)}
-                            ) {
-                                CompositionLocalProvider(
-                                    LocalMinimumInteractiveComponentEnforcement provides false
-                                ) {
-                                    IconButton(
-                                        onClick = updatedOnBackClick,
-                                        modifier = Modifier
-                                            .then(Modifier.size(36.dp))
-                                            .statusBarsPadding()
-                                            .background(
-                                                color = Color.LightGray,
-                                                shape = CircleShape
-                                            ).tooltipAnchor(),
-
-                                        ) {
-                                        Icon(
-                                            imageVector = (TablerIcons.ChevronLeft),
-                                            contentDescription = "Back Button",
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        CustomIconButton(
+                            onClick = updatedOnBackClick,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                            tooltipText = "Back",
+                            buttonRadius =  36.dp,
+                            buttonSize = 15.dp,
+                            backgroundColor = Color.LightGray,
+                            icon = TablerIcons.ChevronLeft
+                        )
                     }
 
                     Box (modifier = Modifier.weight(5f)){
-                        DropSearch(courseNames) { onChangeCourse(it) }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.Center)
+                        ) {
+                            DropSearch(courseNames) { onChangeCourse(it) }
+                        }
                     }
                 }
             }

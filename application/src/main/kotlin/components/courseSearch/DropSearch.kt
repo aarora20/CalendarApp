@@ -56,6 +56,7 @@ fun DropSearch(
         DockedSearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .fillMaxWidth()
                 .onFocusChanged { active = it.isFocused },
             query = text,
             onQueryChange = {text = it},

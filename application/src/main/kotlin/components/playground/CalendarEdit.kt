@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.calendar.AlternateSchedule
 import components.common.CustomIconButton
+import components.courseInfo.padding
 import components.courseSearch.DropSearch
 import components.store
 import compose.icons.TablerIcons
@@ -274,7 +275,8 @@ fun DraggableSchedule(courseSection: ScheduleData) {
                 Modifier.background(Color.LightGray).fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ScheduleCell(text = courseSection.courseComponent + courseSection.classSection, weight = 0.2f)
+                val pad = padding(courseSection.classSection)
+                ScheduleCell(text = courseSection.courseComponent + " " + pad + courseSection.classSection, weight = 0.2f)
                 ScheduleCell(
                     text = "${
                         LocalDateTime.parse(courseSection.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
@@ -378,10 +380,11 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                         try {
                             val toAdd = courseMap[selectedCourse]
                             if (toAdd != null) {
+                                val pad = padding(schedule.classSection)
                                 val response = CustomCalendarClient.addCalendarCourse(store.getState().userId,
                                     selectedCalendar.id, UserCalendarCourse(toAdd.courseId,
                                         toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                        toAdd.title, schedule.courseComponent + " " + schedule.classSection,
+                                        toAdd.title, schedule.courseComponent + " " + pad + schedule.classSection,
                                         schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                         schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                         schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
