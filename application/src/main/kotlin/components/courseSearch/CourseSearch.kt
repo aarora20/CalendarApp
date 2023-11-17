@@ -143,7 +143,7 @@ fun CustomSearchBar(courses: List<String>, changeToCourseInfo: (course: String) 
                         onClick = { exploreCourses(text.uppercase()) },
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
-                        Text("Explore all $text courses")
+                        Text("Explore All ${text.uppercase()} Courses")
                     }
                 }
             }

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.common.CustomIconButton
+import components.courseInfo.detectTimeConflict
 import components.courseSearch.DropSearch
 import components.store
 import compose.icons.TablerIcons
@@ -30,7 +31,6 @@ import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
 import java.time.LocalDateTime
-import components.courseInfo.detectTimeConflict
 
 @Immutable
 sealed class SelectionScreen {
@@ -173,7 +173,7 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                         it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
                                     if (isTimeConflict != "NO CONFLICT") {
                                         snackBarState.showSnackbar(
-                                            message = "Unable to Add due to Time Conflict with: " + isTimeConflict,
+                                            message = "Unable to Add Due to Time Conflict With: " + isTimeConflict,
                                             duration = SnackbarDuration.Short
                                         )
                                     } else {
