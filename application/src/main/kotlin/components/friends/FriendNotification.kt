@@ -42,10 +42,22 @@ fun FriendNotification(
         }
     }
     Column (
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DividerComposable("Pending")
+        DividerComposable("Sent")
+
+        LazyColumn {
+            items(pendingList) {
+                NotificationItem(it, pendingList)
+            }
+        }
+    }
+    Column (
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DividerComposable("Incoming")
 
         LazyColumn {
             items(pendingList) {

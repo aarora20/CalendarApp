@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.friendsRouting() {
-    route("/friends") {
+    route("/users/{userId}/friends") {
         post("/send") {
             val params = call.receive<FriendParams>();
             val request = friendService.sendFriendRequest(params.userId, params.friendId);
@@ -22,13 +22,18 @@ fun Route.friendsRouting() {
             }
         }
 
-        get("/{id}") {
-            val id = call.parameters.getOrFail<String>("id")
+        get {
+            val id = call.parameters.getOrFail<String>("userId")
             call.respond(dao.findFriends(id))
         }
 
-        get("/requests/pending/{id}") {
-            val id = call.parameters.getOrFail<String>("id")
+        get("/requests/incoming") {
+            val id = call.parameters.getOrFail<String>("userId")
+            call.respond(dao.findAllPending(id))
+        }
+
+        get("/requests/sent") {
+            val id = call.parameters.getOrFail<String>("userId")
             call.respond(dao.findAllPending(id))
         }
 
@@ -44,7 +49,7 @@ fun Route.friendsRouting() {
 
         post("/requests/delete") {
             val params = call.receive<FriendParams>();
-            val request = dao.rejectFriendRequest(params.userId, params.friendId);
+            val request = dao.deleteFriendRequest(params.userId, params.friendId);
             if (!request) {
                 call.respond(HttpStatusCode.BadRequest, "Fail to reject request")
             } else {

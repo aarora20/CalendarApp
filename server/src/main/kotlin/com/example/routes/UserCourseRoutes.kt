@@ -11,14 +11,14 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.userCoursesRouting() {
-    route("/user") {
-        post("/{id}/courses") {
+    route("/users") {
+        put("/{id}/courses/all") {
             val calendar = call.receive<Calendar>()
             val id = call.parameters.getOrFail<String>("id")
             call.respond(dao.updateUserCourses(id, calendar.courses))
         }
 
-        post("/{id}/course") {
+        post("/{id}/courses") {
             val course = call.receive<UserCourse>()
             val id = call.parameters.getOrFail<String>("id")
             val addedCourse: UserCourse? = dao.addUserCourse(id, course)

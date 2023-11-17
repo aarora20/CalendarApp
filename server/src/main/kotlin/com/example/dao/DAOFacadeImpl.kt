@@ -124,13 +124,31 @@ class DAOFacadeImpl : DAOFacade {
             .map(::resultRowToFriend)
     }
 
-    // find all pending requests
+    // find all incoming pending requests
     override suspend fun findAllPending(userId: String): List<User> = dbQuery {
         try {
             transaction {
                 val friendIds =  Friends.select { (Friends.friendId eq UUID.fromString(userId)) and
                         (Friends.status eq "pending")}
                     .map { it[Friends.userId] }
+
+                val pending =  Users.select {Users.id inList friendIds }
+
+                pending.map(::resultRowToUser)
+
+            }
+        } catch (e: Exception) {
+            listOf()
+        }
+    }
+
+    // Find all sent pending requests
+    override suspend fun findAllSent(userId: String): List<User> = dbQuery {
+        try {
+            transaction {
+                val friendIds =  Friends.select { (Friends.userId eq UUID.fromString(userId)) and
+                        (Friends.status eq "pending")}
+                    .map { it[Friends.friendId] }
 
                 val pending =  Users.select {Users.id inList friendIds }
 
@@ -166,7 +184,7 @@ class DAOFacadeImpl : DAOFacade {
         friendRequestExists
     }
 
-    override suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
+    override suspend fun deleteFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
         val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(friendId)
                 and (Friends.friendId eq UUID.fromString(userId))) }
         if (deleted > 0) {

@@ -27,14 +27,13 @@ object CourseSchedulesClient {
     }
 
     suspend fun getUserCourses(userId: String): List<UserCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/$userId/courses")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/courses")
         return response.body<List<UserCourse>>()
     }
 
-    @OptIn(InternalAPI::class)
     suspend fun addUserCourse(course: UserCourse, userId: String): UserCourse? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/course") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/courses") {
             contentType(ContentType.Application.Json)
             setBody(course)
         }
@@ -46,10 +45,9 @@ object CourseSchedulesClient {
         }
     }
 
-    @OptIn(InternalAPI::class)
     suspend fun updateSchedule(courses: List<UserCourse>, userId: String): Boolean {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/courses") {
+        val response: HttpResponse = client.put("http://0.0.0.0:8080/users/$userId/courses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
         }
@@ -64,7 +62,7 @@ object CourseSchedulesClient {
 
     @OptIn(InternalAPI::class)
     suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/user/$userId/wishlist") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/wishlist") {
             contentType(ContentType.Application.Json)
             setBody(course)
         }
@@ -73,13 +71,13 @@ object CourseSchedulesClient {
     }
 
     suspend fun getWishlist(userId: String): List<WishCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/user/$userId/wishlist")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/wishlist")
         return response.body<List<WishCourse>>()
     }
 
     suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
         return try {
-            val response: HttpResponse = client.delete("http://0.0.0.0:8080/user/$userId/wishlist/$subjectCode/$catalogNumber")
+            val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/wishlist/$subjectCode/$catalogNumber")
             response.status == HttpStatusCode.NoContent
         } catch (e: ClientRequestException) {
             println("Error in request: ${e.message}")

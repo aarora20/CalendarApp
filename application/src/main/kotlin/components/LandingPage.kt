@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import components.Home.HomeScreen
+import components.home.HomeScreen
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
@@ -24,6 +24,9 @@ import components.playground.PlaygroundHome
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
+import compose.icons.TablerIcons
+import compose.icons.tablericons.Home
+import compose.icons.tablericons.Search
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
@@ -162,7 +165,15 @@ fun landingScreen(
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
                         ) {
                             NavigationDrawerItem(
-                                label = { Text(text = "Home") },
+                                label = {
+                                    Row (
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(imageVector = TablerIcons.Home, contentDescription = "Home")
+                                        Text(text = "Home", modifier = Modifier.padding(start = 8.dp))
+                                    }
+                                        },
                                 selected = showInNav == AppScreen.Home,
                                 onClick = {showInNav = AppScreen.Home},
                                 colors = NavigationDrawerItemDefaults.colors(
@@ -173,7 +184,15 @@ fun landingScreen(
                             )
 
                             NavigationDrawerItem(
-                                label = { Text(text = "Course Search") },
+                                label = {
+                                    Row (
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(imageVector = TablerIcons.Search, contentDescription = "Course Search")
+                                        Text(text = "Course Search", modifier = Modifier.padding(start = 8.dp))
+                                    }
+                                },
                                 selected = showInNav == AppScreen.CourseSearch,
                                 onClick = {showInNav = AppScreen.CourseSearch},
                                 colors = NavigationDrawerItemDefaults.colors(

@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.Icon
 import androidx.compose.material.NavigationRail
 import androidx.compose.material.NavigationRailItem
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.CalendarStats
@@ -61,42 +65,56 @@ fun FriendsPage(/*onBackClick: () -> Unit*/) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationRailSidebar(
-    //onBackClick: () -> Unit,
     onSearch : () -> Unit,
     onList : () -> Unit,
     onNotif: () -> Unit,
     onCompare: () -> Unit
 ) {
     NavigationRail() {
-        //NavigationRailItem(
-            //selected = false,
-            //onClick = onBackClick,
-            //icon = { Icon(Icons.Default.Home, "home")}
-        //)
         Spacer(modifier = Modifier.height(60.dp))
-
-        NavigationRailItem(
-            selected = false,
-            onClick = onSearch,
-            icon = { Icon(imageVector = TablerIcons.Search, "search")}
-        )
-        NavigationRailItem(
-            selected = false,
-            onClick = onNotif,
-            icon = { Icon(imageVector = TablerIcons.Clock, "pending")}
-        )
-        NavigationRailItem(
-            selected = false,
-            onClick = onList,
-            icon = { Icon(imageVector = TablerIcons.Users, "friends",
-                )}
-        )
-        NavigationRailItem(
-            selected = false,
-            onClick = onCompare,
-            icon = { Icon(imageVector = TablerIcons.CalendarStats, "calendar")}
-        )
+        PlainTooltipBox(
+            tooltip = { Text("Friend Search", color = Color.White) }
+        ) {
+            NavigationRailItem(
+                selected = false,
+                onClick = onSearch,
+                icon = { Icon(imageVector = TablerIcons.Search, "search")},
+                modifier = Modifier.tooltipAnchor()
+            )
+        }
+        PlainTooltipBox(
+            tooltip = { Text("Requests", color = Color.White) }
+        ) {
+            NavigationRailItem(
+                selected = false,
+                onClick = onNotif,
+                icon = { Icon(imageVector = TablerIcons.Clock, "pending")},
+                modifier = Modifier.tooltipAnchor()
+            )
+        }
+        PlainTooltipBox(
+            tooltip = { Text("Friends List", color = Color.White) }
+        ) {
+            NavigationRailItem(
+                selected = false,
+                onClick = onList,
+                icon = { Icon(imageVector = TablerIcons.Users, "friends",
+                )},
+                modifier = Modifier.tooltipAnchor()
+            )
+        }
+        PlainTooltipBox(
+            tooltip = { Text("Compare Calendar", color = Color.White) }
+        ) {
+            NavigationRailItem(
+                selected = false,
+                onClick = onCompare,
+                icon = { Icon(imageVector = TablerIcons.CalendarStats, "calendar")},
+                modifier = Modifier.tooltipAnchor()
+            )
+        }
     }
 }
