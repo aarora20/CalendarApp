@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import components.common.CustomIconButton
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Plus
@@ -40,29 +41,15 @@ import kotlinx.coroutines.launch
 import models.CustomCalendar
 import models.CustomCalendarParams
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PlaygroundCalendarsPage(
+    calendarList: List<CustomCalendar>,
     onClickCalendar: (calendar: CustomCalendar) -> Unit,
     onCreateNewCalendar: (calendar: CustomCalendar) -> Unit
 ) {
-    var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
     val calendarScope = rememberCoroutineScope()
     var openDialog by remember {  mutableStateOf(false) }
-    val interactionSource = remember { MutableInteractionSource() }
-
-    LaunchedEffect(true) {
-        calendarScope.launch{
-            try {
-               customCalendars = CustomCalendarClient.getCalendars(store.getState().userId)
-            } catch (e: ClientRequestException) {
-                println("Error fetching data: ${e.message}")
-            } catch (e: Exception) {
-                println(e.message)
-            }
-        }
-    }
 
     Column (
         modifier = Modifier.fillMaxWidth(),
@@ -99,45 +86,21 @@ fun PlaygroundCalendarsPage(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-
-            Box (
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
-                ) {
-                PlainTooltipBox(
-                    tooltip = {Text("Create Calendar", color = Color.White)}
-                ) {
-                    CompositionLocalProvider(
-                        LocalMinimumInteractiveComponentEnforcement provides false
-                    ) {
-                        IconButton(
-                            onClick = {
-                                openDialog = true
-                            },
-                            modifier = Modifier
-                                .then(Modifier.size(36.dp))
-                                .statusBarsPadding()
-                                .background(
-                                    color = Color.LightGray,
-                                    shape = CircleShape
-                                )
-                                .tooltipAnchor(),
-
-                            ) {
-                            Icon(
-                                imageVector = (TablerIcons.Plus),
-                                contentDescription = "Add Button",
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
-                    }
-                }
-            }
+            CustomIconButton(
+                onClick={ openDialog = true },
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                tooltipText = "Create Calendar",
+                buttonRadius = 36.dp,
+                buttonSize = 15.dp,
+                backgroundColor = Color.LightGray,
+                icon = TablerIcons.Plus
+            )
         }
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2)
         ) {
-            items(customCalendars) {
+            items(calendarList) {
                 CalendarItem(it, onClickCalendar)
             }
         }
@@ -253,38 +216,15 @@ fun CreateCalendarDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-
-                    Box (
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
-                    ) {
-                        PlainTooltipBox(
-                            tooltip = {Text("Close Modal", color = Color.White)}
-                        ) {
-                            CompositionLocalProvider(
-                                LocalMinimumInteractiveComponentEnforcement provides false
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        onDismissRequest()
-                                    },
-                                    modifier = Modifier
-                                        .then(Modifier.size(20.dp))
-                                        .statusBarsPadding()
-                                        .background(
-                                            color = Color.Transparent,
-                                            shape = CircleShape
-                                        ).tooltipAnchor(),
-
-                                    ) {
-                                    Icon(
-                                        imageVector = (TablerIcons.X),
-                                        contentDescription = "Close Button",
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    CustomIconButton(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                        tooltipText = "Close Modal",
+                        buttonRadius = 20.dp,
+                        buttonSize = 15.dp,
+                        backgroundColor = Color.Transparent,
+                        icon = TablerIcons.X
+                    )
                 }
 
                 Row (

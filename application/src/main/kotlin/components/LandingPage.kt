@@ -1,29 +1,34 @@
 package components
 
 import APIclient.CourseSchedulesClient
+import APIclient.CustomCalendarClient
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.material3.Divider
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.PermanentDrawerSheet
-import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import components.Home.HomeScreen
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
-import components.calendar.CalendarRender
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
+import components.playground.CalendarEditView
+import components.playground.PlaygroundHome
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
-import models.UserCourse
+import models.CustomCalendar
+import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.LogoutUser
@@ -54,10 +59,6 @@ sealed class Screen {
     object Login: Screen()
     object SignUp: Screen()
     object Landing : Screen()
-    //object CourseSelection : Screen()
-    //object CourseSearch : Screen()
-    //object FriendsPage : Screen()
-    //object Wishlish : Screen()
 }
 
 val INITIAL_STATE = AuthState("", "")
@@ -102,52 +103,12 @@ fun landingPage() {
         is Screen.Landing -> {
             landingScreen(
                 courseList = courseList,
-                onLogout = { currentScreen = Screen.Login })
-
-                        /*
-                onCourseSelectionClick = {
-                    currentScreen = Screen.CourseSelection
-                },
-                onCourseSearchClick = {
-                    currentScreen = Screen.CourseSearch
-                },
-                onFriendsClick = {
-                    currentScreen = Screen.FriendsPage
-                },
-                onWishlistClick = {
-                    currentScreen = Screen.Wishlish
+                onLogout = {
+                    currentScreen = Screen.Login
                 }
-
-                */
-
+            )
 
         }
-
-        /*
-        is Screen.CourseSelection -> {
-//            selectionScreen(onBackClick = {
-//                currentScreen = Screen.Landing
-//            })
-            PlaygroundHome(courseList)
-        }
-        is Screen.CourseSearch -> {
-            CourseSearchScreen(onBackClick = {
-                currentScreen = Screen.Landing
-            },  courses = courseList)
-        }
-
-        is Screen.FriendsPage -> {
-            FriendsPage(onBackClick = {
-                currentScreen = Screen.Landing
-            })
-        }
-        // when click on wishlist, it will prompt to this screen
-        is Screen.Wishlish -> {
-            wishSelection(onBackClick = { currentScreen = Screen.Landing })
-        }
-
-
-         */
     }
 }
 
@@ -158,20 +119,34 @@ sealed class AppScreen {
     object CourseSelection : AppScreen()
     object CourseSearch : AppScreen()
     object FriendsPage : AppScreen()
-    object Wishlish : AppScreen()
+    object Wishlist : AppScreen()
 
-    object Calendar: AppScreen()
+    object Playground: AppScreen()
+    object AlternateSchedule: AppScreen()
 
 }
 
 
 @Composable
-fun landingScreen(courseList: List<CourseDetails>, onLogout: () -> Unit) {
-
-
-
+fun landingScreen(
+    courseList: List<CourseDetails>,
+    onLogout: () -> Unit
+) {
     var showInNav by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
+    val calendarScope = rememberCoroutineScope()
+    var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
+    var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
+    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
 
+    LaunchedEffect(true) {
+        calendarScope.launch {
+            try {
+                customCalendars = CustomCalendarClient.getCalendars(store.getState().userId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
     Row (
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -185,72 +160,149 @@ fun landingScreen(courseList: List<CourseDetails>, onLogout: () -> Unit) {
                     Column(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .width(200.dp)
+                            .fillMaxWidth()
 
                     ) {
-                        Text("Welcome Jeff!", modifier = Modifier.padding(16.dp))
+                        Card(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = "Home") },
+                                selected = showInNav == AppScreen.Home,
+                                onClick = {showInNav = AppScreen.Home},
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                    selectedContainerColor = Color(0xFF6699CC)
+                                ),
+                                shape = CardDefaults.shape
+                            )
+
+                            NavigationDrawerItem(
+                                label = { Text(text = "Course Search") },
+                                selected = showInNav == AppScreen.CourseSearch,
+                                onClick = {showInNav = AppScreen.CourseSearch},
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                    selectedContainerColor = Color(0xFF6699CC)
+                                ),
+                                shape = CardDefaults.shape
+                            )
+                        }
                         Divider()
+                        Card(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = "Friends") },
+                                selected = showInNav == AppScreen.FriendsPage,
+                                onClick = {showInNav = AppScreen.FriendsPage},
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                    selectedContainerColor = Color(0xFF6699CC)
+                                ),
+                                shape = CardDefaults.shape
+                            )
 
-                        NavigationDrawerItem(
-                            label = { Text(text = "Home") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.Home}
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text(text = "Course Search") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.CourseSearch}
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text(text = "Course Selection") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.CourseSelection}
-                        )
-
+                            NavigationDrawerItem(
+                                label = { Text(text = "Wishlist") },
+                                selected = showInNav == AppScreen.Wishlist,
+                                onClick = {showInNav = AppScreen.Wishlist},
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                    selectedContainerColor = Color(0xFF6699CC)
+                                ),
+                                shape = CardDefaults.shape
+                            )
+                        }
                         Divider()
+                        Card(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                                .fillMaxHeight(0.85f)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = "My Calendars") },
+                                selected = showInNav == AppScreen.Playground,
+                                onClick = {showInNav = AppScreen.Playground},
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                    selectedContainerColor = Color(0xFF6699CC)
+                                ),
+                                shape = CardDefaults.shape
+                            )
+                            Box (
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                val stateVertical = rememberScrollState(0)
+                                Box (
+                                    modifier = Modifier.fillMaxHeight().verticalScroll(stateVertical)
+                                ) {
+                                    Column (
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        NavigationDrawerItem(
+                                            label = { Text(text = "Current Calendar") },
+                                            selected = showInNav == AppScreen.CourseSelection,
+                                            onClick = {showInNav = AppScreen.CourseSelection},
+                                            colors = NavigationDrawerItemDefaults.colors(
+                                                unselectedContainerColor = Color.Transparent,
+                                                selectedContainerColor = Color(0xFF6699CC)
+                                            ),
+                                            shape = CardDefaults.shape
+                                        )
 
-                        NavigationDrawerItem(
-                            label = { Text(text = "Calendar") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.Calendar}
-                        )
+                                        for (it in customCalendars) {
+                                            NavigationDrawerItem(
+                                                label = { Text(text = it.name) },
+                                                selected = showInNav == AppScreen.AlternateSchedule &&
+                                                        selectedCalendar.id == it.id,
+                                                onClick = {
+                                                    calendarScope.launch {
+                                                        try {
+                                                            userCourses = CustomCalendarClient.getCalendarCourses(
+                                                                store.getState().userId, it.id)
+                                                            selectedCalendar = it
+                                                            showInNav = AppScreen.AlternateSchedule
 
-                        Divider()
-
-                        NavigationDrawerItem(
-                            label = { Text(text = "Friends") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.FriendsPage}
-                        )
-
-                        Divider()
-
-                        NavigationDrawerItem(
-                            label = { Text(text = "Wishlist") },
-                            selected = false,
-                            onClick = {showInNav = AppScreen.Wishlish}
-                        )
-
-                        Divider()
-                        Spacer(Modifier.weight(1f))
-                        Divider()
-                        NavigationDrawerItem(
-                            label = { Text(text = "Logout") },
-                            selected = false,
-                            onClick = {
-                                // Dispatch LogoutUser action
-                                store.dispatch(LogoutUser())
-                                // Navigate to Login Screen or perform other necessary cleanup
-                                onLogout()
+                                                        } catch (e: Exception) {
+                                                            e.printStackTrace()
+                                                        }
+                                                    }
+                                                },
+                                                colors = NavigationDrawerItemDefaults.colors(
+                                                    unselectedContainerColor = Color.Transparent,
+                                                    selectedContainerColor = Color(0xFF6699CC)
+                                                ),
+                                                shape = CardDefaults.shape
+                                            )
+                                        }
+                                    }
+                                }
+                                VerticalScrollbar(
+                                    modifier = Modifier.align(Alignment.CenterEnd)
+                                        .fillMaxHeight(),
+                                    adapter = rememberScrollbarAdapter(stateVertical)
+                                )
                             }
-                        )
-
-                        Divider()
+                        }
+                        Card(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = "Logout") },
+                                selected = false,
+                                onClick = {
+                                    // Dispatch LogoutUser action
+                                    store.dispatch(LogoutUser())
+                                    // Navigate to Login Screen or perform other necessary cleanup
+                                    onLogout()
+                                },
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                ),
+                                shape = CardDefaults.shape
+                            )
+                        }
                     }
-
-
                     // ...other drawer items
                 }
             }
@@ -274,28 +326,17 @@ fun landingScreen(courseList: List<CourseDetails>, onLogout: () -> Unit) {
                     FriendsPage()
                 }
 
-                is AppScreen.Wishlish -> {
+                is AppScreen.Wishlist -> {
                     wishSelection()
                 }
 
-                is AppScreen.Calendar -> {
-
-                    val selectedCourses = remember { mutableStateListOf<UserCourse>()}
-                    val userCourseScope = rememberCoroutineScope()
-                    LaunchedEffect(true) {
-                        userCourseScope.launch{
-                            try {
-                                val courses = CourseSchedulesClient.getUserCourses(store.getState().userId)
-                                selectedCourses.addAll(courses)
-                            }catch (e: ClientRequestException) {
-                                println("Error fetching data: ${e.message}")
-                            } catch (e : Exception) {
-                                println("Error parsing data: ${e.message}")
-                            }
-                        }
+                is AppScreen.Playground -> {
+                    PlaygroundHome(courseList, customCalendars)
+                }
+                is AppScreen.AlternateSchedule -> {
+                    key (selectedCalendar) {
+                        CalendarEditView(userCourses, courseList, selectedCalendar)
                     }
-
-                    CalendarRender(courseList = selectedCourses)
                 }
             }
         }
