@@ -45,7 +45,7 @@ fun Draggable(
                         scaleX = 1f
                         scaleY = 1f
                         alpha = if (targetSize == IntSize.Zero) 0f else .9f
-                        translationX = offset.x.minus(targetSize.width / 2)
+                        translationX = offset.x.minus(targetSize.width / 2).minus(500f)
                         translationY = offset.y.minus(targetSize.height / 2)
                     }
                     .onGloballyPositioned {
@@ -77,10 +77,8 @@ fun <T> DragTarget(
             // detect DragGestures After Press
             detectDragGestures(onDragStart = {
                 currentState.dataToDrop = dataToDrop
-                println("data to drop")
-                println(dataToDrop)
                 currentState.isDragging = true
-                currentState.dragPosition = currentPosition + it - Offset(x = 400f, y = 0f)
+                currentState.dragPosition = currentPosition + it
                 currentState.draggableComposable = content
             }, onDrag = { change, dragAmount ->
                 change.consume()

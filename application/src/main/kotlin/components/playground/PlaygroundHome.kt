@@ -31,6 +31,18 @@ fun PlaygroundHome(
                 }
             }
         },
+        onRemoveCalendar = { calendar ->
+            userCalendarCourseScope.launch {
+                try {
+                   val response = CustomCalendarClient.deleteCalendar(store.getState().userId, calendar.id)
+                    if (response) {
+                        fetchCalendars()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        },
         onCreateNewCalendar = {
             changeToCalendar(it)
             fetchCalendars()

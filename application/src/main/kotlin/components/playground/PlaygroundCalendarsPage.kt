@@ -34,6 +34,7 @@ import components.common.CustomIconButton
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Plus
+import compose.icons.tablericons.Trash
 import compose.icons.tablericons.X
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +48,7 @@ fun PlaygroundCalendarsPage(
     calendarList: List<CustomCalendar>,
     goToCurrent: () -> Unit,
     onClickCalendar: (calendar: CustomCalendar) -> Unit,
+    onRemoveCalendar: (calendar: CustomCalendar) -> Unit,
     onCreateNewCalendar: (calendar: CustomCalendar) -> Unit
 ) {
     val calendarScope = rememberCoroutineScope()
@@ -102,7 +104,7 @@ fun PlaygroundCalendarsPage(
             columns = GridCells.Fixed(2)
         ) {
             items(calendarList) {
-                CalendarItem(it, onClickCalendar)
+                CalendarItem(it, onClickCalendar, onRemoveCalendar)
             }
         }
 
@@ -153,7 +155,10 @@ fun CalendarListItem(goToCurrent: () -> Unit) {
 
 
 @Composable
-fun CalendarItem(calendar: CustomCalendar, onClickCalendar: (calendar: CustomCalendar) -> Unit) {
+fun CalendarItem(calendar: CustomCalendar,
+                 onClickCalendar: (calendar: CustomCalendar) -> Unit,
+                 onRemoveCalendar: (calendar: CustomCalendar) -> Unit
+) {
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp, vertical = 4.dp)
@@ -175,17 +180,31 @@ fun CalendarItem(calendar: CustomCalendar, onClickCalendar: (calendar: CustomCal
                 .padding(10.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = calendar.name,
-                fontSize = 15.sp,
-                modifier = Modifier.padding(start = 8.dp),
-            )
+            Row (
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = calendar.name,
+                    fontSize = 15.sp,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+                CustomIconButton(
+                    onClick= { onRemoveCalendar(calendar) },
+                    modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    tooltipText= "Remove Calendar",
+                    buttonRadius= 36.dp,
+                    buttonSize= 15.dp,
+                    backgroundColor = Color.LightGray,
+                    icon = TablerIcons.Trash
+                )
+            }
 
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun CreateCalendarDialog(
     onDismissRequest: () -> Unit,
