@@ -74,7 +74,7 @@ fun coursePage(
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
                 androidx.compose.material3.Snackbar(
                     snackbarData = it,
-                    modifier = Modifier.width(400.dp),
+                    modifier = Modifier.width(500.dp),
                     )
             }
         },

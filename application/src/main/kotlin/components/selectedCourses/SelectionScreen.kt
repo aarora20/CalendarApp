@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,7 @@ import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
 import java.time.LocalDateTime
+import components.courseInfo.detectTimeConflict
 
 @Immutable
 sealed class SelectionScreen {
@@ -59,26 +62,42 @@ fun selectionScreen(
             }
         }
     }
-    Row (modifier = Modifier.fillMaxSize()) {
-        Column (modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})) {
-            when (currentScreen) {
-                is SelectionScreen.CourseSelection -> {
-                    courseSelection(selectedCourses, { currentScreen = SelectionScreen.Calendar}, { course ->
-                        selectedCourses.remove(course)
-                    }, {
-                        isSheetOpen = !isSheetOpen
-                    })
-                }
-                is SelectionScreen.Calendar -> {
-                    CalendarContainer(selectedCourses, { currentScreen = SelectionScreen.CourseSelection }) {
-                        isSheetOpen = !isSheetOpen
+
+    val snackbarState = remember { SnackbarHostState() }
+    androidx.compose.material3.Scaffold(
+        containerColor = Color.Transparent,
+        snackbarHost = {
+            androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
+                androidx.compose.material3.Snackbar(
+                    snackbarData = it,
+                    modifier = Modifier.width(500.dp),
+                )
+            }
+        },
+    ) {
+
+        Row (modifier = Modifier.fillMaxSize()) {
+            Column (modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})) {
+                when (currentScreen) {
+                    is SelectionScreen.CourseSelection -> {
+                        courseSelection(selectedCourses, { currentScreen = SelectionScreen.Calendar}, { course ->
+                            selectedCourses.remove(course)
+                        }, {
+                            isSheetOpen = !isSheetOpen
+                        })
+                    }
+                    is SelectionScreen.Calendar -> {
+                        CalendarContainer(selectedCourses, { currentScreen = SelectionScreen.CourseSelection }) {
+                            isSheetOpen = !isSheetOpen
+                        }
                     }
                 }
             }
-        }
-        if (isSheetOpen) {
-            AddCourseSideSheet(courseNames, courseMap, schedules, { schedules = it }) {
-                selectedCourses.add(it)
+            if (isSheetOpen) {
+                AddCourseSideSheet(courseNames, courseMap, schedules,
+                    selectedCourses, snackbarState, { schedules = it }) {
+                    selectedCourses.add(it)
+                }
             }
         }
     }
@@ -88,9 +107,11 @@ fun selectionScreen(
 fun AddCourseSideSheet(courseNames: List<String>,
                        courseMap:  Map<String, CourseDetails>,
                        schedules: List<ScheduleData>,
+                       selectedCourses: List<UserCourse>,
+                       snackBarState: SnackbarHostState,
                        setSchedules: (scheduleData: List<ScheduleData>) -> Unit,
                        addToSchedule: (UserCourse) -> Unit
-                       ) {
+) {
 
     val addScope = rememberCoroutineScope()
     var selectedCourse by remember { mutableStateOf("") }
@@ -146,20 +167,31 @@ fun AddCourseSideSheet(courseNames: List<String>,
                         AddableScheduleItem(it) {
                             addScope.launch {
                                 try {
-                                    val toAdd = courseMap[selectedCourse]
-                                    if (toAdd != null) {
-                                        val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
-                                            toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                            toAdd.title, it.courseComponent + " " + it.classSection,
-                                            it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
-                                            it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
-                                            it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
-                                            store.getState().userId,
+                                    val isTimeConflict = detectTimeConflict(selectedCourses,
+                                        it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                                        it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                        it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
+                                    if (isTimeConflict != "NO CONFLICT") {
+                                        snackBarState.showSnackbar(
+                                            message = "Unable to Add due to Time Conflict with: " + isTimeConflict,
+                                            duration = SnackbarDuration.Short
                                         )
-                                        if (response != null) {
-                                            addToSchedule(response)
-                                        } else {
-                                            // error do nothing
+                                    } else {
+                                        val toAdd = courseMap[selectedCourse]
+                                        if (toAdd != null) {
+                                            val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
+                                                toAdd.subjectCode + " " + toAdd.catalogNumber,
+                                                toAdd.title, it.courseComponent + " " + it.classSection,
+                                                it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                                                it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                                it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
+                                                store.getState().userId,
+                                            )
+                                            if (response != null) {
+                                                addToSchedule(response)
+                                            } else {
+                                                // error do nothing
+                                            }
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -183,7 +215,7 @@ fun AddableScheduleItem(schedule: ScheduleData, addCourse: (schedule: ScheduleDa
         ScheduleCell(text = schedule.courseComponent + schedule.classSection, weight = 0.2f)
         ScheduleCell(text = "${
             LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
-            .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
                 LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
