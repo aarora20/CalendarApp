@@ -34,6 +34,7 @@ import models.CustomCalendar
 import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
+import store.LogoutUser
 import store.rootReducer
 
 // fake data for now for wishlist
@@ -105,6 +106,9 @@ fun landingPage() {
         is Screen.Landing -> {
             landingScreen(
                 courseList = courseList,
+                onLogout = {
+                    currentScreen = Screen.Login
+                }
             )
 
         }
@@ -128,7 +132,8 @@ sealed class AppScreen {
 
 @Composable
 fun landingScreen(
-    courseList: List<CourseDetails>
+    courseList: List<CourseDetails>,
+    onLogout: () -> Unit
 ) {
     var showInNav by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
     val calendarScope = rememberCoroutineScope()
@@ -231,6 +236,7 @@ fun landingScreen(
                         Divider()
                         Card(
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                                .fillMaxHeight(0.85f)
                         ) {
                             NavigationDrawerItem(
                                 label = { Text(text = "My Calendars") },
@@ -247,7 +253,7 @@ fun landingScreen(
                             ) {
                                 val stateVertical = rememberScrollState(0)
                                 Box (
-                                    modifier = Modifier.fillMaxSize().verticalScroll(stateVertical)
+                                    modifier = Modifier.fillMaxHeight().verticalScroll(stateVertical)
                                 ) {
                                     Column (
                                         modifier = Modifier.fillMaxSize()
@@ -296,8 +302,25 @@ fun landingScreen(
                                     adapter = rememberScrollbarAdapter(stateVertical)
                                 )
                             }
-                            }
-
+                        }
+                        Card(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 7.dp)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = "Logout") },
+                                selected = false,
+                                onClick = {
+                                    // Dispatch LogoutUser action
+                                    store.dispatch(LogoutUser())
+                                    // Navigate to Login Screen or perform other necessary cleanup
+                                    onLogout()
+                                },
+                                colors = NavigationDrawerItemDefaults.colors(
+                                    unselectedContainerColor = Color.Transparent,
+                                ),
+                                shape = CardDefaults.shape
+                            )
+                        }
                     }
                     // ...other drawer items
                 }
