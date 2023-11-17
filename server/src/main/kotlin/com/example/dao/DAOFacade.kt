@@ -33,6 +33,8 @@ interface DAOFacade {
 
     suspend fun deleteFriendRequest(userId: String, friendId: String): Boolean
 
+    suspend fun unfriend(userId: String, friendId: String): Boolean
+
     // User Courses
     suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse?
     suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean

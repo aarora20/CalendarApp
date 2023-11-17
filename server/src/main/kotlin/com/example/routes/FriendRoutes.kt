@@ -22,6 +22,16 @@ fun Route.friendsRouting() {
             }
         }
 
+        post("/unfriend") {
+            val params = call.receive<FriendParams>();
+            val request = dao.unfriend(params.userId, params.friendId);
+            if (!request) {
+                call.respond(HttpStatusCode.BadRequest, "Fail to unfriend")
+            } else {
+                call.respond(request)
+            }
+        }
+
         get {
             val id = call.parameters.getOrFail<String>("userId")
             call.respond(dao.findFriends(id))
@@ -34,7 +44,7 @@ fun Route.friendsRouting() {
 
         get("/requests/sent") {
             val id = call.parameters.getOrFail<String>("userId")
-            call.respond(dao.findAllPending(id))
+            call.respond(dao.findAllSent(id))
         }
 
         post("/requests/accept") {

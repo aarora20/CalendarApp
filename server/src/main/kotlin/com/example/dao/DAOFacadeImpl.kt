@@ -94,7 +94,7 @@ class DAOFacadeImpl : DAOFacade {
         val insertStatement = Friends.insert {
             it[Friends.userId] = UUID.fromString(userId)
             it[Friends.friendId] = UUID.fromString(friendId)
-            it[Friends.status] = "pending"
+            it[status] = "pending"
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToFriend)
     }
@@ -163,14 +163,14 @@ class DAOFacadeImpl : DAOFacade {
     override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? = dbQuery {
         val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(friendId)
                 and (Friends.friendId eq UUID.fromString(userId))) }) {
-            it[Friends.status] = "accepted"
+            it[status] = "accepted"
         }
 
         if (updateStatement > 0) {
             val addInverse = Friends.insert {
                 it[Friends.userId] = UUID.fromString(userId)
                 it[Friends.friendId] = UUID.fromString(friendId)
-                it[Friends.status] = "accepted"
+                it[status] = "accepted"
             }
             addInverse.resultedValues?.singleOrNull()?.let(::resultRowToFriend)
         } else {
@@ -186,12 +186,28 @@ class DAOFacadeImpl : DAOFacade {
 
     override suspend fun deleteFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
         val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(friendId)
-                and (Friends.friendId eq UUID.fromString(userId))) }
+                and (Friends.friendId eq UUID.fromString(userId)) and (status eq "pending")) }
         if (deleted > 0) {
             true
         } else {
             false
         }
+    }
+
+    override suspend fun unfriend(userId: String, friendId: String): Boolean = dbQuery {
+        try {
+            transaction {
+                val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(friendId)
+                        and (Friends.friendId eq UUID.fromString(userId)) and (Friends.status eq "accepted")) }
+                val deletedReverse = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(userId)
+                        and (Friends.friendId eq UUID.fromString(friendId)) and (Friends.status eq "accepted")) }
+
+                deleted > 0 && deletedReverse > 0
+            }
+        } catch (e: Exception) {
+            false
+        }
+
     }
 
     override suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse? = dbQuery {

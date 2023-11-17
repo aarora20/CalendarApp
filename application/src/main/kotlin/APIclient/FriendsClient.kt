@@ -47,11 +47,18 @@ object FriendsClient {
         return response.body()
     }
 
-    suspend fun getPendingList(userId: String): List<User> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/friends/requests/pending") {
+    suspend fun getIncomingList(userId: String): List<User> {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/friends/requests/incoming") {
         }
         return response.body()
     }
+
+    suspend fun getSentList(userId: String): List<User> {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/friends/requests/sent") {
+        }
+        return response.body()
+    }
+
 
     suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? {
         val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/friends/requests/accept") {
@@ -67,7 +74,20 @@ object FriendsClient {
     }
 
     suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/friends/requests/reject") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/friends/requests/delete") {
+            contentType(ContentType.Application.Json)
+            setBody(FriendParams(userId, friendId))
+        }
+
+        return if (response.status == HttpStatusCode.BadRequest) {
+            false
+        } else {
+            response.body()
+        }
+    }
+
+    suspend fun unfriend(userId: String, friendId: String): Boolean {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/friends/unfriend") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
         }
