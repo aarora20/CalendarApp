@@ -33,7 +33,7 @@ fun HomeScreen(
         horizontalArrangement = Arrangement.Start
     ) {
         val currentDate = LocalDate.now()
-        val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"))
+        val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EE MMMM dd, yyyy"))
         Column {
             Text(
                 text = formattedDate,
