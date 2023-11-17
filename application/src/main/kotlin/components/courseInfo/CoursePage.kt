@@ -7,10 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,7 +88,7 @@ fun coursePage(
                     fontSize = 30.sp,
                     maxLines = 1
                 )
-
+                Divider(color = Color.Black, thickness = 1.dp)
                 // subsequent row provides the course code and its name
                 // also provides the user an option to add the course to their wish list
                 Row (

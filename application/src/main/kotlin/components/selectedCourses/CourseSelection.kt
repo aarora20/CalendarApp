@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -81,7 +82,7 @@ fun courseSelection(
 
         // set the header of the page letting the user know this will provide course selection options
         Row(
-            Modifier.fillMaxWidth().padding(vertical = 20.dp),
+            Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -95,6 +96,9 @@ fun courseSelection(
                 Text("Calendar View")
             }
         }
+        Row {
+            Divider(color = Color.Black, thickness = 1.dp)
+        }
 
         Row(
             Modifier.fillMaxWidth().padding(vertical = 20.dp),
@@ -102,7 +106,7 @@ fun courseSelection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "List of Selected Courses"
+                text = "List of Selected Courses:"
             )
             Button(
                 onClick = {

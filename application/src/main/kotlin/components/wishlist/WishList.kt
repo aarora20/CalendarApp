@@ -58,6 +58,7 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
             fontSize = 30.sp,
             maxLines = 1
         )
+        Divider(color = Color.Black, thickness = 1.dp)
         Row(
             Modifier.fillMaxWidth().padding(vertical = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -113,7 +114,6 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                             Text("Remove from Wish List")
                         }
                     }
-                    Divider(color = Color.Black, thickness = 1.dp)
                 }
             }
         }
