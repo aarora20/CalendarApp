@@ -29,7 +29,6 @@ import models.ScheduleData
 import models.UserCourse
 import models.WishCourses
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun coursePage(
@@ -308,8 +307,9 @@ fun tableScreen(
                 Modifier.fillMaxWidth().border(0.dp, Color.Black),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val pad = padder(sectionNum)
                 TableCell(text = classNum.toString(), weight = classWeight, header = 0)
-                TableCell(text = "$courseComp $sectionNum", weight = sectionWeight, header = 0)
+                TableCell(text = "$courseComp $pad$sectionNum", weight = sectionWeight, header = 0)
                 TableCell(text = "$start - $end", weight = timeWeight, header = 0)
                 TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(
@@ -319,5 +319,22 @@ fun tableScreen(
                     weight = buttonWeight, scope, course, it)
             }
         }
+    }
+}
+
+fun padder (
+    num: Int
+): String {
+    val pad1 = "00"
+    val pad2 = "0"
+    val digits = num.toString().count()
+    return when (digits) {
+        1 -> {
+            pad1
+        }
+        2 -> {
+            pad2
+        }
+        else -> ""
     }
 }
