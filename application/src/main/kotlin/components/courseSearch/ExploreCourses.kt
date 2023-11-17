@@ -14,18 +14,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.CourseDetails
 
-
 @Composable
 fun ExploreCoursesScreen(subjectCode: String, allCourses: List<CourseDetails>, onBackClick: () -> Unit) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
-    val categoryFilter = selectedCategory
+    val category = selectedCategory  // Immutable local copy of selectedCategory
+
     val filteredCourses = allCourses.filter {
-        it.subjectCode == subjectCode && when (categoryFilter) {
+        it.subjectCode == subjectCode && when (category) {
             null -> true
             "5XX+" -> it.catalogNumber.toIntOrNull()?.let { num -> num >= 500 } == true
-            else -> it.catalogNumber.matches(Regex("${categoryFilter[0]}\\d\\d"))
+            else -> {
+                // Modified regex to include optional letters at the end
+                it.catalogNumber.matches(Regex("${category[0]}\\d\\d\\w*"))
+            }
         }
-    }
+    }.sortedWith(compareBy(
+        { it.catalogNumber.filter { char -> char.isDigit() }.toIntOrNull() ?: Int.MAX_VALUE },
+        { it.catalogNumber.filter { char -> char.isLetter() } }
+    ))
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
