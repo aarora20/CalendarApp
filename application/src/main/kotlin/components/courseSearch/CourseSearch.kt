@@ -34,57 +34,64 @@ sealed class SearchScreen {
 }
 
 @Composable
-fun CourseSearchScreen(/*onBackClick: () -> Unit,*/courses: List<CourseDetails>) {
+fun CourseSearchScreen(courses: List<CourseDetails>) {
     val courseNames = courses.map { "${it.subjectCode}${it.catalogNumber}" }
     val courseMap = courses.associateBy { it.subjectCode + it.catalogNumber }
     var currentScreen by remember { mutableStateOf<SearchScreen>(SearchScreen.Search) }
+    var previousScreen by remember { mutableStateOf<SearchScreen?>(null) }
     var course by remember { mutableStateOf("") }
     var addedCourses by remember { mutableStateOf(emptySet<String>()) }
 
     val scope = rememberCoroutineScope()
 
+    val changeToCourseInfo: (String) -> Unit = { selectedCourse ->
+        previousScreen = currentScreen
+        course = selectedCourse
+        currentScreen = SearchScreen.CourseInfo
+    }
+
+    val onBackClick: () -> Unit = {
+        currentScreen = previousScreen ?: SearchScreen.Search
+        previousScreen = null // Reset the previous screen
+    }
+
     LaunchedEffect(true) {
         scope.launch {
-            try {
-                // Fetch and handle added courses
-            } catch (e: Exception) {
-                println("Error: ${e.message}")
-            }
+            // Fetch and handle added courses
         }
     }
 
     Column {
-        when (val screen = currentScreen) {  // Use a local immutable copy of currentScreen
+        when (val screen = currentScreen) {
             is SearchScreen.Search -> {
-                CustomSearchBar(courseNames, /*onBackClick, */changeToCourseInfo = { selectedCourse ->
-                    course = selectedCourse
-                    currentScreen = SearchScreen.CourseInfo
-                }, exploreCourses = { subjectCode ->
+                CustomSearchBar(courseNames, changeToCourseInfo, { subjectCode ->
+                    previousScreen = currentScreen
                     currentScreen = SearchScreen.ExploreCourses(subjectCode)
                 })
             }
             is SearchScreen.CourseInfo -> {
                 courseMap[course]?.let { courseDetails ->
-                    coursePage(courseNames, addedCourses, onBackClick = { currentScreen = SearchScreen.Search }, course = courseDetails) {
-                        course = it
-                        currentScreen = SearchScreen.CourseInfo
-                    }
+                    coursePage(courseNames, addedCourses, onBackClick, courseDetails, changeToCourseInfo, currentScreen)
                 }
             }
             is SearchScreen.ExploreCourses -> {
                 ExploreCoursesScreen(
-                    subjectCode = screen.subjectCode,  // Use the local copy for explicit casting
+                    subjectCode = screen.subjectCode,
                     allCourses = courses,
-                    onBackClick = { currentScreen = SearchScreen.Search }
+                    changeToCourseInfo = changeToCourseInfo,
+                    onBackClick = onBackClick
                 )
+            }
+            else -> {
+                // Default action when none of the known screen types are matched
+                currentScreen = SearchScreen.Search
             }
         }
     }
 }
 
 @Composable
-fun CustomSearchBar(courses: List<String>, //onBackClick: () -> Unit,
-                    changeToCourseInfo: (course: String) -> Unit,
+fun CustomSearchBar(courses: List<String>, changeToCourseInfo: (course: String) -> Unit,
                     exploreCourses: (subjectCode: String) -> Unit) {
     var text by remember { mutableStateOf("") }
     var searchedCourses by remember { mutableStateOf(emptyList<String>()) }
@@ -99,11 +106,6 @@ fun CustomSearchBar(courses: List<String>, //onBackClick: () -> Unit,
     }
 
     Column {
-        //Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-            //Button(onClick = onBackClick) {
-                //Text("Back")
-            //}
-        //}
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -135,12 +137,10 @@ fun CustomSearchBar(courses: List<String>, //onBackClick: () -> Unit,
                     )
                 }
 
-                // Check if the entered subject code matches any in the database, case-insensitively
                 val isSubjectCodeValid = subjectCodes.any { it.equals(text, ignoreCase = true) }
-
                 if (isSubjectCodeValid) {
                     Button(
-                        onClick = { exploreCourses(text.uppercase()) },  // Convert to uppercase for consistency
+                        onClick = { exploreCourses(text.uppercase()) },
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         Text("Explore all $text courses")

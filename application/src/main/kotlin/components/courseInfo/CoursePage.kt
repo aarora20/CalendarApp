@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.courseSearch.DropSearch
+import components.courseSearch.SearchScreen
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ChevronLeft
@@ -42,7 +43,8 @@ fun coursePage(
     addedCourses: Set<String>,
     onBackClick: () -> Unit,
     course: CourseDetails,
-    onChangeCourse: (course: String) -> Unit
+    onChangeCourse: (course: String) -> Unit,
+    originScreen: SearchScreen
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
@@ -67,6 +69,14 @@ fun coursePage(
         }
     }
 
+    val updatedOnBackClick: () -> Unit = {
+        when (originScreen) {
+            is SearchScreen.Search -> onBackClick()
+            is SearchScreen.ExploreCourses -> onBackClick()
+            else -> onBackClick()
+        }
+    }
+
     // sets the page as a column
     val snackbarState = remember { SnackbarHostState() }
     androidx.compose.material3.Scaffold(
@@ -75,7 +85,7 @@ fun coursePage(
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
                 androidx.compose.material3.Snackbar(
                     snackbarData = it,
-                    modifier = Modifier.width(400.dp),
+                    modifier = Modifier.width(500.dp),
                     )
             }
         },
@@ -98,7 +108,7 @@ fun coursePage(
                                     LocalMinimumInteractiveComponentEnforcement provides false
                                 ) {
                                     IconButton(
-                                        onClick = onBackClick,
+                                        onClick = updatedOnBackClick,
                                         modifier = Modifier
                                             .then(Modifier.size(36.dp))
                                             .statusBarsPadding()
