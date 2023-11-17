@@ -10,6 +10,7 @@ import models.UserCalendarCourse
 @Composable
 fun PlaygroundHome(
                    calendarList: List<CustomCalendar>,
+                   goToCurrent: () -> Unit,
                    changeToCalendar: (calendar: CustomCalendar) -> Unit,
                    fetchCalendars: () -> Unit) {
     val userCalendarCourseScope = rememberCoroutineScope()
@@ -17,6 +18,8 @@ fun PlaygroundHome(
 
     PlaygroundCalendarsPage(
         calendarList,
+        goToCurrent = goToCurrent,
+
         onClickCalendar = { calendar ->
             userCalendarCourseScope.launch {
                 try {

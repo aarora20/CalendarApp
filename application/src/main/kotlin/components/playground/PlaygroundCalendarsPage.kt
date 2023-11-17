@@ -45,6 +45,7 @@ import models.CustomCalendarParams
 @Composable
 fun PlaygroundCalendarsPage(
     calendarList: List<CustomCalendar>,
+    goToCurrent: () -> Unit,
     onClickCalendar: (calendar: CustomCalendar) -> Unit,
     onCreateNewCalendar: (calendar: CustomCalendar) -> Unit
 ) {
@@ -70,7 +71,7 @@ fun PlaygroundCalendarsPage(
         Row (
             modifier = Modifier.fillMaxWidth(0.5f)
         ) {
-            CalendarListItem()
+            CalendarListItem(goToCurrent)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -121,15 +122,14 @@ fun PlaygroundCalendarsPage(
 }
 
 @Composable
-fun CalendarListItem() {
+fun CalendarListItem(goToCurrent: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clip(CardDefaults.shape)
-//            .combinedClickable(
-//                onClick = { navigateToDetail(email.id) },
-//                onLongClick = { toggleSelection(email.id) }
-//            )
+            .clickable {
+                goToCurrent()
+            }
         ,
         colors = CardDefaults.cardColors(
             containerColor = Color.LightGray
@@ -269,7 +269,6 @@ fun CreateCalendarDialog(
                                         } else {
                                             // error
                                         }
-
                                     }
                                 }catch (e: ClientRequestException) {
                                     println("Error fetching data: ${e.message}")

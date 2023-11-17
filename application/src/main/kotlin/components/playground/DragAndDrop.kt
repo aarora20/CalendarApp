@@ -80,7 +80,7 @@ fun <T> DragTarget(
                 println("data to drop")
                 println(dataToDrop)
                 currentState.isDragging = true
-                currentState.dragPosition = currentPosition + it
+                currentState.dragPosition = currentPosition + it - Offset(x = 400f, y = 0f)
                 currentState.draggableComposable = content
             }, onDrag = { change, dragAmount ->
                 change.consume()

@@ -380,7 +380,11 @@ fun landingScreen(
                 }
 
                 is AppScreen.Playground -> {
-                    PlaygroundHome(customCalendars, {
+                    PlaygroundHome(customCalendars,
+                        {
+                          showInNav = AppScreen.CourseSelection
+                        },
+                        {
                         selectedCalendar = it
                         showInNav = AppScreen.AlternateSchedule
                     }) {
@@ -397,7 +401,9 @@ fun landingScreen(
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar)
+                        CalendarEditView(userCourses, courseList, selectedCalendar) {
+                            showInNav = AppScreen.Playground
+                        }
                     }
                 }
             }
