@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.common.CustomIconButton
@@ -181,9 +183,29 @@ fun wishSelection(/*onBackClick: () -> Unit*/) {
                 text = "Wish List of Courses Per Term"
             )
         }
-        LazyRow {
-            items(inputTerms) { term ->
-                TermBox(term)
+        LazyRow (
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            var counter = 1
+            items(inputTerms.windowed(2, step = 2, partialWindows = true)) { termPair ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Year ${counter.toString()}",
+                        fontSize = 25.sp,
+                        color = Color.Black,
+                        style = TextStyle(textDecoration = TextDecoration.Underline)
+                    )
+                    for (term in termPair) {
+                        TermBox(term = term)
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
+                }
+                counter++
             }
         }
         /* What we had before adding multiple terms to wishlist
