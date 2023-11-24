@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import models.AuthRes
 import models.UserParams
-import util.UserResponseData
+import util.RouteResponseData
 
 object AuthClient {
     private val client = HttpClient(CIO) {
@@ -18,7 +18,7 @@ object AuthClient {
             json()
         }
     }
-    suspend fun loginUser(user: UserParams): UserResponseData<AuthRes>? {
+    suspend fun loginUser(user: UserParams): RouteResponseData<AuthRes>? {
 
         val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/login") {
             contentType(ContentType.Application.Json)
@@ -32,7 +32,7 @@ object AuthClient {
         }
     }
 
-    suspend fun registerUser(user: UserParams): UserResponseData<AuthRes>? {
+    suspend fun registerUser(user: UserParams): RouteResponseData<AuthRes>? {
 
         val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/register") {
             contentType(ContentType.Application.Json)

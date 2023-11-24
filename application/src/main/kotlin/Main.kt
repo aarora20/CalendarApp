@@ -7,7 +7,6 @@ import androidx.compose.ui.window.rememberWindowState
 import components.landingPage
 import java.awt.Dimension
 
-
 @Composable
 @Preview
 fun App() {
