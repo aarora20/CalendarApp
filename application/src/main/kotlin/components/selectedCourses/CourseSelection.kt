@@ -68,6 +68,7 @@ fun courseSelection(
                     fontSize = 25.sp,
                     maxLines = 1
                 )
+
                 Button (
                     onClick = onCalendarClick,
                     modifier = Modifier.width(180.dp)
