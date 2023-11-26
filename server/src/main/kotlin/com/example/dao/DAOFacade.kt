@@ -1,9 +1,6 @@
 package com.example.dao
 
-import com.example.models.Friend
-import com.example.models.User
-import com.example.models.UserCourse
-import com.example.models.WishlistCourse
+import com.example.models.*
 
 interface DAOFacade {
 
@@ -28,11 +25,15 @@ interface DAOFacade {
 
     suspend fun findAllPending(userId: String): List<User>
 
+    suspend fun findAllSent(userId: String): List<User>
+
     suspend fun acceptFriendRequest(userId: String, friendId: String): Friend?
 
     suspend fun findFriendRequest(userId: String, friendId: String): Boolean
 
-    suspend fun rejectFriendRequest(userId: String, friendId: String): Boolean
+    suspend fun deleteFriendRequest(userId: String, friendId: String): Boolean
+
+    suspend fun unfriend(userId: String, friendId: String): Boolean
 
     // User Courses
     suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse?
@@ -44,6 +45,17 @@ interface DAOFacade {
     suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String): Boolean
     suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse>
 
+    // Custom Calendars and UserCalendarCourses (Playground feature)
+
+    suspend fun addUserCalendarCourse(userIdArg: String, calendarIdArg: String, course: UserCalendarCourse): UserCalendarCourse?
+    suspend fun updateUserCalendarCourses(userIdArg: String, calendarIdArg: String, courses: List<UserCalendarCourse>): Boolean
+    suspend fun getAllUserCalendarCourses(userId: String, calendarId: String): List<UserCalendarCourse>
+
+    suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendarParams): CustomCalendar?
+
+    suspend fun deleteCustomCalendar(userIdArg: String, calendarId: String): Boolean
+
+    suspend fun getCustomCalendars(userIdArg: String): List<CustomCalendar>
 
 }
 

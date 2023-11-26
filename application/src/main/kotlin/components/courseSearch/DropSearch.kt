@@ -1,16 +1,15 @@
 package components.courseSearch
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -47,7 +46,6 @@ fun DropSearch(
                 }
                 searchedCourses = FuzzySearch.extractTop(searchText.uppercase(Locale.getDefault()), courses, 5)
                     .map { it.toString() }
-                println(searchedCourses)
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             }
@@ -74,10 +72,8 @@ fun DropSearch(
                     headlineContent = { Text(course) },
                     modifier = Modifier
                         .clickable {
-                            println("clicked")
                             text = ""
                             onClickCourse(course)
-                            println(course)
                             active = false
                         }
                         .fillMaxWidth()

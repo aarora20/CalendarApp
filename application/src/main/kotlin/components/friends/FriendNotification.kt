@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import components.common.CustomIconButton
 import components.common.DividerComposable
 import components.store
 import compose.icons.TablerIcons
+import compose.icons.tablericons.ArrowBack
 import compose.icons.tablericons.Check
 import compose.icons.tablericons.Trash
 import io.ktor.client.plugins.*
@@ -29,11 +31,13 @@ fun FriendNotification(
 
 ) {
     var notificationScope = rememberCoroutineScope()
-    var pendingList = remember { mutableStateListOf<User>() }
+    var incomingList = remember { mutableStateListOf<User>() }
+    var sentList = remember { mutableStateListOf<User>() }
     LaunchedEffect(true) {
         notificationScope.launch{
             try {
-                pendingList.addAll(FriendsClient.getPendingList(store.getState().userId))
+                incomingList.addAll(FriendsClient.getIncomingList(store.getState().userId))
+                sentList.addAll(FriendsClient.getSentList(store.getState().userId))
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {
@@ -42,14 +46,26 @@ fun FriendNotification(
         }
     }
     Column (
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DividerComposable("Pending")
+        DividerComposable("Sent")
 
         LazyColumn {
-            items(pendingList) {
-                NotificationItem(it, pendingList)
+            items(sentList) {
+                NotificationItem(it, sentList, false)
+            }
+        }
+    }
+    Column (
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DividerComposable("Incoming")
+
+        LazyColumn {
+            items(incomingList) {
+                NotificationItem(it, incomingList, true)
             }
         }
     }
@@ -58,7 +74,8 @@ fun FriendNotification(
 @Composable
 fun NotificationItem(
     user: User,
-    requests: SnapshotStateList<User>
+    requests: SnapshotStateList<User>,
+    isIncoming: Boolean,
 ) {
     val requestScope = rememberCoroutineScope()
     Row(
@@ -77,27 +94,32 @@ fun NotificationItem(
                 .weight(1f)
         )
 
-        IconButton(
-            onClick = {
-                requestScope.launch {
-                    try {
-                        val friend = FriendsClient.acceptFriendRequest(store.getState().userId, user.id)
-                        if (friend != null) {
-                            requests.remove(user)
+        if (isIncoming) {
+            CustomIconButton(
+                onClick = {
+                    requestScope.launch {
+                        try {
+                            val friend = FriendsClient.acceptFriendRequest(store.getState().userId, user.id)
+                            if (friend != null) {
+                                requests.remove(user)
+                            }
+                        }catch (e: ClientRequestException) {
+                            println("Error fetching data: ${e.message}")
+                        } catch (e: Exception) {
+                            println(e.message)
                         }
-                    }catch (e: ClientRequestException) {
-                        println("Error fetching data: ${e.message}")
-                    } catch (e: Exception) {
-                        println(e.message)
                     }
-                }
-            }
-        ) {
-            Icon(
-                imageVector = TablerIcons.Check, "remove"
+                },
+                modifier = Modifier,
+                tooltipText = "Accept Request",
+                buttonRadius = 48.dp,
+                buttonSize = 20.dp,
+                backgroundColor =  Color.Transparent,
+                icon =  TablerIcons.Check
+
             )
-        }
-        IconButton(
+
+            CustomIconButton(
                 onClick = {
                     requestScope.launch {
                         try {
@@ -111,12 +133,40 @@ fun NotificationItem(
                             println(e.message)
                         }
                     }
-                }
-                ) {
-            Icon(
-                imageVector = TablerIcons.Trash, "remove"
+                },
+                modifier = Modifier,
+                tooltipText = "Reject Request",
+                buttonRadius = 48.dp,
+                buttonSize = 20.dp,
+                backgroundColor =  Color.Transparent,
+                icon =  TablerIcons.Trash
+
+            )
+        } else {
+            CustomIconButton(
+                onClick = {
+                    requestScope.launch {
+                        try {
+                            val rejectStatus = FriendsClient.rejectFriendRequest(user.id, store.getState().userId)
+                            if (rejectStatus) {
+                                requests.remove(user)
+                            }
+                        }catch (e: ClientRequestException) {
+                            println("Error fetching data: ${e.message}")
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
+                    }
+                },
+                modifier = Modifier,
+                tooltipText = "Withdraw Request",
+                buttonRadius = 48.dp,
+                buttonSize = 20.dp,
+                backgroundColor =  Color.Transparent,
+                icon =  TablerIcons.ArrowBack
+
             )
         }
-    }
 
+    }
 }

@@ -27,7 +27,7 @@ fun Route.userRouting() {
         }
     }
 
-    route("/user") {
+    route("/users") {
         get("/{id}") {
             val id = call.parameters.getOrFail<String>("id")
             val user = dao.user(id)
@@ -40,12 +40,12 @@ fun Route.userRouting() {
         }
     }
 
-    route("/users/{id}") {
+    // Find all similar users in the database to the given username
+    route("/users/{id}/find") {
         get() {
             val id = call.parameters.getOrFail<String>("id")
             val params = call.receive<UsernameParams>()
             call.respond(friendService.searchUsers(id, params.username))
         }
     }
-
 }

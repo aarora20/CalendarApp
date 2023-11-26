@@ -5,7 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -17,6 +17,9 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.common.CustomIconButton
+import compose.icons.TablerIcons
+import compose.icons.tablericons.ChevronLeft
 import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
@@ -50,21 +53,26 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
     val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY",
         "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
-    // val screenSize = java.awt.Toolkit.getDefaultToolkit().screenSize
-    // print(screenSize.getWidth())
+    var screenHeight = LocalWindowInfo.current.containerSize.height
+    var hourHeight = (screenHeight / hours).dp
+    if (hourHeight < 40.dp) {
+        hourHeight = 40.dp
+    }
 
     Column (
         modifier = Modifier
             .fillMaxWidth()
     ) {
 
-        // BACK BUTTON
-        Button(onClick = onBackClick,
-            modifier = Modifier
-                .padding(0.dp)
-                .height(45.dp)) {
-            Text("Back")
-        }
+        CustomIconButton(
+            onClick= onBackClick,
+            modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            tooltipText= "Go Back",
+            buttonRadius= 36.dp,
+            buttonSize= 15.dp,
+            backgroundColor = Color.LightGray,
+            icon = TablerIcons.ChevronLeft
+        )
 
         // TITLES
         Row (
@@ -101,33 +109,18 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
             }
         }
 
-        // ACTUAL CALENDAR
-        var screenHeight = LocalWindowInfo.current.containerSize.height
-        var contentHeight = 800
-
         Row (
             modifier = Modifier
                 .weight(0.84f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .onSizeChanged { constraints ->
-                    contentHeight = constraints.height
-                    print("contentHeight: ")
-                    print(contentHeight)
-                    print(" ")
-                    print("screenHeight: ")
-                    print(screenHeight)
-                    print(" ")
-                }
+
 
                 .drawBehind {
-                    val hourHeightHalf = hourHeight / 2
-                    val hourHeightHalfPx = hourHeightHalf.toPx().roundToInt().toFloat()
-
                     repeat(hours * 2) {
                         drawLine(
-                            start = Offset(x = 100f, y = it * hourHeightHalfPx),
-                            end = Offset(x = size.width, y = it * hourHeightHalfPx),
+                            start = Offset(x = 0f, y = it * (hourHeight / 2).toPx().toFloat()),
+                            end = Offset(x = size.width, y = it * (hourHeight / 2).toPx().toFloat()),
                             strokeWidth = 0.4.dp.toPx(),
                             color = Color.LightGray
                         )
@@ -136,11 +129,6 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
 
             ) {
 
-            // make hourHeight adapt to changes in screenSize
-            hourHeight = (screenHeight / hours).dp
-            if (hourHeight < 40.dp) {
-                hourHeight = 40.dp
-            }
 
             Column (
                 modifier = Modifier
@@ -156,7 +144,8 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Schedule(dayClass)
+                    val textSize = 10
+                    Schedule(hourHeight = hourHeight, classes = dayClass, textSize)
                 }
             }
         }

@@ -1,10 +1,6 @@
 package com.example.plugins
 
-import com.example.routes.courseSchedulesRouting
-import com.example.routes.userCoursesRouting
-import com.example.routes.userRouting
-import com.example.routes.wishlistRouting
-import com.example.routes.friendsRouting
+import com.example.routes.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
@@ -15,5 +11,7 @@ fun Application.configureRouting() {
         courseSchedulesRouting()
         wishlistRouting()
         friendsRouting()
+        customCalendarRouting()
+        userCalendarCourseRouting()
     }
 }

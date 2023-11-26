@@ -2,7 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 val ktor_version: String by project
 
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "1.9.10"
     id("org.jetbrains.compose") version "1.5.3"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
@@ -40,7 +40,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CalendarApp"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.3"
         }
     }
 }
