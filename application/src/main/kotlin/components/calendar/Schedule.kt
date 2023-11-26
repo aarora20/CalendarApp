@@ -39,7 +39,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
-
 import compose.icons.TablerIcons
 import compose.icons.tablericons.CaretRight
 import compose.icons.tablericons.CaretLeft
@@ -65,6 +64,10 @@ data class UniClass(
     val finish :LocalDateTime
 )
 
+enum class Theme {
+    THEME1, THEME2
+}
+
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mma")
 val HourFormatter = DateTimeFormatter.ofPattern("h a")
 val DateFormatter = DateTimeFormatter.ofPattern("MMM dd")
@@ -86,12 +89,15 @@ val startTime = LocalTime.parse("08:00:00")
 val endTime = LocalTime.parse("22:00:00")
 val hours = ChronoUnit.HOURS.between(startTime, endTime).toInt()
 
+
+
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @Preview
-
 fun oneClass (
     uniclass: UniClass,
-    modifier: Modifier = Modifier,
+    textSize: Int,
+    modifier: Modifier = Modifier
 ) {
     Column (
         modifier = Modifier
@@ -102,10 +108,14 @@ fun oneClass (
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
+
+        val density = LocalWindowInfo.current.containerSize.width / 3 / 7
+
         Text(uniclass.name + " " + uniclass.type,
-            fontSize = 10.sp)
+
+            fontSize = textSize.sp)
         Text(uniclass.start.format(TimeFormatter).replace(".", "").uppercase() + " - " + uniclass.finish.format(TimeFormatter).replace(".", "").uppercase(),
-            fontSize = 10.sp)
+            fontSize = textSize.sp)
     }
 }
 
@@ -144,8 +154,9 @@ fun ScheduleSidebar(
 fun Schedule(
     hourHeight: Dp,
     classes: List<UniClass>,
+    textSize: Int,
     modifier: Modifier = Modifier,
-    uniclassContent: @Composable (uniclass: UniClass) -> Unit = { oneClass(uniclass = it) },
+    uniclassContent: @Composable (uniclass: UniClass) -> Unit = { oneClass(uniclass = it, textSize) },
 ) {
 
     Layout(
@@ -181,12 +192,59 @@ fun Schedule(
     }
 }
 
+fun generateColors(courseList: List<UserCourse>, theme: Theme): Map<String, Color> {
+    val distinctCourseNames = courseList.map { it.courseNum }.distinct()
+    val colorMap = mutableMapOf<String, Color>()
+
+    // Define color sets for each theme
+    val theme1Colors = listOf(
+        Color(174, 214, 241),
+        Color(133, 193, 233),
+        Color(93, 173, 226),
+        Color(52, 152, 219),
+        Color(46, 134, 193),
+        Color(127, 179, 213),
+        Color(84, 153, 199),
+        Color(41, 128, 185),
+    )
+
+    val theme2Colors = listOf(
+        Color(255, 207, 210),
+        Color(241, 192, 232),
+        Color(207, 186, 240),
+        Color(163, 196, 243),
+        Color(144, 219, 244),
+        Color(142, 236, 245),
+        Color(152, 245, 225),
+        Color(185, 251, 192),
+        Color(251, 248, 204),
+        Color(253, 228, 207),
+    )
+
+    val selectedThemeColors = when (theme) {
+        Theme.THEME1 -> theme1Colors
+        Theme.THEME2 -> theme2Colors
+    }
+
+    for ((index, courseName) in distinctCourseNames.withIndex()) {
+        // Use colors from the selected theme in order
+        val colorIndex = index % selectedThemeColors.size
+        colorMap[courseName] = selectedThemeColors[colorIndex]
+    }
+
+    return colorMap
+}
+
+
+
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun CalendarRender(courseList: List<UserCourse>) {
+fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
+
+    val colorMap = generateColors(courseList, selectedTheme)
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
-        it.component, Color(0xffffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, colorMap[it.courseNum]!!, it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 
@@ -323,7 +381,6 @@ fun CalendarRender(courseList: List<UserCourse>) {
 
     //print("hourHeight modified \n")
     //print("hourheight: " + hourHeight + "\n")
-
 
     Column (
         modifier = Modifier
@@ -468,7 +525,8 @@ fun CalendarRender(courseList: List<UserCourse>) {
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Schedule(hourHeight = hourHeight, classes = dayClass)
+                    val textSize = 10
+                    Schedule(hourHeight = hourHeight, classes = dayClass, textSize)
                 }
             }
         }

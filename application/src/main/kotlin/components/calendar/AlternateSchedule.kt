@@ -125,7 +125,8 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Schedule(hourHeight = hourHeight, classes = dayClass)
+                    val textSize = 10
+                    Schedule(hourHeight = hourHeight, classes = dayClass, textSize)
                 }
             }
         }
