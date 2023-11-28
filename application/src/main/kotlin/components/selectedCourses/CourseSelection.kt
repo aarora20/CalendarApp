@@ -22,7 +22,10 @@ import androidx.compose.ui.unit.sp
 import components.common.CustomIconButton
 import components.store
 import compose.icons.TablerIcons
-import compose.icons.tablericons.*
+import compose.icons.tablericons.Calendar
+import compose.icons.tablericons.DeviceFloppy
+import compose.icons.tablericons.Plus
+import compose.icons.tablericons.Trash
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.UserCourse
