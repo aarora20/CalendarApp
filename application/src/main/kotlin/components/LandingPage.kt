@@ -2,6 +2,7 @@ package components
 
 import APIclient.CourseSchedulesClient
 import APIclient.CustomCalendarClient
+import APIclient.TokenClient
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +28,7 @@ import components.wishlist.wishSelection
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.CustomCalendar
@@ -35,6 +37,8 @@ import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.LogoutUser
 import store.rootReducer
+import java.io.File
+import java.io.FileInputStream
 
 // fake data for now for wishlist
 // Should replace with api get results
@@ -76,7 +80,17 @@ fun landingPage() {
     LaunchedEffect(true) {
         scope.launch{
             try {
-                courseList = CourseSchedulesClient.getCourses()
+//                println(System.getProperty("user.dir"))
+////                println(FileInputStream("test.input").read())
+////                println(File("test.input").useLines { it.toList() })
+////                println(File(javaClass.getResource("/test.input").toURI()).useLines { it.toList() })
+////                println(javaClass.getResource("/test.input").readText())
+////                courseList = CourseSchedulesClient.getCourses()
+//                TokenClient.getIdToken();
+                while (true) {
+                    println("interval");
+                    delay(5000);
+                }
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {
@@ -408,7 +422,6 @@ fun landingScreen(
                 }
             }
         }
-
     }
 }
 

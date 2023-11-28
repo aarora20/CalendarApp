@@ -47,3 +47,6 @@ server/.db/
 
 ### Dotenv file ###
 .env
+
+### Google Cloud Files ###
+application/src/main/resources/

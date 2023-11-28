@@ -5,7 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-const val apiToken = "C6990FF709E54275BEC5687553B94B51"  // Centralized API token
+val apiToken: String = System.getenv("API_TOKEN") // Centralized API token
 fun Route.courseSchedulesRouting() {
 
     val client = httpClient(apiToken)  // Reuse HttpClient instance

@@ -37,6 +37,7 @@ object AuthClient {
         val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(user)
+            bearerAuth("")
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {

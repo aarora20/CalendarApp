@@ -7,17 +7,14 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-import io.github.cdimascio.dotenv.Dotenv
-import io.github.cdimascio.dotenv.dotenv
 
 object DatabaseFactory {
     fun init() {
-        val dotenv = dotenv()
         val driverClassName = "org.postgresql.Driver"
-        val dbUser = dotenv["DB_USER"]
-        val dbPass = dotenv["DB_PASS"]
-        val dbName = dotenv["DB_NAME"]
-        val instanceConnectionName = dotenv["INSTANCE_CONNECTION_NAME"]
+        val dbUser = System.getenv("DB_USER")
+        val dbPass = System.getenv("DB_PASS")
+        val dbName = System.getenv("DB_NAME")
+        val instanceConnectionName = System.getenv("INSTANCE_CONNECTION_NAME")
         val jdbcURL = "jdbc:postgresql:///${dbName}"
 //        val jdbcURL = "jdbc:postgresql://localhost:5432/calendarApp"
         val database = Database.connect(createHikariDataSource(jdbcURL, driverClassName, dbUser,
