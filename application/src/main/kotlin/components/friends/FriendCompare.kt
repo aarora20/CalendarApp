@@ -3,6 +3,7 @@ package components.friends
 import APIclient.CourseSchedulesClient
 import APIclient.FriendsClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.Checkbox
@@ -13,10 +14,19 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import components.calendar.CalendarCompareScreen
+import components.calendar.CompareTheme
+import components.calendar.Theme
+import components.common.CustomIconButton
+import components.selectedCourses.ThemeDropdown
 import components.store
+import compose.icons.TablerIcons
+import compose.icons.tablericons.ChevronLeft
+import compose.icons.tablericons.ChevronsDown
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.User
@@ -28,6 +38,69 @@ sealed class CompareScreen {
     object Compare: CompareScreen()
 
 }
+
+@Composable
+fun CompareThemeDropdown(
+    expanded: Boolean,
+    selectedTheme: CompareTheme,
+    expandedFunc: (tf: Boolean) -> Unit,
+    selectedThemeFunc: (theme: CompareTheme) -> Unit
+) {
+    Row (
+        Modifier
+            .padding(top = 15.dp).padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Dropdown Button
+        Box(
+            modifier = Modifier.clickable { expandedFunc(true) }
+
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "${selectedTheme.name}",
+                    fontSize = 18.sp
+                )
+                androidx.compose.material3.Icon(
+                    imageVector = TablerIcons.ChevronsDown,
+                    contentDescription = null
+                )
+            }
+
+            androidx.compose.material3.DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expandedFunc(false) }
+            ) {
+                CompareTheme.values().forEach { theme ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedThemeFunc(theme)
+                            expandedFunc(false)
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                text = theme.name,
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun FriendCompare(currentScreen: CompareScreen,
@@ -48,10 +121,8 @@ fun FriendCompare(currentScreen: CompareScreen,
                     onCompare
                 ) { friend = it }
             }
-
         }
     }
-
 }
 
 @Composable
@@ -66,6 +137,9 @@ fun CompareCalendar(
     var checkedFriendList by remember { mutableStateOf(emptyList<UserCourse>()) }
     var isChecked1 by remember { mutableStateOf(true) }
     var isChecked2 by remember { mutableStateOf(true) }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedTheme by remember { mutableStateOf(CompareTheme.THEME1) }
 
     LaunchedEffect(true) {
         calendarScope.launch{
@@ -82,16 +156,29 @@ fun CompareCalendar(
         }
     }
 
-    Row {
-        Column (
-            modifier = Modifier.fillMaxHeight().fillMaxWidth(0.1f),
-            verticalArrangement = Arrangement.Center
+    Column {
+        Row (
+            modifier = Modifier.weight(0.1f),
+            horizontalArrangement = Arrangement.Center
         ) {
+
+            CustomIconButton(
+                onClick= onSelect,
+                modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                tooltipText= "Go Back",
+                buttonRadius= 36.dp,
+                buttonSize= 15.dp,
+                backgroundColor = Color.LightGray,
+                icon = TablerIcons.ChevronLeft
+            )
+
+            // FIRST CHECKBOX
             Row (
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                //horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(start = 15.dp),
             ) {
+
                 Text ("me")
                 Checkbox(
                     checked = isChecked1,
@@ -108,13 +195,14 @@ fun CompareCalendar(
                 )
             }
 
+            // SECOND CHECKBOX
             Row (
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(4.dp).fillMaxWidth()
+                //horizontalArrangement = Arrangement.SpaceBetween,
+                //modifier = Modifier.padding(4.dp).fillMaxWidth()
             ) {
                 Row (
-                    modifier = Modifier.fillMaxWidth(0.8f)
+                    //modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
@@ -131,8 +219,31 @@ fun CompareCalendar(
                     colors = CheckboxDefaults.colors()
                 )
             }
+
+            // THEME button
+            fun expandedFunc(tf: Boolean) {
+                expanded = tf
+            }
+
+            fun selectedThemeFunc(theme: CompareTheme) {
+                selectedTheme = theme
+            }
+
+            CompareThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
+
         }
-        CalendarCompareScreen(checkedUserList, checkedFriendList, onSelect)
+
+        Row (
+            modifier = Modifier.weight(0.9f)
+                .padding(start = 5.dp)
+
+        ) {
+            Row (
+                horizontalArrangement = Arrangement.End,
+            ) {
+                CalendarCompareScreen(checkedUserList, checkedFriendList, onSelect, selectedTheme)
+            }
+        }
     }
 }
 

@@ -24,16 +24,57 @@ import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
+
+enum class CompareTheme {
+    THEME1, THEME2, THEME3
+}
+
+
+fun generateCompareColours(theme: CompareTheme): List<Color> {
+
+    // Define color sets for each theme
+    val theme1Colors = listOf(
+        Color(174, 214, 241).copy(alpha=0.3f),
+        Color(133, 193, 233).copy(alpha=0.3f),
+    )
+
+    val theme2Colors = listOf(
+        Color(255, 207, 210).copy(alpha=0.3f),
+        Color(260, 228, 207).copy(alpha=0.3f),
+    )
+
+    val theme3Colors = listOf(
+        Color(255, 207, 210),
+        Color(253, 228, 207),
+    )
+
+    if (theme == CompareTheme.THEME1) {
+        return theme1Colors
+    } else if (theme == CompareTheme.THEME2) {
+        return theme2Colors
+    } else {
+        return theme3Colors
+    }
+}
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCourse>, onBackClick: () -> Unit) {
+fun CalendarCompareScreen(
+    userList: List<UserCourse>,
+    friendList: List<UserCourse>,
+    onBackClick: () -> Unit,
+    theme: CompareTheme) {
+
+    val themeColours = generateCompareColours(theme)
+
     val userSelectedCourses =  userList.map { UniClass(it.courseNum,
-        it.component, Color(0x55ffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, themeColours[0], it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 
     val friendSelectedCourses = friendList.map { UniClass(it.courseNum,
-        it.component, Color(0x550096FF), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, themeColours[1], it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 
@@ -64,22 +105,15 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
             .fillMaxWidth()
     ) {
 
-        CustomIconButton(
-            onClick= onBackClick,
-            modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            tooltipText= "Go Back",
-            buttonRadius= 36.dp,
-            buttonSize= 15.dp,
-            backgroundColor = Color.LightGray,
-            icon = TablerIcons.ChevronLeft
-        )
+        // where button used to be
 
         // TITLES
         Row (
             modifier = Modifier
-                .height(50.dp)
+                .height(37.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
             // TIMES space
 

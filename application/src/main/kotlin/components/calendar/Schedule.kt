@@ -206,6 +206,14 @@ fun generateColors(courseList: List<UserCourse>, theme: Theme): Map<String, Colo
         Color(127, 179, 213),
         Color(84, 153, 199),
         Color(41, 128, 185),
+        Color(174, 214, 241),
+        Color(133, 193, 233),
+        Color(93, 173, 226),
+        Color(52, 152, 219),
+        Color(46, 134, 193),
+        Color(127, 179, 213),
+        Color(84, 153, 199),
+        Color(41, 128, 185),
     )
 
     val theme2Colors = listOf(
@@ -219,6 +227,17 @@ fun generateColors(courseList: List<UserCourse>, theme: Theme): Map<String, Colo
         Color(185, 251, 192),
         Color(251, 248, 204),
         Color(253, 228, 207),
+        Color(255, 207, 210),
+        Color(241, 192, 232),
+        Color(207, 186, 240),
+        Color(163, 196, 243),
+        Color(144, 219, 244),
+        Color(142, 236, 245),
+        Color(152, 245, 225),
+        Color(185, 251, 192),
+        Color(251, 248, 204),
+        Color(253, 228, 207),
+
     )
 
     val selectedThemeColors = when (theme) {

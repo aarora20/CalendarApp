@@ -333,7 +333,6 @@ fun detectTimeConflict(
     return "NO CONFLICT"
 }
 
-
 @Composable
 fun RowScope.TableCell(
     text: String,

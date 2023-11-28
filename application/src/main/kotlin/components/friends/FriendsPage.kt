@@ -31,7 +31,7 @@ sealed class FriendScreen {
 }
 
 @Composable
-fun FriendsPage(/*onBackClick: () -> Unit*/) {
+fun FriendsPage() {
     var currentScreen by remember { mutableStateOf<FriendScreen>(FriendScreen.Search) }
     var compareScreen by remember { mutableStateOf<CompareScreen>(CompareScreen.Select) }
 

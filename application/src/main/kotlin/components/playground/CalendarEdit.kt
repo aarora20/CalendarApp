@@ -4,6 +4,7 @@ import APIclient.CourseSchedulesClient
 import APIclient.CustomCalendarClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.calendar.AlternateSchedule
+import components.calendar.Theme
 import components.common.CustomIconButton
 import components.courseSearch.DropSearch
 import components.store
@@ -34,6 +36,8 @@ import models.CustomCalendar
 import models.ScheduleData
 import models.UserCalendarCourse
 import java.time.LocalDateTime
+import components.selectedCourses.ThemeDropdown
+
 
 @Composable
 fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<CourseDetails>,
@@ -73,7 +77,6 @@ fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<Cour
             }
         }
     }
-
 }
 
 @Composable
@@ -317,6 +320,10 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                    toggleScheduleSideSheet: () -> Unit) {
 
     val addCourseScope = rememberCoroutineScope()
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedTheme by remember { mutableStateOf(Theme.THEME1) }
+
     Column (
         modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})
     ) {
@@ -345,6 +352,17 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                 )
             }
             Row () {
+
+                fun expandedFunc(tf: Boolean) {
+                    expanded = tf
+                }
+
+                fun selectedThemeFunc(theme: Theme) {
+                    selectedTheme = theme
+                }
+
+                ThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
+
                 CustomIconButton(
                     onClick= toggleListSideSheet,
                     modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -403,7 +421,3 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
         }
     }
 }
-
-
-
-
