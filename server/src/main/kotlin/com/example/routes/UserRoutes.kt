@@ -26,26 +26,4 @@ fun Route.userRouting() {
             call.respond(res.statusCode, res.data)
         }
     }
-
-    route("/users") {
-        get("/{id}") {
-            val id = call.parameters.getOrFail<String>("id")
-            val user = dao.user(id)
-            if (user != null) {
-                call.respond(user)
-            } else {
-                call.respond("No user found!")
-            }
-
-        }
-    }
-
-    // Find all similar users in the database to the given username
-    route("/users/{id}/find") {
-        get() {
-            val id = call.parameters.getOrFail<String>("id")
-            val params = call.receive<UsernameParams>()
-            call.respond(friendService.searchUsers(id, params.username))
-        }
-    }
 }
