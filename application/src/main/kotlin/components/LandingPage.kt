@@ -413,10 +413,10 @@ fun landingScreen(
                         calendarScope.launch {
                             try {
                                 selectedCalendar = it
-                                showInNav = AppScreen.AlternateSchedule
                                 customCalendars = CustomCalendarClient.getCalendars(
                                     store.getState().userId)
-
+                                userCourses = emptyList()
+                                showInNav = AppScreen.AlternateSchedule
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
