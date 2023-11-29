@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -17,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.common.CustomIconButton
@@ -344,8 +343,9 @@ fun wishSelection(
                         text = "Year $year",
                         fontSize = 25.sp,
                         color = Color.Black,
-                        style = TextStyle(textDecoration = TextDecoration.Underline)
+                        //style = TextStyle(textDecoration = TextDecoration.Underline)
                     )
+
                     for (terms in wishMap) {
                         //print("$terms \n")
                         if (year.digitToChar() == terms.key[0]) {
@@ -485,7 +485,9 @@ fun TermBox(term: String, listCourses: List<wishCourses>, empty: Boolean) {
                 fontSize = 20.sp,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+            Divider(color = Color.Black, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(4.dp))
             CourseList(courses = listCourses, empty = empty)
         }
     }
@@ -497,7 +499,9 @@ fun CourseList(courses: List<wishCourses>, empty: Boolean) {
         if (!empty) {
             courses.forEach { course ->
                 CourseRow(course)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(color = Color.LightGray, thickness = 0.5.dp)
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
         // Add Course to Wishlist Button
