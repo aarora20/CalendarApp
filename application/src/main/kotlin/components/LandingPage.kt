@@ -40,20 +40,26 @@ import store.rootReducer
 // Should replace with api get results
 private val listOfWishCourses = listOf(
     wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "346",
-        title = "Application Development"
+        year = "1",
+        term = "A",
+        subjectCode = "MATH",
+        catalogNumber = "135",
+        title = "Algebra for Honours Mathematics"
     ),
     wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "240",
-        title = "Data Structures and Data Management"
+        year = "1",
+        term = "A",
+        subjectCode = "MATH",
+        catalogNumber = "137",
+        title = "Calculus 1 for Honours Mathematics"
     ),
     wishCourses(
-        subjectCode = "STAT",
-        catalogNumber = "373",
-        title = "Regression and Forecasting Methods in Finance"
-    )
+        year = "1",
+        term = "A",
+        subjectCode = "CS",
+        catalogNumber = "135",
+        title = "Designing Functional Programs"
+    ),
 )
 
 @Immutable
