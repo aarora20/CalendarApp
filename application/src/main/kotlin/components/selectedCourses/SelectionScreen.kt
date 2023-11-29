@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.common.CustomIconButton
 import components.courseInfo.detectTimeConflict
+import components.courseInfo.padding
 import components.courseSearch.DropSearch
 import components.store
 import compose.icons.TablerIcons
@@ -180,9 +181,10 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                     } else {
                                         val toAdd = courseMap[selectedCourse]
                                         if (toAdd != null) {
+                                            val pad = padding(it.classSection)
                                             val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
                                                 toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                                toAdd.title, it.courseComponent + " " + it.classSection,
+                                                toAdd.title, it.courseComponent + " " + pad + it.classSection,
                                                 it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                                 it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                                 it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
@@ -217,7 +219,8 @@ fun AddableScheduleItem(schedule: ScheduleData,
         Modifier.background(Color.LightGray).border(0.dp, Color.Black).heightIn(max=80.dp).fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ScheduleCell(text = schedule.courseComponent + schedule.classSection, weight = 0.2f + shiftWeight)
+        val pad = padding(schedule.classSection)
+        ScheduleCell(text = schedule.courseComponent + " $pad" + schedule.classSection, weight = 0.2f + shiftWeight)
         ScheduleCell(text = "${
             LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
                 .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
