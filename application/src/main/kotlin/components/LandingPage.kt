@@ -168,7 +168,7 @@ fun landingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth()
+                            .width(300.dp)
 
                     ) {
                         Card(

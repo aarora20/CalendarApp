@@ -4,6 +4,7 @@ import APIclient.CourseSchedulesClient
 import APIclient.CustomCalendarClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.calendar.AlternateSchedule
+import components.calendar.Theme
 import components.common.CustomIconButton
 import components.courseInfo.padding
 import components.courseSearch.DropSearch
@@ -34,6 +36,8 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.*
 import java.time.LocalDateTime
+import components.selectedCourses.ThemeDropdown
+
 
 
 @Immutable
@@ -387,6 +391,10 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                    toggleScheduleSideSheet: () -> Unit) {
 
     val addCourseScope = rememberCoroutineScope()
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedTheme by remember { mutableStateOf(Theme.OCEAN) }
+
     Column (
         modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})
     ) {
@@ -415,6 +423,17 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                 )
             }
             Row () {
+
+                fun expandedFunc(tf: Boolean) {
+                    expanded = tf
+                }
+
+                fun selectedThemeFunc(theme: Theme) {
+                    selectedTheme = theme
+                }
+
+                ThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
+
                 CustomIconButton(
                     onClick= toggleListSideSheet,
                     modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -481,11 +500,8 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                     }
                 }
             }
-            AlternateSchedule(listOfClasses)
+
+            AlternateSchedule(listOfClasses, selectedTheme)
         }
     }
 }
-
-
-
-
