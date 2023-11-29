@@ -9,7 +9,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import models.*
-import util.UserResponseData
 
 object FriendsClient {
     private val client = HttpClient(CIO) {

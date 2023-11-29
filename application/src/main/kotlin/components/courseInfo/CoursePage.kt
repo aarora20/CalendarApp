@@ -398,8 +398,9 @@ fun tableScreen(
     // Each cell of a column must have the same weight.
     val sectionWeight = .15f // 15%
     val classWeight = .10f // 10%
+    val enrolledWeight = 0.10f // 10%
     val timeWeight = .3f // 30%
-    val dateWeight = 0.25f // 25%
+    val dateWeight = 0.15f // 15%
     val buttonWeight = .2f // 20%
     // The LazyColumn will be our table. Notice the use of the weights below
     LazyColumn(Modifier.fillMaxSize().padding(0.dp)) {
@@ -411,6 +412,7 @@ fun tableScreen(
             ) {
                 TableCell(text = "Class", weight = classWeight, header = 1)
                 TableCell(text = "Section", weight = sectionWeight, header = 1)
+                TableCell(text = "Enrolled", weight = enrolledWeight, header = 1)
                 TableCell(text = "Time", weight = timeWeight, header = 1)
                 TableCell(text = "Days", weight = dateWeight, header = 1)
                 TableCell(text = "Add to Course Schedule", weight = buttonWeight, header = 1)
@@ -433,6 +435,7 @@ fun tableScreen(
                 val pad = padding(sectionNum)
                 TableCell(text = classNum.toString(), weight = classWeight, header = 0)
                 TableCell(text = "$courseComp $pad$sectionNum", weight = sectionWeight, header = 0)
+                TableCell(text = "${it.enrolledStudents}/${it.maxEnrollmentCapacity}", weight = enrolledWeight, header = 0)
                 TableCell(text = "$start - $end", weight = timeWeight, header = 0)
                 TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(

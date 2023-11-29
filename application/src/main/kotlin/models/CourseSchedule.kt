@@ -2,6 +2,13 @@ package models
 
 import kotlinx.serialization.Serializable
 
+
+@Serializable
+data class CourseSchedule(
+    val course: CourseDetails,
+    val schedule: List<ScheduleData>
+)
+
 @Serializable
 data class ScheduleData(
     val courseId: String,
