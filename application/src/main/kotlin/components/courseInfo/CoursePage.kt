@@ -14,6 +14,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import components.common.CustomIconButton
 import components.common.CustomIconButton
 import components.courseSearch.DropSearch
 import components.courseSearch.SearchScreen
@@ -174,7 +176,7 @@ fun coursePage(
 
     // sets the page as a column
     val snackbarState = remember { SnackbarHostState() }
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {

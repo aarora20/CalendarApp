@@ -144,7 +144,7 @@ fun landingScreen(
     val calendarScope = rememberCoroutineScope()
     var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
     var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
-    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
+//    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
 
     LaunchedEffect(true) {
         calendarScope.launch {
@@ -303,8 +303,6 @@ fun landingScreen(
                                                 onClick = {
                                                     calendarScope.launch {
                                                         try {
-                                                            userCourses = CustomCalendarClient.getCalendarCourses(
-                                                                store.getState().userId, it.id)
                                                             selectedCalendar = it
                                                             showInNav = AppScreen.AlternateSchedule
 
@@ -393,8 +391,6 @@ fun landingScreen(
                         {
                             calendarScope.launch {
                                 try {
-                                    userCourses = CustomCalendarClient.getCalendarCourses(
-                                        store.getState().userId, it.id)
                                     selectedCalendar = it
                                     showInNav = AppScreen.AlternateSchedule
 
@@ -421,7 +417,6 @@ fun landingScreen(
                                 selectedCalendar = it
                                 customCalendars = CustomCalendarClient.getCalendars(
                                     store.getState().userId)
-                                userCourses = emptyList()
                                 showInNav = AppScreen.AlternateSchedule
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -431,14 +426,12 @@ fun landingScreen(
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar) {
-                            showInNav = AppScreen.Playground
-                        }
+                        CalendarEditView(courseList, selectedCalendar,
+                            { showInNav = AppScreen.Playground })
                     }
                 }
             }
         }
-
     }
 }
 
