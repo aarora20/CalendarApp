@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import components.common.CustomIconButton
 import components.courseInfo.detectTimeConflict
+import components.courseInfo.padding
 import components.courseSearch.DropSearch
 import components.store
 import compose.icons.TablerIcons
@@ -64,7 +66,7 @@ fun selectionScreen(
     }
 
     val snackbarState = remember { SnackbarHostState() }
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
@@ -164,7 +166,7 @@ fun AddCourseSideSheet(courseNames: List<String>,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     items(schedules) {
-                        AddableScheduleItem(it) {
+                        AddableScheduleItem(it, true) {
                             addScope.launch {
                                 try {
                                     val isTimeConflict = detectTimeConflict(selectedCourses,
@@ -179,9 +181,10 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                     } else {
                                         val toAdd = courseMap[selectedCourse]
                                         if (toAdd != null) {
+                                            val pad = padding(it.classSection)
                                             val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
                                                 toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                                toAdd.title, it.courseComponent + " " + it.classSection,
+                                                toAdd.title, it.courseComponent + " " + pad + it.classSection,
                                                 it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                                 it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                                 it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
@@ -207,37 +210,44 @@ fun AddCourseSideSheet(courseNames: List<String>,
 }
 
 @Composable
-fun AddableScheduleItem(schedule: ScheduleData, addCourse: (schedule: ScheduleData) -> Unit) {
+fun AddableScheduleItem(schedule: ScheduleData,
+        hasAddButton: Boolean,
+        addCourse: (schedule: ScheduleData) -> Unit
+) {
+   val shiftWeight = if (!hasAddButton)  0.03f else 0f
     Row(
-        Modifier.background(Color.LightGray).border(0.dp, Color.Black).heightIn(max=80.dp),
+        Modifier.background(Color.LightGray).border(0.dp, Color.Black).heightIn(max=80.dp).fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ScheduleCell(text = schedule.courseComponent + schedule.classSection, weight = 0.2f)
+        val pad = padding(schedule.classSection)
+        ScheduleCell(text = schedule.courseComponent + " $pad" + schedule.classSection, weight = 0.2f + shiftWeight)
         ScheduleCell(text = "${
             LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
                 .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
                 LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
                     .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
-            , weight = 0.4f)
+            , weight = 0.4f + shiftWeight)
         ScheduleCell(text = schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
-            , weight = 0.2f)
-        Row (
-            modifier = Modifier.fillMaxSize().weight(0.2f, fill = true),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            CustomIconButton(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
-                    addCourse(schedule)
-                },
-                tooltipText = "Add To Schedule",
-                buttonRadius = 20.dp,
-                buttonSize = 10.dp,
-                backgroundColor = Color.LightGray,
-                icon = TablerIcons.Plus
-            )
+            , weight = 0.22f + shiftWeight)
+        if (hasAddButton) {
+            Row (
+                modifier = Modifier.fillMaxSize().weight(0.18f, fill = true),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CustomIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        addCourse(schedule)
+                    },
+                    tooltipText = "Add To Schedule",
+                    buttonRadius = 20.dp,
+                    buttonSize = 10.dp,
+                    backgroundColor = Color.LightGray,
+                    icon = TablerIcons.Plus
+                )
+            }
         }
     }
 }

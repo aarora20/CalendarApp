@@ -20,7 +20,7 @@ import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
 import components.home.HomeScreen
 import components.playground.CalendarEditView
-import components.playground.PlaygroundHome
+import components.playground.PlaygroundCalendarsPage
 import components.selectedCourses.selectionScreen
 import components.wishlist.wishCourses
 import components.wishlist.wishSelection
@@ -40,20 +40,26 @@ import store.rootReducer
 // Should replace with api get results
 private val listOfWishCourses = listOf(
     wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "346",
-        title = "Application Development"
+        year = "1",
+        term = "A",
+        subjectCode = "MATH",
+        catalogNumber = "135",
+        title = "Algebra for Honours Mathematics"
     ),
     wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "240",
-        title = "Data Structures and Data Management"
+        year = "1",
+        term = "A",
+        subjectCode = "MATH",
+        catalogNumber = "137",
+        title = "Calculus 1 for Honours Mathematics"
     ),
     wishCourses(
-        subjectCode = "STAT",
-        catalogNumber = "373",
-        title = "Regression and Forecasting Methods in Finance"
-    )
+        year = "1",
+        term = "A",
+        subjectCode = "CS",
+        catalogNumber = "135",
+        title = "Designing Functional Programs"
+    ),
 )
 
 @Immutable
@@ -138,7 +144,7 @@ fun landingScreen(
     val calendarScope = rememberCoroutineScope()
     var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
     var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
-    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
+//    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
 
     LaunchedEffect(true) {
         calendarScope.launch {
@@ -297,8 +303,6 @@ fun landingScreen(
                                                 onClick = {
                                                     calendarScope.launch {
                                                         try {
-                                                            userCourses = CustomCalendarClient.getCalendarCourses(
-                                                                store.getState().userId, it.id)
                                                             selectedCalendar = it
                                                             showInNav = AppScreen.AlternateSchedule
 
@@ -380,19 +384,40 @@ fun landingScreen(
                 }
 
                 is AppScreen.Playground -> {
-                    PlaygroundHome(customCalendars,
+                    PlaygroundCalendarsPage(customCalendars,
                         {
                           showInNav = AppScreen.CourseSelection
                         },
                         {
-                        selectedCalendar = it
-                        showInNav = AppScreen.AlternateSchedule
-                    }) {
+                            calendarScope.launch {
+                                try {
+                                    selectedCalendar = it
+                                    showInNav = AppScreen.AlternateSchedule
+
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                    }, {
                         calendarScope.launch {
                             try {
+                                val response = CustomCalendarClient.deleteCalendar(store.getState().userId, it.id)
+                                if (response) {
+                                    customCalendars = CustomCalendarClient.getCalendars(
+                                        store.getState().userId)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        }) {
+                        calendarScope.launch {
+                            try {
+                                selectedCalendar = it
                                 customCalendars = CustomCalendarClient.getCalendars(
                                     store.getState().userId)
-
+                                showInNav = AppScreen.AlternateSchedule
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -401,14 +426,12 @@ fun landingScreen(
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar) {
-                            showInNav = AppScreen.Playground
-                        }
+                        CalendarEditView(courseList, selectedCalendar,
+                            { showInNav = AppScreen.Playground })
                     }
                 }
             }
         }
-
     }
 }
 

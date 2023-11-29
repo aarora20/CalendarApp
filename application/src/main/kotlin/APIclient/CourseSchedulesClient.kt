@@ -22,7 +22,7 @@ object CourseSchedulesClient {
         }
     }
     suspend fun getCourses(): Courses {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/courses/1239")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/courses/1241")
         return response.body<Courses>()
     }
 
@@ -56,11 +56,10 @@ object CourseSchedulesClient {
     }
 
     suspend fun getCourseSchedule(courseId: String): List<ScheduleData> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/classSchedules/1239/${courseId}")
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/classSchedules/1241/${courseId}")
         return response.body<List<ScheduleData>>()
     }
 
-    @OptIn(InternalAPI::class)
     suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
         val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/wishlist") {
             contentType(ContentType.Application.Json)

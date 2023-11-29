@@ -77,3 +77,45 @@ fun CustomIconButton(
         }
     }
 }
+
+@Composable
+fun WarningDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        icon = {
+            androidx.compose.material.Icon(icon, contentDescription = "Warning")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            androidx.compose.material.TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material.TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}

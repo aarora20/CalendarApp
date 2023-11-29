@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,23 +26,31 @@ import androidx.compose.ui.zIndex
 import components.calendar.AlternateSchedule
 import components.calendar.Theme
 import components.common.CustomIconButton
+import components.courseInfo.padding
 import components.courseSearch.DropSearch
+import components.playground.optimization.OptimizationPage
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
-import models.CourseDetails
-import models.CustomCalendar
-import models.ScheduleData
-import models.UserCalendarCourse
+import models.*
 import java.time.LocalDateTime
 import components.selectedCourses.ThemeDropdown
 
 
+
+@Immutable
+sealed class AlternateScreen {
+    object CalendarEdit : AlternateScreen()
+    object Optimize : AlternateScreen()
+}
+
+
 @Composable
-fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<CourseDetails>,
-                     selectedCalendar: CustomCalendar, goToCalendars: () -> Unit) {
+fun CalendarEditView(allCourses: List<CourseDetails>,
+                     selectedCalendar: CustomCalendar,
+                     goToCalendars: () -> Unit) {
     var isScheduleSheetOpen by remember { mutableStateOf(false) }
     var isListSheetOpen by remember { mutableStateOf(false) }
     var selectedCourse by remember { mutableStateOf("") }
@@ -49,30 +58,87 @@ fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<Cour
     val courseMap = allCourses.associateBy { it.subjectCode + it.catalogNumber }
     var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
     val listOfClasses = remember { mutableStateListOf<UserCalendarCourse>() }
+    var currentScreen by remember { mutableStateOf<AlternateScreen>(AlternateScreen.CalendarEdit) }
+    val calendarScope = rememberCoroutineScope()
+    val selectedCourses = remember { mutableStateListOf<CourseSchedule>() }
+    var isError by remember { mutableStateOf(false) }
+
     LaunchedEffect(true) {
-        listOfClasses.addAll(courseList)
+        calendarScope.launch {
+            try {
+                val courses = CustomCalendarClient.getCalendarCourses(
+                    store.getState().userId, selectedCalendar.id
+                )
+                listOfClasses.addAll(courses)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                isError = true
+            }
+        }
     }
 
-    Draggable(modifier = Modifier.fillMaxSize()) {
-        Row (modifier = Modifier.fillMaxSize()) {
-            ScheduleTarget(isScheduleSheetOpen || isListSheetOpen, courseList, selectedCalendar, courseMap,
-                selectedCourse, listOfClasses, goToCalendars,
-                {
-                    isListSheetOpen = !isListSheetOpen
-                    isScheduleSheetOpen = false
-                })
-                { isScheduleSheetOpen = !isScheduleSheetOpen
-                    isListSheetOpen = false
-                }
-            key(schedules) {
-                if (isScheduleSheetOpen) {
-                    ScheduleSideSheet(courseNames, courseMap, schedules, { schedules = it },
-                        ) { selectedCourse = it }
+    if (isError) {
+        Row(modifier = Modifier.fillMaxSize().padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center) {
+            SelectionContainer {
+                Text("The calendar no longer exists")
+            }
+        }
+    } else {
+        when (currentScreen) {
+            is AlternateScreen.CalendarEdit -> {
+                Draggable(modifier = Modifier.fillMaxSize()) {
+                    Row (modifier = Modifier.fillMaxSize()) {
+                        ScheduleTarget(isScheduleSheetOpen || isListSheetOpen, selectedCalendar, courseMap,
+                            selectedCourse, listOfClasses, goToCalendars,
+                            {
+                                currentScreen = AlternateScreen.Optimize
+                            }
+                            ,
+                            {
+                                isListSheetOpen = !isListSheetOpen
+                                isScheduleSheetOpen = false
+                            })
+                        { isScheduleSheetOpen = !isScheduleSheetOpen
+                            isListSheetOpen = false
+                        }
+                        key(schedules) {
+                            if (isScheduleSheetOpen) {
+                                ScheduleSideSheet(courseNames, courseMap, schedules, { schedules = it },
+                                ) { selectedCourse = it }
+                            }
+                        }
+                        if (isListSheetOpen) {
+                            ListSideSheet(listOfClasses, selectedCalendar) {
+                                listOfClasses.remove(it)
+                            }
+                        }
+                    }
                 }
             }
-            if (isListSheetOpen) {
-                ListSideSheet(listOfClasses, selectedCalendar) {
-                    listOfClasses.remove(it)
+
+            AlternateScreen.Optimize -> {
+                OptimizationPage(
+                    selectedCalendar.id,
+                    courseNames,
+                    courseMap,
+                    selectedCourses,
+                    {
+                        calendarScope.launch {
+                            try {
+                                val courses = CustomCalendarClient.getCalendarCourses(
+                                    store.getState().userId, selectedCalendar.id
+                                )
+                                listOfClasses.removeAll(listOfClasses)
+                                listOfClasses.addAll(courses)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                ) {
+                    currentScreen = AlternateScreen.CalendarEdit
                 }
             }
         }
@@ -213,7 +279,10 @@ fun ListSideSheet(
                     )
                 }
             }
-            Row {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 20.dp, horizontal = 8.dp),)
+            {
                 LazyColumn(Modifier.padding(0.dp)) {
                     items(courseListMap.keys.toList()) {
                         courseListMap[it]?.let { it1 -> CalendarCourseCluster(it1, it, removeCourse) }
@@ -277,7 +346,8 @@ fun DraggableSchedule(courseSection: ScheduleData) {
                 Modifier.background(Color.LightGray).fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ScheduleCell(text = courseSection.courseComponent + courseSection.classSection, weight = 0.2f)
+                val pad = padding(courseSection.classSection)
+                ScheduleCell(text = courseSection.courseComponent + " " + pad + courseSection.classSection, weight = 0.2f)
                 ScheduleCell(
                     text = "${
                         LocalDateTime.parse(courseSection.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
@@ -311,11 +381,12 @@ fun RowScope.ScheduleCell(
 }
 
 @Composable
-fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
+fun ScheduleTarget(isSheetOpen: Boolean,
                    selectedCalendar: CustomCalendar, courseMap: Map<String, CourseDetails>,
                    selectedCourse: String,
                    listOfClasses: SnapshotStateList<UserCalendarCourse>,
                    goToCalendars: () -> Unit,
+                   goToOptimize: () -> Unit,
                    toggleListSideSheet: () -> Unit,
                    toggleScheduleSideSheet: () -> Unit) {
 
@@ -381,6 +452,18 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                     backgroundColor = Color.LightGray,
                     icon = TablerIcons.Plus
                 )
+                Button(
+                    onClick = goToOptimize,
+                    modifier = Modifier.width(180.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Optimize", color = Color.White)
+                    }
+                }
 
             }
         }
@@ -396,10 +479,11 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                         try {
                             val toAdd = courseMap[selectedCourse]
                             if (toAdd != null) {
+                                val pad = padding(schedule.classSection)
                                 val response = CustomCalendarClient.addCalendarCourse(store.getState().userId,
                                     selectedCalendar.id, UserCalendarCourse(toAdd.courseId,
                                         toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                        toAdd.title, schedule.courseComponent + " " + schedule.classSection,
+                                        toAdd.title, schedule.courseComponent + " " + pad + schedule.classSection,
                                         schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                         schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                         schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())

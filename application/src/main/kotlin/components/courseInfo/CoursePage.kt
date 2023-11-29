@@ -1,19 +1,20 @@
 package components.courseInfo
 
 import APIclient.CourseSchedulesClient
-import APIclient.CourseSchedulesClient.addToWishlist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import components.common.CustomIconButton
+import components.common.CustomIconButton
 import components.courseSearch.DropSearch
 import components.courseSearch.SearchScreen
 import components.store
@@ -33,8 +36,101 @@ import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
-import models.WishCourse
 import java.time.LocalDateTime
+
+data class WishlistTerms(
+    val text: String
+)
+
+private val selectedTerms = listOf(
+    WishlistTerms(
+        text = "1A"
+    ),
+    WishlistTerms(
+        text = "1B"
+    ),
+    WishlistTerms(
+        text = "2A"
+    ),
+    WishlistTerms(
+        text = "2B"
+    ),
+    WishlistTerms(
+        text = "3A"
+    ),
+    WishlistTerms(
+        text = "3B"
+    ),
+    WishlistTerms(
+        text = "4A"
+    ),
+    WishlistTerms(
+        text = "4B"
+    )
+)
+
+@Composable
+fun wishlistDropDown(
+    terms: List<WishlistTerms>,
+    scope: CoroutineScope,
+    course: CourseDetails,
+) {
+    var showDropdown by remember { mutableStateOf(false) }
+    var wishList by remember { mutableStateOf("+ Wishlist") }
+    Box(
+        modifier = Modifier
+            //.fillMaxWidth()
+            .clickable { showDropdown = true }
+            .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
+            .background(Color.White, RoundedCornerShape(4.dp))
+            .padding(8.dp)
+    ) {
+        Text(text = wishList, style = MaterialTheme.typography.h6)
+        DropdownMenu(
+            expanded = showDropdown,
+            onDismissRequest = { showDropdown = false },
+        ) {
+            terms.forEach { term ->
+                DropdownMenuItem(
+                    onClick = {
+                        val selectedTerm = term.text
+                        wishList = "Added to Term: $selectedTerm"
+                        showDropdown = false
+                        /*
+                        scope.launch {
+                            val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
+                            val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
+                            if (!success) {
+                                println("Error adding course to wishlist.")
+                                wishList = "+ Wish List"  // Revert button text on failure
+                            }
+                        }
+                         */
+                    }
+                ) {
+                    Text(text = term.text)
+                }
+            }
+        }
+    }
+    /* Old version of wishlist add
+    Button(
+        onClick = {
+            wishList = "Added to Wish List!"
+            scope.launch {
+                val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
+                val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
+                if (!success) {
+                    println("Error adding course to wishlist.")
+                    wishList = "+ Wish List"  // Revert button text on failure
+                }
+            }
+        }
+    ) {
+        Text(wishList)
+    }
+     */
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -44,7 +140,8 @@ fun coursePage(
     onBackClick: () -> Unit,
     course: CourseDetails,
     onChangeCourse: (course: String) -> Unit,
-    originScreen: SearchScreen
+    originScreen: SearchScreen,
+    //terms: List<WishlistTerms>
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
@@ -79,7 +176,7 @@ fun coursePage(
 
     // sets the page as a column
     val snackbarState = remember { SnackbarHostState() }
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
@@ -98,39 +195,23 @@ fun coursePage(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                 ) {
                     Row (modifier = Modifier.weight(1f), verticalAlignment = Alignment.Top) {
-                        Box (
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
-                        ) {
-                            PlainTooltipBox(
-                                tooltip = {Text("Back", color = Color.White)}
-                            ) {
-                                CompositionLocalProvider(
-                                    LocalMinimumInteractiveComponentEnforcement provides false
-                                ) {
-                                    IconButton(
-                                        onClick = updatedOnBackClick,
-                                        modifier = Modifier
-                                            .then(Modifier.size(36.dp))
-                                            .statusBarsPadding()
-                                            .background(
-                                                color = Color.LightGray,
-                                                shape = CircleShape
-                                            ).tooltipAnchor(),
-
-                                        ) {
-                                        Icon(
-                                            imageVector = (TablerIcons.ChevronLeft),
-                                            contentDescription = "Back Button",
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        CustomIconButton(
+                            onClick = updatedOnBackClick,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                            tooltipText = "Back",
+                            buttonRadius =  36.dp,
+                            buttonSize = 15.dp,
+                            backgroundColor = Color.LightGray,
+                            icon = TablerIcons.ChevronLeft
+                        )
                     }
 
                     Box (modifier = Modifier.weight(5f)){
-                        DropSearch(courseNames) { onChangeCourse(it) }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.Center)
+                        ) {
+                            DropSearch(courseNames) { onChangeCourse(it) }
+                        }
                     }
                 }
             }
@@ -163,22 +244,8 @@ fun coursePage(
                         )
 
                         // wish list option
-                        var wishList by remember { mutableStateOf("+ Wish List") }
-                        Button(
-                            onClick = {
-                                wishList = "Added to Wish List!"
-                                scope.launch {
-                                    val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
-                                    val success = addToWishlist(store.getState().userId, toAdd)
-                                    if (!success) {
-                                        println("Error adding course to wishlist.")
-                                        wishList = "+ Wish List"  // Revert button text on failure
-                                    }
-                                }
-                            }
-                        ) {
-                            Text(wishList)
-                        }
+                        // temporary list holding all terms
+                        wishlistDropDown(selectedTerms, scope, course, )
                     }
 
                     // provides the description of the course
@@ -397,8 +464,9 @@ fun tableScreen(
     // Each cell of a column must have the same weight.
     val sectionWeight = .15f // 15%
     val classWeight = .10f // 10%
+    val enrolledWeight = 0.10f // 10%
     val timeWeight = .3f // 30%
-    val dateWeight = 0.25f // 25%
+    val dateWeight = 0.15f // 15%
     val buttonWeight = .2f // 20%
     // The LazyColumn will be our table. Notice the use of the weights below
     LazyColumn(Modifier.fillMaxSize().padding(0.dp)) {
@@ -410,6 +478,7 @@ fun tableScreen(
             ) {
                 TableCell(text = "Class", weight = classWeight, header = 1)
                 TableCell(text = "Section", weight = sectionWeight, header = 1)
+                TableCell(text = "Enrolled", weight = enrolledWeight, header = 1)
                 TableCell(text = "Time", weight = timeWeight, header = 1)
                 TableCell(text = "Days", weight = dateWeight, header = 1)
                 TableCell(text = "Add to Course Schedule", weight = buttonWeight, header = 1)
@@ -432,6 +501,7 @@ fun tableScreen(
                 val pad = padding(sectionNum)
                 TableCell(text = classNum.toString(), weight = classWeight, header = 0)
                 TableCell(text = "$courseComp $pad$sectionNum", weight = sectionWeight, header = 0)
+                TableCell(text = "${it.enrolledStudents}/${it.maxEnrollmentCapacity}", weight = enrolledWeight, header = 0)
                 TableCell(text = "$start - $end", weight = timeWeight, header = 0)
                 TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(
