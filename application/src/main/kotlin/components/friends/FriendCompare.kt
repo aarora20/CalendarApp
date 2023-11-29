@@ -3,8 +3,10 @@ package components.friends
 import APIclient.CourseSchedulesClient
 import APIclient.FriendsClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -48,13 +50,28 @@ fun CompareThemeDropdown(
 ) {
     Row (
         Modifier
-            .padding(top = 15.dp).padding(horizontal = 4.dp),
-        horizontalArrangement = Arrangement.End,
+            .padding(top = 15.dp).padding(end = 15.dp)
+            .padding(0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Dropdown Button
         Box(
             modifier = Modifier.clickable { expandedFunc(true) }
+                .background(
+                    color = if (selectedTheme == CompareTheme.OCEAN) {
+                        Color(174, 214, 241)
+                    } else if (selectedTheme == CompareTheme.PASTEL) {
+                        Color(255, 207, 210)
+                    } else if (selectedTheme == CompareTheme.SUNSET) {
+                        Color(255,189,145)
+                    } else {
+                        Color(170,214,136)
+                    },
+                    shape = RoundedCornerShape(7.dp)
+                )
+                .padding(horizontal = 10.dp, vertical = 7.5.dp)
+
 
         ) {
             Row(
@@ -63,7 +80,7 @@ fun CompareThemeDropdown(
             ) {
                 Text(
                     text = "${selectedTheme.name}",
-                    fontSize = 18.sp
+                    fontSize = 15.sp
                 )
                 androidx.compose.material3.Icon(
                     imageVector = TablerIcons.ChevronsDown,
@@ -139,7 +156,7 @@ fun CompareCalendar(
     var isChecked2 by remember { mutableStateOf(true) }
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf(CompareTheme.THEME1) }
+    var selectedTheme by remember { mutableStateOf(CompareTheme.OCEAN) }
 
     LaunchedEffect(true) {
         calendarScope.launch{
@@ -159,7 +176,7 @@ fun CompareCalendar(
     Column {
         Row (
             modifier = Modifier.weight(0.1f),
-            horizontalArrangement = Arrangement.Center
+            //horizontalArrangement = Arrangement.Center
         ) {
 
             CustomIconButton(
@@ -172,64 +189,81 @@ fun CompareCalendar(
                 icon = TablerIcons.ChevronLeft
             )
 
-            // FIRST CHECKBOX
             Row (
-                verticalAlignment = Alignment.CenterVertically,
-                //horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(start = 15.dp),
-            ) {
-
-                Text ("me")
-                Checkbox(
-                    checked = isChecked1,
-                    onCheckedChange = {
-                        isChecked1 = it
-                        checkedUserList = if (!isChecked1) {
-                            emptyList()
-                        } else {
-                            userList
-                        }
-                               },
-                    modifier = Modifier.padding(4.dp),
-                    colors = CheckboxDefaults.colors()
-                )
-            }
-
-            // SECOND CHECKBOX
-            Row (
-                verticalAlignment = Alignment.CenterVertically,
-                //horizontalArrangement = Arrangement.SpaceBetween,
-                //modifier = Modifier.padding(4.dp).fillMaxWidth()
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row (
-                    //modifier = Modifier.fillMaxWidth(0.8f)
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                Checkbox(
-                    checked = isChecked2,
-                    onCheckedChange = { isChecked2 = it
-                        checkedFriendList = if (!isChecked2) {
-                            emptyList()
-                        } else {
-                            friendList
+                    // FIRST CHECKBOX
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        //horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.padding(start = 15.dp)
+                    ) {
+
+                        Text ("me")
+                        Checkbox(
+                            checked = isChecked1,
+                            onCheckedChange = {
+                                isChecked1 = it
+                                checkedUserList = if (!isChecked1) {
+                                    emptyList()
+                                } else {
+                                    userList
+                                }
+                            },
+                            modifier = Modifier.padding(4.dp),
+                            colors = CheckboxDefaults.colors()
+                        )
+                    }
+
+                    // SECOND CHECKBOX
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        //horizontalArrangement = Arrangement.SpaceBetween,
+                        //modifier = Modifier.padding(4.dp).fillMaxWidth()
+                    ) {
+                        Row (
+                            //modifier = Modifier.fillMaxWidth(0.8f)
+                        ) {
+                            Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
-                    },
-                    modifier = Modifier.padding(4.dp),
-                    colors = CheckboxDefaults.colors()
-                )
+                        Checkbox(
+                            checked = isChecked2,
+                            onCheckedChange = { isChecked2 = it
+                                checkedFriendList = if (!isChecked2) {
+                                    emptyList()
+                                } else {
+                                    friendList
+                                }
+                            },
+                            modifier = Modifier.padding(4.dp),
+                            colors = CheckboxDefaults.colors()
+                        )
+                    }
+
+                }
+
+
+                Row (
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    // THEME button
+                    fun expandedFunc(tf: Boolean) {
+                        expanded = tf
+                    }
+
+                    fun selectedThemeFunc(theme: CompareTheme) {
+                        selectedTheme = theme
+                    }
+
+                    CompareThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
+                }
+
             }
 
-            // THEME button
-            fun expandedFunc(tf: Boolean) {
-                expanded = tf
-            }
-
-            fun selectedThemeFunc(theme: CompareTheme) {
-                selectedTheme = theme
-            }
-
-            CompareThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
 
         }
 

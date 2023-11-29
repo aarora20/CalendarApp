@@ -22,11 +22,178 @@ import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
+
+fun generateColorsAlternate(courseList: List<UserCalendarCourse>, theme: Theme): Map<String, Color> {
+    val distinctCourseNames = courseList.map { it.courseNum }.distinct()
+    val colorMap = mutableMapOf<String, Color>()
+
+    // Define color sets for each theme
+
+    val alpha = 0.6f
+    val theme1Colors = listOf(
+        Color(174, 214, 241).copy(alpha = alpha),
+        Color(133, 193, 233).copy(alpha = alpha),
+        Color(93, 173, 226).copy(alpha = alpha),
+        Color(52, 152, 219).copy(alpha = alpha),
+        Color(46, 134, 193).copy(alpha = alpha),
+        Color(127, 179, 213).copy(alpha = alpha),
+        Color(84, 153, 199).copy(alpha = alpha),
+        Color(41, 128, 185).copy(alpha = alpha),
+        Color(174, 214, 241).copy(alpha = alpha),
+        Color(133, 193, 233).copy(alpha = alpha),
+        Color(93, 173, 226).copy(alpha = alpha),
+        Color(52, 152, 219).copy(alpha = alpha),
+        Color(46, 134, 193).copy(alpha = alpha),
+        Color(127, 179, 213).copy(alpha = alpha),
+        Color(84, 153, 199).copy(alpha = alpha),
+        Color(41, 128, 185).copy(alpha = alpha),
+        Color(174, 214, 241).copy(alpha = alpha),
+        Color(133, 193, 233).copy(alpha = alpha),
+        Color(93, 173, 226).copy(alpha = alpha),
+        Color(52, 152, 219).copy(alpha = alpha),
+        Color(46, 134, 193).copy(alpha = alpha),
+        Color(127, 179, 213).copy(alpha = alpha),
+        Color(84, 153, 199).copy(alpha = alpha),
+        Color(41, 128, 185).copy(alpha = alpha),
+        Color(174, 214, 241).copy(alpha = alpha),
+        Color(133, 193, 233).copy(alpha = alpha),
+        Color(93, 173, 226).copy(alpha = alpha),
+        Color(52, 152, 219).copy(alpha = alpha),
+        Color(46, 134, 193).copy(alpha = alpha),
+        Color(127, 179, 213).copy(alpha = alpha),
+        Color(84, 153, 199).copy(alpha = alpha),
+        Color(41, 128, 185).copy(alpha = alpha),
+    )
+
+    val theme2Colors = listOf(
+        Color(255, 207, 210).copy(alpha = alpha),
+        Color(241, 192, 232).copy(alpha = alpha),
+        Color(207, 186, 240).copy(alpha = alpha),
+        Color(163, 196, 243).copy(alpha = alpha),
+        Color(144, 219, 244).copy(alpha = alpha),
+        Color(142, 236, 245).copy(alpha = alpha),
+        Color(152, 245, 225).copy(alpha = alpha),
+        Color(185, 251, 192).copy(alpha = alpha),
+        Color(251, 248, 204).copy(alpha = alpha),
+        Color(253, 228, 207).copy(alpha = alpha),
+        Color(255, 207, 210).copy(alpha = alpha),
+        Color(241, 192, 232).copy(alpha = alpha),
+        Color(207, 186, 240).copy(alpha = alpha),
+        Color(163, 196, 243).copy(alpha = alpha),
+        Color(144, 219, 244).copy(alpha = alpha),
+        Color(142, 236, 245).copy(alpha = alpha),
+        Color(152, 245, 225).copy(alpha = alpha),
+        Color(185, 251, 192).copy(alpha = alpha),
+        Color(251, 248, 204).copy(alpha = alpha),
+        Color(253, 228, 207).copy(alpha = alpha),
+        Color(152, 245, 225).copy(alpha = alpha),
+        Color(185, 251, 192).copy(alpha = alpha),
+        Color(251, 248, 204).copy(alpha = alpha),
+        Color(253, 228, 207).copy(alpha = alpha),
+        Color(255, 207, 210).copy(alpha = alpha),
+        Color(241, 192, 232).copy(alpha = alpha),
+        Color(207, 186, 240).copy(alpha = alpha),
+        Color(163, 196, 243).copy(alpha = alpha),
+        Color(144, 219, 244).copy(alpha = alpha),
+        Color(142, 236, 245).copy(alpha = alpha),
+        Color(152, 245, 225).copy(alpha = alpha),
+        Color(185, 251, 192).copy(alpha = alpha),
+        Color(251, 248, 204).copy(alpha = alpha),
+        Color(253, 228, 207).copy(alpha = alpha),
+
+        )
+
+    val theme3Colors = listOf(
+        Color(255,248,182).copy(alpha = alpha),
+        Color(255,189,145).copy(alpha = alpha),
+        Color(255,141,113).copy(alpha = alpha),
+        Color(255,112,126).copy(alpha = alpha),
+        Color(255,213,179).copy(alpha = alpha),
+        Color(255,182,158).copy(alpha = alpha),
+        Color(255,167,145).copy(alpha = alpha),
+        Color(255,248,182).copy(alpha = alpha),
+        Color(255,189,145).copy(alpha = alpha),
+        Color(255,141,113).copy(alpha = alpha),
+        Color(255,112,126).copy(alpha = alpha),
+        Color(255,213,179).copy(alpha = alpha),
+        Color(255,182,158).copy(alpha = alpha),
+        Color(255,167,145).copy(alpha = alpha),
+        Color(255,248,182).copy(alpha = alpha),
+        Color(255,189,145).copy(alpha = alpha),
+        Color(255,141,113).copy(alpha = alpha),
+        Color(255,112,126).copy(alpha = alpha),
+        Color(255,213,179).copy(alpha = alpha),
+        Color(255,182,158).copy(alpha = alpha),
+        Color(255,167,145).copy(alpha = alpha),
+        Color(255,248,182).copy(alpha = alpha),
+        Color(255,189,145).copy(alpha = alpha),
+        Color(255,141,113).copy(alpha = alpha),
+        Color(255,112,126).copy(alpha = alpha),
+        Color(255,213,179).copy(alpha = alpha),
+        Color(255,182,158).copy(alpha = alpha),
+        Color(255,167,145).copy(alpha = alpha),
+    )
+
+    val theme4Colors = listOf(
+        Color(170,214,136).copy(alpha = alpha),
+        Color(152,195,119).copy(alpha = alpha),
+        Color(139,189,120).copy(alpha = alpha),
+        Color(94,167,88).copy(alpha = alpha),
+        Color(71,137,75).copy(alpha = alpha),
+        Color(200,225,204).copy(alpha = alpha),
+        Color(184,216,190).copy(alpha = alpha),
+        Color(224,240,227).copy(alpha = alpha),
+        Color(170,214,136).copy(alpha = alpha),
+        Color(152,195,119).copy(alpha = alpha),
+        Color(139,189,120).copy(alpha = alpha),
+        Color(94,167,88).copy(alpha = alpha),
+        Color(71,137,75).copy(alpha = alpha),
+        Color(200,225,204).copy(alpha = alpha),
+        Color(184,216,190).copy(alpha = alpha),
+        Color(224,240,227).copy(alpha = alpha),
+        Color(170,214,136).copy(alpha = alpha),
+        Color(152,195,119).copy(alpha = alpha),
+        Color(139,189,120).copy(alpha = alpha),
+        Color(94,167,88).copy(alpha = alpha),
+        Color(71,137,75).copy(alpha = alpha),
+        Color(200,225,204).copy(alpha = alpha),
+        Color(184,216,190).copy(alpha = alpha),
+        Color(224,240,227).copy(alpha = alpha),
+        Color(170,214,136).copy(alpha = alpha),
+        Color(152,195,119).copy(alpha = alpha),
+        Color(139,189,120).copy(alpha = alpha),
+        Color(94,167,88).copy(alpha = alpha),
+        Color(71,137,75).copy(alpha = alpha),
+        Color(200,225,204).copy(alpha = alpha),
+        Color(184,216,190).copy(alpha = alpha),
+        Color(224,240,227).copy(alpha = alpha),
+    )
+
+    val selectedThemeColors = when (theme) {
+        Theme.OCEAN -> theme1Colors
+        Theme.PASTEL -> theme2Colors
+        Theme.SUNSET -> theme3Colors
+        Theme.EARTH -> theme4Colors
+    }
+
+    for ((index, courseName) in distinctCourseNames.withIndex()) {
+        // Use colors from the selected theme in order
+        val colorIndex = index % selectedThemeColors.size
+        colorMap[courseName] = selectedThemeColors[colorIndex]
+    }
+
+    return colorMap
+}
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AlternateSchedule(courseList: List<UserCalendarCourse>) {
+fun AlternateSchedule(courseList: List<UserCalendarCourse>, selectedTheme: Theme) {
+
+    val colorMap = generateColorsAlternate(courseList, selectedTheme)
+
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
-        it.component, Color(0x55ffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, colorMap[it.courseNum]!!, it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 

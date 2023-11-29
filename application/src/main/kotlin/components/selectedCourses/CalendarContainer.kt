@@ -36,13 +36,27 @@ fun ThemeDropdown(
 ) {
     Row (
         Modifier
-            .padding(top = 15.dp).padding(horizontal = 4.dp),
+            .padding(top = 6.dp).padding(end = 8.dp)
+            .padding(0.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Dropdown Button
         Box(
             modifier = Modifier.clickable { expandedFunc(true) }
+                .background(
+                    color = if (selectedTheme == Theme.OCEAN) {
+                        Color(174, 214, 241)
+                    } else if (selectedTheme == Theme.PASTEL) {
+                        Color(255, 207, 210)
+                    } else if (selectedTheme == Theme.SUNSET) {
+                        Color(255,189,145)
+                    } else {
+                        Color(170,214,136)
+                           },
+                    shape = RoundedCornerShape(7.dp)
+                )
+                .padding(horizontal = 10.dp, vertical = 7.5.dp)
 
         ) {
             Row(
@@ -50,8 +64,8 @@ fun ThemeDropdown(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${selectedTheme.name}",
-                    fontSize = 18.sp
+                    text = "${selectedTheme.name} ",
+                    fontSize = 15.sp
                 )
                 Icon(
                     imageVector = TablerIcons.ChevronsDown,
@@ -61,7 +75,7 @@ fun ThemeDropdown(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expandedFunc(false) }
+                onDismissRequest = { expandedFunc(false) },
             ) {
                 Theme.values().forEach { theme ->
                     DropdownMenuItem(
@@ -96,7 +110,7 @@ fun CalendarContainer(
     openSideSheet: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf(Theme.THEME1) }
+    var selectedTheme by remember { mutableStateOf(Theme.OCEAN) }
 
     Column (
         modifier = Modifier.fillMaxSize()

@@ -322,7 +322,7 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
     val addCourseScope = rememberCoroutineScope()
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf(Theme.THEME1) }
+    var selectedTheme by remember { mutableStateOf(Theme.OCEAN) }
 
     Column (
         modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})
@@ -417,7 +417,7 @@ fun ScheduleTarget(isSheetOpen: Boolean, courseList: List<UserCalendarCourse>,
                 }
             }
 
-            AlternateSchedule(listOfClasses)
+            AlternateSchedule(listOfClasses, selectedTheme)
         }
     }
 }
