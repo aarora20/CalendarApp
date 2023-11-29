@@ -12,7 +12,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
-import org.junit.runner.OrderWith
 import kotlin.test.*
 
 class AuthTest {
