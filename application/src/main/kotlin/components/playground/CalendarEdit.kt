@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,10 +31,7 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
-import models.CourseDetails
-import models.CustomCalendar
-import models.ScheduleData
-import models.UserCalendarCourse
+import models.*
 import java.time.LocalDateTime
 
 
@@ -45,8 +43,9 @@ sealed class AlternateScreen {
 
 
 @Composable
-fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<CourseDetails>,
-                     selectedCalendar: CustomCalendar, goToCalendars: () -> Unit) {
+fun CalendarEditView(allCourses: List<CourseDetails>,
+                     selectedCalendar: CustomCalendar,
+                     goToCalendars: () -> Unit) {
     var isScheduleSheetOpen by remember { mutableStateOf(false) }
     var isListSheetOpen by remember { mutableStateOf(false) }
     var selectedCourse by remember { mutableStateOf("") }
@@ -55,54 +54,90 @@ fun CalendarEditView(courseList: List<UserCalendarCourse>, allCourses: List<Cour
     var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
     val listOfClasses = remember { mutableStateListOf<UserCalendarCourse>() }
     var currentScreen by remember { mutableStateOf<AlternateScreen>(AlternateScreen.CalendarEdit) }
+    val calendarScope = rememberCoroutineScope()
+    val selectedCourses = remember { mutableStateListOf<CourseSchedule>() }
+    var isError by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
-        listOfClasses.addAll(courseList)
+        calendarScope.launch {
+            try {
+                val courses = CustomCalendarClient.getCalendarCourses(
+                    store.getState().userId, selectedCalendar.id
+                )
+                listOfClasses.addAll(courses)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                isError = true
+            }
+        }
     }
 
-    when (currentScreen) {
-        is AlternateScreen.CalendarEdit -> {
-            Draggable(modifier = Modifier.fillMaxSize()) {
-                Row (modifier = Modifier.fillMaxSize()) {
-                    ScheduleTarget(isScheduleSheetOpen || isListSheetOpen, selectedCalendar, courseMap,
-                        selectedCourse, listOfClasses, goToCalendars,
-                        {
-                            currentScreen = AlternateScreen.Optimize
+    if (isError) {
+        Row(modifier = Modifier.fillMaxSize().padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center) {
+            SelectionContainer {
+                Text("The calendar no longer exists")
+            }
+        }
+    } else {
+        when (currentScreen) {
+            is AlternateScreen.CalendarEdit -> {
+                Draggable(modifier = Modifier.fillMaxSize()) {
+                    Row (modifier = Modifier.fillMaxSize()) {
+                        ScheduleTarget(isScheduleSheetOpen || isListSheetOpen, selectedCalendar, courseMap,
+                            selectedCourse, listOfClasses, goToCalendars,
+                            {
+                                currentScreen = AlternateScreen.Optimize
+                            }
+                            ,
+                            {
+                                isListSheetOpen = !isListSheetOpen
+                                isScheduleSheetOpen = false
+                            })
+                        { isScheduleSheetOpen = !isScheduleSheetOpen
+                            isListSheetOpen = false
                         }
-                        ,
-                        {
-                            isListSheetOpen = !isListSheetOpen
-                            isScheduleSheetOpen = false
-                        })
-                    { isScheduleSheetOpen = !isScheduleSheetOpen
-                        isListSheetOpen = false
-                    }
-                    key(schedules) {
-                        if (isScheduleSheetOpen) {
-                            ScheduleSideSheet(courseNames, courseMap, schedules, { schedules = it },
-                            ) { selectedCourse = it }
+                        key(schedules) {
+                            if (isScheduleSheetOpen) {
+                                ScheduleSideSheet(courseNames, courseMap, schedules, { schedules = it },
+                                ) { selectedCourse = it }
+                            }
                         }
-                    }
-                    if (isListSheetOpen) {
-                        ListSideSheet(listOfClasses, selectedCalendar) {
-                            listOfClasses.remove(it)
+                        if (isListSheetOpen) {
+                            ListSideSheet(listOfClasses, selectedCalendar) {
+                                listOfClasses.remove(it)
+                            }
                         }
                     }
                 }
             }
-        }
 
-        AlternateScreen.Optimize -> {
-            OptimizationPage(
-                selectedCalendar.id,
-                courseNames,
-                courseMap
-            ) {
-                currentScreen = AlternateScreen.CalendarEdit
+            AlternateScreen.Optimize -> {
+                OptimizationPage(
+                    selectedCalendar.id,
+                    courseNames,
+                    courseMap,
+                    selectedCourses,
+                    {
+                        calendarScope.launch {
+                            try {
+                                val courses = CustomCalendarClient.getCalendarCourses(
+                                    store.getState().userId, selectedCalendar.id
+                                )
+                                listOfClasses.removeAll(listOfClasses)
+                                listOfClasses.addAll(courses)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                ) {
+                    currentScreen = AlternateScreen.CalendarEdit
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -443,7 +478,6 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                     }
                 }
             }
-
             AlternateSchedule(listOfClasses)
         }
     }
