@@ -47,3 +47,6 @@ server/.db/
 
 ### Dotenv file ###
 .env
+
+### GCP files ###
+application/src/main/resources/

@@ -7,7 +7,6 @@ import androidx.compose.ui.window.rememberWindowState
 import components.landingPage
 import java.awt.Dimension
 
-
 @Composable
 @Preview
 fun App() {
@@ -17,7 +16,7 @@ fun App() {
 fun main() = application {
     val state = rememberWindowState(placement = WindowPlacement.Maximized)
     Window(onCloseRequest = ::exitApplication, state) {
-        window.minimumSize = Dimension(1000, 600)
+        window.minimumSize = Dimension(1700, 900)
         App()
     }
 }

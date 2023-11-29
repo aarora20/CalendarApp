@@ -60,7 +60,6 @@ object CourseSchedulesClient {
         return response.body<List<ScheduleData>>()
     }
 
-    @OptIn(InternalAPI::class)
     suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
         val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/wishlist") {
             contentType(ContentType.Application.Json)
