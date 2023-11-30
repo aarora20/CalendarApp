@@ -245,7 +245,7 @@ class DAOFacadeImpl : DAOFacade {
     }
 
     override suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean = dbQuery {
-       try {
+        try {
             transaction {
                 val userExists = Users.select { Users.id eq UUID.fromString(userIdArg)}.count() > 0
 
@@ -286,7 +286,7 @@ class DAOFacadeImpl : DAOFacade {
         try {
             transaction {
                 val userCoursesQuery = (UserCourses innerJoin Users).slice(UserCourses.courseId, UserCourses.component
-                ,UserCourses.courseNum, UserCourses.courseTitle, UserCourses.startTime,
+                    ,UserCourses.courseNum, UserCourses.courseTitle, UserCourses.startTime,
                     UserCourses.endTime, UserCourses.weekPattern)
                     .select { Users.id eq UUID.fromString(id) }
 
@@ -306,8 +306,9 @@ class DAOFacadeImpl : DAOFacade {
                 if (userExists) {
                     val wishlistCourseExists = Wishlists.select {
                         (Wishlists.subjectCode eq wishlistCourse.subjectCode) and
-                                (Wishlists.catalogNumber eq wishlistCourse.catalogNumber) and
-                                (Wishlists.userId eq UUID.fromString(userIdArg))
+                        (Wishlists.catalogNumber eq wishlistCourse.catalogNumber) and
+                        (Wishlists.termYear eq wishlistCourse.termYear) and
+                        (Wishlists.userId eq UUID.fromString(userIdArg))
                     }.count() > 0
 
                     if (!wishlistCourseExists) {
@@ -316,6 +317,7 @@ class DAOFacadeImpl : DAOFacade {
                             it[subjectCode] = wishlistCourse.subjectCode
                             it[catalogNumber] = wishlistCourse.catalogNumber
                             it[courseTitle] = wishlistCourse.courseTitle
+                            it[termYear] = wishlistCourse.termYear
                         }
                         wishlistCourse
                     } else {
@@ -330,13 +332,14 @@ class DAOFacadeImpl : DAOFacade {
             null
         }
     }
-    override suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String): Boolean = dbQuery {
+    override suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean = dbQuery {
         try {
             transaction {
                 val deletedRowCount = Wishlists.deleteWhere {
                     (Wishlists.userId eq UUID.fromString(userIdArg)) and
                             (Wishlists.subjectCode eq subjectCode) and
-                            (Wishlists.catalogNumber eq catalogNumber)
+                            (Wishlists.catalogNumber eq catalogNumber) and
+                            (Wishlists.termYear eq termYear)
                 }
                 deletedRowCount > 0
             }
@@ -346,6 +349,8 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+
+
     override suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse> = dbQuery {
         try {
             transaction {
@@ -354,7 +359,8 @@ class DAOFacadeImpl : DAOFacade {
                         WishlistCourse(
                             subjectCode = it[Wishlists.subjectCode],
                             catalogNumber = it[Wishlists.catalogNumber],
-                            courseTitle = it[Wishlists.courseTitle]
+                            courseTitle = it[Wishlists.courseTitle],
+                            termYear = it[Wishlists.termYear]
                         )
                     }
             }
@@ -451,10 +457,10 @@ class DAOFacadeImpl : DAOFacade {
                 val userCalendarCoursesQuery = (Users innerJoin UserCalendarCourses)
                     .innerJoin(CustomCalendars, { UserCalendarCourses.calendarId}, {CustomCalendars.id})
                     .slice(UserCalendarCourses.courseId, UserCalendarCourses.component
-                    ,UserCalendarCourses.courseNum, UserCalendarCourses.courseTitle, UserCalendarCourses.startTime,
-                    UserCalendarCourses.endTime, UserCalendarCourses.weekPattern)
+                        ,UserCalendarCourses.courseNum, UserCalendarCourses.courseTitle, UserCalendarCourses.startTime,
+                        UserCalendarCourses.endTime, UserCalendarCourses.weekPattern)
                     .select { (CustomCalendars.id eq UUID.fromString(calendarId)) and
-                    (Users.id eq UUID.fromString(userId))}
+                            (Users.id eq UUID.fromString(userId))}
 
                 userCalendarCoursesQuery.map(::resultRowToCalendarCourse)
             }
@@ -472,8 +478,8 @@ class DAOFacadeImpl : DAOFacade {
                 if (userExists) {
                     val calendarExists = CustomCalendars.select {
                         (CustomCalendars.userId eq UUID.fromString(userIdArg) and (
-                            CustomCalendars.name eq calendar.name
-                        ))
+                                CustomCalendars.name eq calendar.name
+                                ))
                     }.count() > 0
 
                     if (!calendarExists) {

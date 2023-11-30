@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class WishCourse(
     val subjectCode: String,
     val catalogNumber: String,
-    val courseTitle: String
+    val courseTitle: String,
+    val termYear: String
 )
