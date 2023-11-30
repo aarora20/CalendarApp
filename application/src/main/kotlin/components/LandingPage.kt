@@ -22,7 +22,6 @@ import components.home.HomeScreen
 import components.playground.CalendarEditView
 import components.playground.PlaygroundCalendarsPage
 import components.selectedCourses.selectionScreen
-import components.wishlist.wishCourses
 import components.wishlist.wishSelection
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
@@ -30,7 +29,6 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.CustomCalendar
-import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.LogoutUser
@@ -38,29 +36,29 @@ import store.rootReducer
 
 // fake data for now for wishlist
 // Should replace with api get results
-private val listOfWishCourses = listOf(
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "MATH",
-        catalogNumber = "135",
-        title = "Algebra for Honours Mathematics"
-    ),
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "MATH",
-        catalogNumber = "137",
-        title = "Calculus 1 for Honours Mathematics"
-    ),
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "CS",
-        catalogNumber = "135",
-        title = "Designing Functional Programs"
-    ),
-)
+//private val listOfWishCourses = listOf(
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "MATH",
+//        catalogNumber = "135",
+//        title = "Algebra for Honours Mathematics"
+//    ),
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "MATH",
+//        catalogNumber = "137",
+//        title = "Calculus 1 for Honours Mathematics"
+//    ),
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "CS",
+//        catalogNumber = "135",
+//        title = "Designing Functional Programs"
+//    ),
+//)
 
 @Immutable
 sealed class Screen {
