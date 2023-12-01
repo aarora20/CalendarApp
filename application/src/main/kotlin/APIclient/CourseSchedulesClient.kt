@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
 import models.Courses
 import models.ScheduleData
 import models.UserCourse
@@ -74,9 +73,9 @@ object CourseSchedulesClient {
         return response.body<List<WishCourse>>()
     }
 
-    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
+    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean {
         return try {
-            val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/wishlist/$subjectCode/$catalogNumber")
+            val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/wishlist/$subjectCode/$catalogNumber/$termYear")
             response.status == HttpStatusCode.NoContent
         } catch (e: ClientRequestException) {
             println("Error in request: ${e.message}")

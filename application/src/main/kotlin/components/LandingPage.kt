@@ -22,7 +22,6 @@ import components.home.HomeScreen
 import components.playground.CalendarEditView
 import components.playground.PlaygroundCalendarsPage
 import components.selectedCourses.selectionScreen
-import components.wishlist.wishCourses
 import components.wishlist.wishSelection
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
@@ -30,7 +29,6 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.CustomCalendar
-import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
 import store.AuthState
 import store.LogoutUser
@@ -38,29 +36,29 @@ import store.rootReducer
 
 // fake data for now for wishlist
 // Should replace with api get results
-private val listOfWishCourses = listOf(
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "MATH",
-        catalogNumber = "135",
-        title = "Algebra for Honours Mathematics"
-    ),
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "MATH",
-        catalogNumber = "137",
-        title = "Calculus 1 for Honours Mathematics"
-    ),
-    wishCourses(
-        year = "1",
-        term = "A",
-        subjectCode = "CS",
-        catalogNumber = "135",
-        title = "Designing Functional Programs"
-    ),
-)
+//private val listOfWishCourses = listOf(
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "MATH",
+//        catalogNumber = "135",
+//        title = "Algebra for Honours Mathematics"
+//    ),
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "MATH",
+//        catalogNumber = "137",
+//        title = "Calculus 1 for Honours Mathematics"
+//    ),
+//    wishCourses(
+//        year = "1",
+//        term = "A",
+//        subjectCode = "CS",
+//        catalogNumber = "135",
+//        title = "Designing Functional Programs"
+//    ),
+//)
 
 @Immutable
 sealed class Screen {
@@ -144,7 +142,7 @@ fun landingScreen(
     val calendarScope = rememberCoroutineScope()
     var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
     var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
-    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
+//    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
 
     LaunchedEffect(true) {
         calendarScope.launch {
@@ -168,7 +166,7 @@ fun landingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth()
+                            .width(300.dp)
 
                     ) {
                         Card(
@@ -303,8 +301,6 @@ fun landingScreen(
                                                 onClick = {
                                                     calendarScope.launch {
                                                         try {
-                                                            userCourses = CustomCalendarClient.getCalendarCourses(
-                                                                store.getState().userId, it.id)
                                                             selectedCalendar = it
                                                             showInNav = AppScreen.AlternateSchedule
 
@@ -393,8 +389,6 @@ fun landingScreen(
                         {
                             calendarScope.launch {
                                 try {
-                                    userCourses = CustomCalendarClient.getCalendarCourses(
-                                        store.getState().userId, it.id)
                                     selectedCalendar = it
                                     showInNav = AppScreen.AlternateSchedule
 
@@ -421,7 +415,6 @@ fun landingScreen(
                                 selectedCalendar = it
                                 customCalendars = CustomCalendarClient.getCalendars(
                                     store.getState().userId)
-                                userCourses = emptyList()
                                 showInNav = AppScreen.AlternateSchedule
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -431,14 +424,12 @@ fun landingScreen(
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar) {
-                            showInNav = AppScreen.Playground
-                        }
+                        CalendarEditView(courseList, selectedCalendar,
+                            { showInNav = AppScreen.Playground })
                     }
                 }
             }
         }
-
     }
 }
 

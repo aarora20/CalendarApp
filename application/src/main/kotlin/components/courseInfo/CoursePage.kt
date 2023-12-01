@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.ScheduleData
 import models.UserCourse
+import models.WishCourse
 import java.time.LocalDateTime
 
 data class WishlistTerms(
@@ -94,16 +96,20 @@ fun wishlistDropDown(
                         val selectedTerm = term.text
                         wishList = "Added to Term: $selectedTerm"
                         showDropdown = false
-                        /*
+                        // Add course to wishlist with the selected term
                         scope.launch {
-                            val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
+                            val toAdd = WishCourse(
+                                subjectCode = course.subjectCode,
+                                catalogNumber = course.catalogNumber,
+                                courseTitle = course.title,
+                                termYear = selectedTerm // Add termYear information
+                            )
                             val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
                             if (!success) {
                                 println("Error adding course to wishlist.")
-                                wishList = "+ Wish List"  // Revert button text on failure
+                                wishList = "+ Wishlist"  // Revert button text on failure
                             }
                         }
-                         */
                     }
                 ) {
                     Text(text = term.text)
@@ -174,7 +180,7 @@ fun coursePage(
 
     // sets the page as a column
     val snackbarState = remember { SnackbarHostState() }
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
             androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
@@ -397,7 +403,6 @@ fun detectTimeConflict(
 
     return "NO CONFLICT"
 }
-
 
 @Composable
 fun RowScope.TableCell(

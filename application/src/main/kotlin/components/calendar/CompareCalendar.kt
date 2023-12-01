@@ -24,16 +24,64 @@ import models.UserCourse
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
+
+enum class CompareTheme {
+    OCEAN, PASTEL, SUNSET, EARTH
+}
+
+fun generateCompareColours(theme: CompareTheme): List<Color> {
+
+    // Define color sets for each theme
+    val alpha = 0.5f
+    val theme1Colors = listOf(
+        Color(174, 214, 241).copy(alpha=alpha),
+        Color(133, 193, 233).copy(alpha=alpha),
+    )
+
+    val theme2Colors = listOf(
+        Color(255, 207, 210).copy(alpha=alpha),
+        Color(241, 192, 232).copy(alpha=alpha),
+    )
+
+    val theme3Colors = listOf(
+        Color(255,112,126).copy(alpha=alpha),
+        Color(255,213,179).copy(alpha=alpha),
+    )
+
+    val theme4Colors = listOf(
+        Color(94,167,88).copy(alpha=alpha),
+        Color(71,137,75).copy(alpha=alpha),
+    )
+
+    if (theme == CompareTheme.OCEAN) {
+        return theme1Colors
+    } else if (theme == CompareTheme.PASTEL) {
+        return theme2Colors
+    } else if (theme == CompareTheme.SUNSET) {
+        return theme3Colors
+    } else {
+        return theme4Colors
+    }
+}
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCourse>, onBackClick: () -> Unit) {
+fun CalendarCompareScreen(
+    userList: List<UserCourse>,
+    friendList: List<UserCourse>,
+    onBackClick: () -> Unit,
+    theme: CompareTheme) {
+
+    val themeColours = generateCompareColours(theme)
+
     val userSelectedCourses =  userList.map { UniClass(it.courseNum,
-        it.component, Color(0x55ffeb46), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, themeColours[0], it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 
     val friendSelectedCourses = friendList.map { UniClass(it.courseNum,
-        it.component, Color(0x550096FF), it.weekPattern, LocalDateTime.parse(it.startTime),
+        it.component, themeColours[1], it.weekPattern, LocalDateTime.parse(it.startTime),
         LocalDateTime.parse(it.endTime))
     }
 
@@ -64,22 +112,15 @@ fun CalendarCompareScreen(userList: List<UserCourse>, friendList: List<UserCours
             .fillMaxWidth()
     ) {
 
-        CustomIconButton(
-            onClick= onBackClick,
-            modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            tooltipText= "Go Back",
-            buttonRadius= 36.dp,
-            buttonSize= 15.dp,
-            backgroundColor = Color.LightGray,
-            icon = TablerIcons.ChevronLeft
-        )
+        // where button used to be
 
         // TITLES
         Row (
             modifier = Modifier
-                .height(50.dp)
+                .height(37.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
             // TIMES space
 
