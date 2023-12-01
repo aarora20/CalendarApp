@@ -239,13 +239,14 @@ fun OptimizationPage(
     courseNames: List<String>,
     courseMap:  Map<String, CourseDetails>,
     selectedCourses: SnapshotStateList<CourseSchedule>,
+    toggleComputing: (Boolean) -> Unit,
     updateCalendar: (id: String) -> Unit,
     goToCalendar: () -> Unit,
 ) {
     var isSheetOpen by remember { mutableStateOf(false) }
     Row (modifier = Modifier.fillMaxSize()) {
         Column (modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})) {
-            OptimizationSelection(calendarId, selectedCourses, { selectedCourses.remove(it) }, goToCalendar, updateCalendar ) {
+            OptimizationSelection(calendarId, selectedCourses, toggleComputing, { selectedCourses.remove(it) }, goToCalendar, updateCalendar ) {
                 isSheetOpen = !isSheetOpen
             }
         }
@@ -265,6 +266,7 @@ fun OptimizationPage(
 fun OptimizationSelection(
     calendarId: String,
     selectedCourses: List<CourseSchedule>,
+    toggleComputing: (Boolean) -> Unit,
     removeItem: (courseSchedule: CourseSchedule) -> Unit,
     goToCalendar: () -> Unit,
     updateCalendar: (id: String) -> Unit,
@@ -368,7 +370,8 @@ fun OptimizationSelection(
         }, scope = optimizeScope,
             selectedCourses = selectedCourses,
             calendarId = calendarId,
-            updateCalendar = updateCalendar)
+            updateCalendar = updateCalendar,
+            toggleComputing = toggleComputing)
     }
 }
 
@@ -557,7 +560,8 @@ fun OptimizationDialog(
     scope: CoroutineScope,
     selectedCourses: List<CourseSchedule>,
     calendarId: String,
-    updateCalendar: (id: String) -> Unit
+    updateCalendar: (id: String) -> Unit,
+    toggleComputing: (Boolean) -> Unit
 ) {
     var isLoading by remember {  mutableStateOf(false) }
     Dialog(
@@ -613,6 +617,7 @@ fun OptimizationDialog(
                             onClick = {
                                 scope.launch {
                                     isLoading = true
+                                    toggleComputing(true)
                                     try {
                                         val op = transformScheduleDataToOptimized(selectedCourses)
                                         val ans = OptimizationClient.optimizeSchedule(op)
@@ -627,6 +632,7 @@ fun OptimizationDialog(
                                         e.printStackTrace()
                                     }
                                     isLoading = false
+                                    toggleComputing(false)
                                     onDismissRequest()
                                 }
                             },

@@ -1,12 +1,10 @@
 package components.selectedCourses
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.*
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -16,16 +14,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.calendar.CalendarRender
+import components.calendar.Theme
 import components.common.CustomIconButton
+import components.store
 import compose.icons.TablerIcons
-import compose.icons.tablericons.Calendar
+import compose.icons.tablericons.ChevronsDown
 import compose.icons.tablericons.List
 import compose.icons.tablericons.Plus
 import models.UserCourse
-import components.calendar.Theme
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material.*
-import compose.icons.tablericons.ChevronsDown
+import store.SetCalendarTheme
 
 @Composable
 fun ThemeDropdown(
@@ -110,7 +107,7 @@ fun CalendarContainer(
     openSideSheet: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf(Theme.OCEAN) }
+//    var selectedTheme by remember { mutableStateOf(Theme.OCEAN) }
 
     Column (
         modifier = Modifier.fillMaxSize()
@@ -133,10 +130,10 @@ fun CalendarContainer(
                 }
 
                 fun selectedThemeFunc(theme: Theme) {
-                    selectedTheme = theme
+                    store.dispatch(SetCalendarTheme(theme.name))
                 }
 
-                ThemeDropdown(expanded, selectedTheme, ::expandedFunc, ::selectedThemeFunc)
+                ThemeDropdown(expanded, Theme.valueOf(store.getState().calendarTheme), ::expandedFunc, ::selectedThemeFunc)
 
                 CustomIconButton(
                     onClick= openSideSheet,
@@ -170,6 +167,6 @@ fun CalendarContainer(
 
         }
 
-        CalendarRender(selectedCourses, selectedTheme)
+        CalendarRender(selectedCourses, Theme.valueOf(store.getState().calendarTheme))
     }
 }

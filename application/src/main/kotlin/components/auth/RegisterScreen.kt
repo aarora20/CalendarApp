@@ -65,6 +65,7 @@ fun RegisterScreen(onSuccess: () -> Unit, onLogin: () -> Unit) {
                     focusedLabelColor = Color(0xFF92A3FD),
                     cursorColor = Color(0xFF92A3FD)
                 ),
+                singleLine = true
             )
             OutlinedTextField(
                 value = password,
@@ -76,6 +77,7 @@ fun RegisterScreen(onSuccess: () -> Unit, onLogin: () -> Unit) {
                     focusedLabelColor = Color(0xFF92A3FD),
                     cursorColor = Color(0xFF92A3FD)
                 ),
+                singleLine = true
             )
 
             Text(errorText, style = TextStyle(

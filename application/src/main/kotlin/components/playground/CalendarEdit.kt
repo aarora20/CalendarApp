@@ -50,6 +50,7 @@ sealed class AlternateScreen {
 @Composable
 fun CalendarEditView(allCourses: List<CourseDetails>,
                      selectedCalendar: CustomCalendar,
+                     toggleComputing: (Boolean) -> Unit,
                      goToCalendars: () -> Unit) {
     var isScheduleSheetOpen by remember { mutableStateOf(false) }
     var isListSheetOpen by remember { mutableStateOf(false) }
@@ -127,6 +128,7 @@ fun CalendarEditView(allCourses: List<CourseDetails>,
                     courseNames,
                     courseMap,
                     selectedCourses,
+                    toggleComputing,
                     {
                         calendarScope.launch {
                             try {
