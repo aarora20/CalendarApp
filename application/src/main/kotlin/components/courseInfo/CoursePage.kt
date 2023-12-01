@@ -11,11 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Snackbar
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,9 +76,11 @@ fun wishlistDropDown(
     terms: List<WishlistTerms>,
     scope: CoroutineScope,
     course: CourseDetails,
+    wishListText: String,
+    changeWishListText: (text: String) -> Unit
 ) {
     var showDropdown by remember { mutableStateOf(false) }
-    var wishList by remember { mutableStateOf("+ Wishlist") }
+
     Box(
         modifier = Modifier
             //.fillMaxWidth()
@@ -85,7 +89,7 @@ fun wishlistDropDown(
             .background(Color.White, RoundedCornerShape(4.dp))
             .padding(8.dp)
     ) {
-        Text(text = wishList, style = MaterialTheme.typography.h6)
+        Text(text = wishListText, style = MaterialTheme.typography.h6)
         DropdownMenu(
             expanded = showDropdown,
             onDismissRequest = { showDropdown = false },
@@ -94,7 +98,7 @@ fun wishlistDropDown(
                 DropdownMenuItem(
                     onClick = {
                         val selectedTerm = term.text
-                        wishList = "Added to Term: $selectedTerm"
+                        changeWishListText("Added to Term: $selectedTerm")
                         showDropdown = false
                         // Add course to wishlist with the selected term
                         scope.launch {
@@ -107,7 +111,7 @@ fun wishlistDropDown(
                             val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
                             if (!success) {
                                 println("Error adding course to wishlist.")
-                                wishList = "+ Wishlist"  // Revert button text on failure
+                                changeWishListText("+ Wishlist")  // Revert button text on failure
                             }
                         }
                     }
@@ -117,30 +121,12 @@ fun wishlistDropDown(
             }
         }
     }
-    /* Old version of wishlist add
-    Button(
-        onClick = {
-            wishList = "Added to Wish List!"
-            scope.launch {
-                val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
-                val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
-                if (!success) {
-                    println("Error adding course to wishlist.")
-                    wishList = "+ Wish List"  // Revert button text on failure
-                }
-            }
-        }
-    ) {
-        Text(wishList)
-    }
-     */
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun coursePage(
     courseNames: List<String>,
-    addedCourses: Set<String>,
+    addedCourses: SnapshotStateList<String>,
     onBackClick: () -> Unit,
     course: CourseDetails,
     onChangeCourse: (course: String) -> Unit,
@@ -149,6 +135,7 @@ fun coursePage(
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
+    var wishListText by remember { mutableStateOf("+ Wishlist") }
 
     LaunchedEffect(course) {
         scope.launch{
@@ -167,6 +154,7 @@ fun coursePage(
                 println(e.message)
                 emptyList()
             }
+            wishListText = "+ Wishlist"
         }
     }
 
@@ -183,8 +171,8 @@ fun coursePage(
     Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
-            androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
-                androidx.compose.material3.Snackbar(
+            SnackbarHost(hostState = snackbarState) {
+                Snackbar(
                     snackbarData = it,
                     modifier = Modifier.width(500.dp),
                     )
@@ -214,7 +202,9 @@ fun coursePage(
                         Row(
                             modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.Center)
                         ) {
-                            DropSearch(courseNames) { onChangeCourse(it) }
+                            DropSearch(courseNames) {
+                                onChangeCourse(it)
+                            }
                         }
                     }
                 }
@@ -249,7 +239,9 @@ fun coursePage(
 
                         // wish list option
                         // temporary list holding all terms
-                        wishlistDropDown(selectedTerms, scope, course, )
+                        wishlistDropDown(selectedTerms, scope, course, wishListText) {
+                            wishListText = it
+                        }
                     }
 
                     // provides the description of the course
@@ -411,7 +403,8 @@ fun RowScope.TableCell(
     scope: CoroutineScope,
     course: CourseDetails,
     schedule: ScheduleData,
-    snackBarState: SnackbarHostState
+    snackBarState: SnackbarHostState,
+    addedCourses: SnapshotStateList<String>,
 ) {
     var addCourseStr by remember { mutableStateOf(text) }
     TextButton(
@@ -432,14 +425,16 @@ fun RowScope.TableCell(
                                 duration = SnackbarDuration.Short
                             )
                         } else {
+                            val pad = padding(schedule.classSection)
                             val toAdd = UserCourse(course.courseId,
                                 course.subjectCode + " " + course.catalogNumber,
-                                course.title, schedule.courseComponent + " " + schedule.classSection,
+                                course.title, schedule.courseComponent + " $pad" + schedule.classSection,
                                 schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
                             CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
                             addCourseStr = "Added to Course Schedule!"
+                            addedCourses.add("${toAdd.courseNum}${toAdd.component}")
                         }
 
                     } catch (e: ClientRequestException) {
@@ -462,7 +457,7 @@ fun tableScreen(
     course: CourseDetails,
     schedules: List<ScheduleData>,
     scope: CoroutineScope,
-    addedCourses: Set<String>,
+    addedCourses: SnapshotStateList<String>,
     snackBarState: SnackbarHostState
 ) {
     // Each cell of a column must have the same weight.
@@ -509,10 +504,10 @@ fun tableScreen(
                 TableCell(text = "$start - $end", weight = timeWeight, header = 0)
                 TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(
-                        "${course.subjectCode} ${course.catalogNumber}$courseComp $sectionNum")) {
+                        "${course.subjectCode} ${course.catalogNumber}$courseComp $pad$sectionNum")) {
                     "Added to Course Schedule!" }
                         else { "+ Course Schedule"},
-                    weight = buttonWeight, scope, course, it, snackBarState = snackBarState)
+                    weight = buttonWeight, scope, course, it, snackBarState = snackBarState, addedCourses)
             }
         }
     }

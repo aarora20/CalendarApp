@@ -1,5 +1,6 @@
 package components.courseSearch
 
+import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import components.courseInfo.coursePage
+import components.store
 import fuzzySearch.FuzzySearch
 import kotlinx.coroutines.launch
 import models.CourseDetails
+import models.UserCourse
 import java.util.*
 
 sealed class SearchScreen {
@@ -40,9 +43,16 @@ fun CourseSearchScreen(courses: List<CourseDetails>) {
     var currentScreen by remember { mutableStateOf<SearchScreen>(SearchScreen.Search) }
     var previousScreen by remember { mutableStateOf<SearchScreen?>(null) }
     var course by remember { mutableStateOf("") }
-    var addedCourses by remember { mutableStateOf(emptySet<String>()) }
-
+    val addedCourses = remember { mutableStateListOf<String>() }
+    var userCourses by remember { mutableStateOf(emptyList<UserCourse>()) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(true) {
+        scope.launch {
+            userCourses = CourseSchedulesClient.getUserCourses(store.getState().userId)
+            addedCourses.addAll(userCourses.map { "${it.courseNum}${it.component}" })
+        }
+    }
 
     val changeToCourseInfo: (String) -> Unit = { selectedCourse ->
         previousScreen = currentScreen
@@ -53,12 +63,6 @@ fun CourseSearchScreen(courses: List<CourseDetails>) {
     val onBackClick: () -> Unit = {
         currentScreen = previousScreen ?: SearchScreen.Search
         previousScreen = null // Reset the previous screen
-    }
-
-    LaunchedEffect(true) {
-        scope.launch {
-            // Fetch and handle added courses
-        }
     }
 
     Column {
@@ -141,7 +145,7 @@ fun CustomSearchBar(courses: List<String>, changeToCourseInfo: (course: String) 
                 if (isSubjectCodeValid) {
                     Button(
                         onClick = { exploreCourses(text.uppercase()) },
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp, start = 16.dp)
                     ) {
                         Text("Explore All ${text.uppercase()} Courses")
                     }
