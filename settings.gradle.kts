@@ -11,4 +11,4 @@ pluginManagement {
 }
 
 rootProject.name = "CalendarApp"
-include("application", "server")
+include("application", "server", "plannerServer")

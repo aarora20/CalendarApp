@@ -616,7 +616,7 @@ fun OptimizationDialog(
                                     try {
                                         val op = transformScheduleDataToOptimized(selectedCourses)
                                         val ans = OptimizationClient.optimizeSchedule(op)
-                                        if (ans != null) {
+                                        if (!ans.isNullOrEmpty()) {
                                             val newCourses = transformCourseSectionsToCalendar(ans)
                                             CustomCalendarClient.updateCalendar(store.getState().userId,
                                                 calendarId,
