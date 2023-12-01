@@ -52,13 +52,14 @@ import models.CustomCalendarParams
 @Composable
 fun PlaygroundCalendarsPage(
     calendarList: List<CustomCalendar>,
+    isCalendarDialogOpen: Boolean,
+    toggleCalendarDialog: (Boolean) -> Unit,
     goToCurrent: () -> Unit,
     onClickCalendar: (calendar: CustomCalendar) -> Unit,
     onRemoveCalendar: (calendar: CustomCalendar) -> Unit,
     onCreateNewCalendar: (calendar: CustomCalendar) -> Unit
 ) {
     val calendarScope = rememberCoroutineScope()
-    var openDialog by remember {  mutableStateOf(false) }
 
     Column (
         modifier = Modifier.fillMaxWidth(),
@@ -96,7 +97,7 @@ fun PlaygroundCalendarsPage(
                 fontSize = 20.sp
             )
             CustomIconButton(
-                onClick={ openDialog = true },
+                onClick={ toggleCalendarDialog(true) },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
                 tooltipText = "Create Calendar",
                 buttonRadius = 36.dp,
@@ -115,11 +116,11 @@ fun PlaygroundCalendarsPage(
         }
 
         when {
-            openDialog -> {
+            isCalendarDialogOpen -> {
                 CreateCalendarDialog(
-                    onDismissRequest = { openDialog = false },
+                    onDismissRequest = { toggleCalendarDialog(false) },
                     onConfirmation = {
-                        openDialog = false
+                        toggleCalendarDialog(false)
                     },
                     onCreateNewCalendar = onCreateNewCalendar,
                     calendarScope

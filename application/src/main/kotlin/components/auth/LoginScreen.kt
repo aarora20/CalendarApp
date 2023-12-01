@@ -68,6 +68,7 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
                     focusedLabelColor = Color(0xFF92A3FD),
                     cursorColor = Color(0xFF92A3FD)
                 ),
+                singleLine = true
             )
             OutlinedTextField(
                 value = password,
@@ -83,7 +84,8 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
                     VisualTransformation.None
                 } else {
                     PasswordVisualTransformation()
-                }
+                },
+                singleLine = true
             )
 
             Text(errorText, style = TextStyle(

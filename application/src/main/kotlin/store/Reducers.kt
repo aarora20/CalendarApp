@@ -13,11 +13,18 @@ fun idReducer(state: String, action: Any): String =
         else -> state
     }
 
+fun calendarThemeReducer(state: String, action: Any): String =
+    when (action) {
+        is SetCalendarTheme -> action.calendarTheme
+        else -> state
+    }
+
 
 fun rootReducer(state: AuthState, action: Any) = when (action) {
     is LogoutUser -> AuthState() // Resets to default state
     else -> AuthState(
         token = tokenReducer(state.token, action),
-        userId = idReducer(state.userId, action)
+        userId = idReducer(state.userId, action),
+        calendarTheme = calendarThemeReducer(state.calendarTheme, action)
     )
 }
