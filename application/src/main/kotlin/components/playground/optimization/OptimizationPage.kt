@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -443,10 +444,12 @@ fun OptimizeCourseSideSheet(courseNames: List<String>,
                     if (selectedCourse.isNotEmpty()) {
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
-                                .background(Color.Gray).padding(horizontal = 4.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                                .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(text = selectedCourse, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+                            Text(text = selectedCourse, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                textAlign = TextAlign.Center)
                         }
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)

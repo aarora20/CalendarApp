@@ -3,19 +3,18 @@ package components.selectedCourses
 import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +29,7 @@ import compose.icons.tablericons.Plus
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.CourseDetails
+import models.CourseSchedule
 import models.ScheduleData
 import models.UserCourse
 import java.time.LocalDateTime
@@ -69,8 +69,8 @@ fun selectionScreen(
     Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
-            androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
-                androidx.compose.material3.Snackbar(
+            SnackbarHost(hostState = snackbarState) {
+                Snackbar(
                     snackbarData = it,
                     modifier = Modifier.width(500.dp),
                 )
@@ -150,7 +150,7 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                             { it.courseComponent != "TST" }, // Third, order by whether termcode is not "TST" (false first)
                                             { it.courseComponent }
                                         )).sortedBy { it.classSection })
-                                    selectedCourse = it
+                                    selectedCourse = it + " " + course.title
                                 }
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -160,45 +160,62 @@ fun AddCourseSideSheet(courseNames: List<String>,
                 }
             }
             Box(modifier = Modifier.padding(top = 80.dp, bottom = 4.dp).padding(horizontal = 8.dp).fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Column (
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    items(schedules) {
-                        AddableScheduleItem(it, true) {
-                            addScope.launch {
-                                try {
-                                    val isTimeConflict = detectTimeConflict(selectedCourses,
-                                        it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
-                                        it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
-                                        it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
-                                    if (isTimeConflict != "NO CONFLICT") {
-                                        snackBarState.showSnackbar(
-                                            message = "Unable to Add Due to Time Conflict With: " + isTimeConflict,
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    } else {
-                                        val toAdd = courseMap[selectedCourse]
-                                        if (toAdd != null) {
-                                            val pad = padding(it.classSection)
-                                            val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
-                                                toAdd.subjectCode + " " + toAdd.catalogNumber,
-                                                toAdd.title, it.courseComponent + " " + pad + it.classSection,
-                                                it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
-                                                it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
-                                                it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
-                                                store.getState().userId,
+                    if (selectedCourse.isNotEmpty()) {
+                        Row (
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
+                                .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = selectedCourse, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(schedules) {
+                            AddableScheduleItem(it, true) {
+                                addScope.launch {
+                                    try {
+                                        val isTimeConflict = detectTimeConflict(selectedCourses,
+                                            it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                                            it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                            it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
+                                        if (isTimeConflict != "NO CONFLICT") {
+                                            snackBarState.showSnackbar(
+                                                message = "Unable to Add Due to Time Conflict With: " + isTimeConflict,
+                                                duration = SnackbarDuration.Short
                                             )
-                                            if (response != null) {
-                                                addToSchedule(response)
-                                            } else {
-                                                // error do nothing
+                                        } else {
+                                            val toAdd = courseMap[selectedCourse]
+                                            if (toAdd != null) {
+                                                val pad = padding(it.classSection)
+                                                val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
+                                                    toAdd.subjectCode + " " + toAdd.catalogNumber,
+                                                    toAdd.title, it.courseComponent + " " + pad + it.classSection,
+                                                    it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
+                                                    it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                                    it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
+                                                    store.getState().userId,
+                                                )
+                                                if (response != null) {
+                                                    addToSchedule(response)
+                                                } else {
+                                                    // error do nothing
+                                                }
                                             }
                                         }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
                                     }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
                                 }
                             }
                         }

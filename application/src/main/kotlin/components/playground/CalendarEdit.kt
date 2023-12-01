@@ -54,6 +54,7 @@ fun CalendarEditView(allCourses: List<CourseDetails>,
     var isScheduleSheetOpen by remember { mutableStateOf(false) }
     var isListSheetOpen by remember { mutableStateOf(false) }
     var selectedCourse by remember { mutableStateOf("") }
+    var courseTitle by remember { mutableStateOf("") }
     val courseNames = allCourses.map { "${it.subjectCode}${it.catalogNumber}" }
     val courseMap = allCourses.associateBy { it.subjectCode + it.catalogNumber }
     var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
@@ -105,8 +106,10 @@ fun CalendarEditView(allCourses: List<CourseDetails>,
                         }
                         key(schedules) {
                             if (isScheduleSheetOpen) {
-                                ScheduleSideSheet(courseNames, courseMap, schedules, { schedules = it },
-                                ) { selectedCourse = it }
+                                ScheduleSideSheet(courseNames, courseMap, schedules, courseTitle, { schedules = it },
+                                { selectedCourse = it }) {
+                                    courseTitle = it
+                                }
                             }
                         }
                         if (isListSheetOpen) {
@@ -149,8 +152,12 @@ fun CalendarEditView(allCourses: List<CourseDetails>,
 fun ScheduleSideSheet(courseNames: List<String>,
                       courseMap:  Map<String, CourseDetails>,
                       schedules: List<ScheduleData>,
+                      courseTitle: String,
                       setSchedules: (scheduleData: List<ScheduleData>) -> Unit,
-                      setSelectedCourse: (courseName: String) -> Unit ) {
+                      setSelectedCourse: (courseName: String) -> Unit,
+                      setCourseTitle: (courseTitle: String) -> Unit )
+{
+
     val getScheduleScope = rememberCoroutineScope()
     Column (
         modifier = Modifier.fillMaxSize().drawBehind {
@@ -185,6 +192,7 @@ fun ScheduleSideSheet(courseNames: List<String>,
                                             { it.courseComponent != "TST" }, // Third, order by whether termcode is not "TST" (false first)
                                             { it.courseComponent }
                                         )).sortedBy { it.classSection })
+                                    setCourseTitle(it + " " + course.title)
                                     setSelectedCourse(it)
                                 }
                             } catch (e: Exception) {
@@ -194,19 +202,44 @@ fun ScheduleSideSheet(courseNames: List<String>,
                         }
                     })
                 }
+
             }
             Box(modifier = Modifier.padding(top = 80.dp).padding(horizontal = 16.dp).fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Column (
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    items(schedules) {
-                        DraggableSchedule(it) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        SelectionContainer {
+                            Text("Drag and drop a timeslot to the calendar to add it.", textAlign = TextAlign.Center)
+                        }
+                    }
+                    if (courseTitle.isNotEmpty()) {
+                        Row (
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
+                                .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = courseTitle, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(schedules) {
+                            DraggableSchedule(it) }
                     }
                 }
             }
         }
+    }
 }
 
 @Composable

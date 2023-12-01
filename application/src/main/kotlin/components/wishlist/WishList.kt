@@ -3,12 +3,17 @@ package components.wishlist
 import APIclient.CourseSchedulesClient
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,38 +26,26 @@ import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Minus
 import compose.icons.tablericons.Plus
-import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import models.WishCourse
 
-
 @Composable
-fun wishSelection() {
-    val userId = store.getState().userId
-    var selectedCourses by remember { mutableStateOf(emptyList<WishCourse>()) }
+fun wishSelection(
+    selectedCourses: SnapshotStateList<WishCourse>,
+    changeTerm: (term: String) -> Unit,
+    removeCourse: (course: WishCourse) -> Unit
+) {
     val scope = rememberCoroutineScope()
 
-
-    var wishMap by remember { mutableStateOf(mapOf<String, List<WishCourse>>()) }
+    // Group courses by termYear
+    val wishMap = selectedCourses.groupBy { it.termYear }
     val allPossibleYears = listOf("1", "2", "3", "4")
     val allPossibleTermYears = listOf("1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B")
 
-    val scrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
 
-    LaunchedEffect(userId) {
-        scope.launch {
-            try {
-                selectedCourses = CourseSchedulesClient.getWishlist(userId)
-                // Group courses by termYear
-                wishMap = selectedCourses.groupBy { it.termYear }
-            } catch (e: ClientRequestException) {
-                println("Error fetching data: ${e.message}")
-            } catch (e: Exception) {
-                println(e.message)
-            }
-        }
-    }
     // sets the page as a column
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -77,7 +70,8 @@ fun wishSelection() {
         Box {
             Row(
                 modifier = Modifier
-                    .horizontalScroll(scrollState)
+                    .horizontalScroll(horizontalScrollState)
+                    .verticalScroll(verticalScrollState)
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -94,10 +88,8 @@ fun wishSelection() {
                         )
                         allPossibleTermYears.filter { it.startsWith(year) }.forEach { termYear ->
                             val coursesForTerm = wishMap[termYear] ?: emptyList()
-                            TermBox(termYear, coursesForTerm, selectedCourses, userId, scope) { newCourses ->
-                                selectedCourses = newCourses
-                                wishMap = selectedCourses.groupBy { it.termYear }
-                            }
+                            TermBox(termYear, coursesForTerm, selectedCourses, store.getState().userId, scope,
+                                removeCourse, changeTerm)
                         }
                     }
                 }
@@ -105,7 +97,7 @@ fun wishSelection() {
 
             // Horizontal Scrollbar
             HorizontalScrollbar(
-                adapter = rememberScrollbarAdapter(scrollState),
+                adapter = rememberScrollbarAdapter(horizontalScrollState),
                 modifier = Modifier.align(Alignment.BottomStart)
             )
         }
@@ -114,7 +106,8 @@ fun wishSelection() {
 
 @Composable
 fun TermBox(termYear: String, listCourses: List<WishCourse>, selectedCourses: List<WishCourse>, userId: String,
-            scope: CoroutineScope, updateCourses: (List<WishCourse>) -> Unit) {
+            scope: CoroutineScope, updateCourses: (course: WishCourse) -> Unit,
+            changeTerm: (term: String) -> Unit) {
     Surface(
         modifier = Modifier
             .padding(8.dp)
@@ -138,16 +131,26 @@ fun TermBox(termYear: String, listCourses: List<WishCourse>, selectedCourses: Li
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
-            listCourses.forEachIndexed { index, course ->
-                CourseRow(course, selectedCourses, userId, scope, updateCourses)
-                if (index < listCourses.size - 1) {
-                    Divider(color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
+            LazyColumn (
+               modifier = Modifier.height(250.dp)
+            ) {
+                itemsIndexed(listCourses) { index, course ->
+                    CourseRow(course, selectedCourses, userId, scope, updateCourses)
+                    if (index < listCourses.size - 1) {
+                        Divider(color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
+                    }
                 }
             }
+//            listCourses.forEachIndexed { index, course ->
+//                CourseRow(course, selectedCourses, userId, scope, updateCourses)
+//                if (index < listCourses.size - 1) {
+//                    Divider(color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
+//                }
+//            }
             Spacer(modifier = Modifier.weight(1f)) // Push the button to the bottom
             CustomIconButton(
                 onClick = {
-                    // Button functioning
+                    changeTerm(termYear)
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 tooltipText = "Add Course",
@@ -163,7 +166,7 @@ fun TermBox(termYear: String, listCourses: List<WishCourse>, selectedCourses: Li
 
 @Composable
 fun CourseRow(course: WishCourse, selectedCourses: List<WishCourse>, userId: String,
-              scope: CoroutineScope, updateCourses: (List<WishCourse>) -> Unit) {
+              scope: CoroutineScope, updateCourses: (course: WishCourse) -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -196,10 +199,9 @@ fun CourseRow(course: WishCourse, selectedCourses: List<WishCourse>, userId: Str
                     scope.launch {
                         val success = CourseSchedulesClient.removeFromWishlist(userId, course.subjectCode, course.catalogNumber, course.termYear)
                         if (success) {
-                            // Fetch the updated list from the backend
-                            val updatedCourses = CourseSchedulesClient.getWishlist(userId)
                             // Update the frontend state
-                            updateCourses(updatedCourses)
+                            updateCourses(WishCourse(course.subjectCode, course.catalogNumber,
+                                course.courseTitle, course.termYear))
                         } else {
                             println("Error removing course from wishlist.")
                         }
