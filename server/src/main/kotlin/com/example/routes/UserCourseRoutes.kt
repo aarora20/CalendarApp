@@ -18,9 +18,9 @@ fun Route.userCoursesRouting() {
             val id = call.parameters.getOrFail<String>("id")
             val updateStatus = dao.updateUserCourses(id, calendar.courses)
             if (updateStatus) {
-                call.respond(ResponseData(data = true, message = "Update all course success"))
+                call.respond(ResponseData(data = true, message = "Update all courses success"))
             } else {
-                call.respond(ResponseData(data = false, message = "Fail to update all courses"))
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = false, message = "Fail to update all courses"))
             }
         }
 
@@ -30,7 +30,7 @@ fun Route.userCoursesRouting() {
             val addedCourse: UserCourse? = dao.addUserCourse(id, course)
             if (addedCourse != null) {
                 call.respond(
-                    ResponseData<UserCourse>(
+                    ResponseData(
                         data = addedCourse,
                         message = "Add course success")
                 )

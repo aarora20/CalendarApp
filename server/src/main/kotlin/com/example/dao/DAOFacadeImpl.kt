@@ -30,6 +30,8 @@ class DAOFacadeImpl : DAOFacade {
         component = row[UserCourses.component],
         startTime = row[UserCourses.startTime],
         endTime = row[UserCourses.endTime],
+        startDate = row[UserCourses.startDate],
+        endDate = row[UserCourses.endDate],
         weekPattern = row[UserCourses.weekPattern]
     )
 
@@ -48,22 +50,26 @@ class DAOFacadeImpl : DAOFacade {
         name = row[CustomCalendars.name]
     )
 
+    // retrieves all users from the database
     override suspend fun allUsers(): List<User> = dbQuery {
         Users.selectAll().map(::resultRowToUser)
     }
 
+    // retrieves one user given the user ID
     override suspend fun user(id: String): User? = dbQuery {
         Users.select { Users.id eq UUID.fromString(id)}
             .map(::resultRowToUser)
             .singleOrNull()
     }
 
+    // retrieves one user given the username
     override suspend fun findUser(username: String): User? = dbQuery {
         Users.select { Users.username eq username}
             .map(::resultRowToUser)
             .singleOrNull()
     }
 
+    // retrieves all users whose username is similar to the given username. Uses Postgres extension pg_trgm
     override suspend fun findSimilarUsers(username: String): List<User> = dbQuery {
         transaction {
             val result = mutableListOf<User>()
@@ -78,6 +84,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Inserts a new user to the database. Hashes the password given through the UI login page
     override suspend fun addNewUser(username: String, password: String): User? = dbQuery {
         val insertStatement = Users.insert {
             it[Users.username] = username
@@ -86,10 +93,12 @@ class DAOFacadeImpl : DAOFacade {
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToUser)
     }
 
+    // Deletes a user given a user ID
     override suspend fun deleteUser(id: String): Boolean = dbQuery {
         Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
     }
 
+    // Inserts a pending request into the database
     override suspend fun addFriend(userId: String, friendId: String): Friend? = dbQuery {
         val insertStatement = Friends.insert {
             it[Friends.userId] = UUID.fromString(userId)
@@ -160,6 +169,8 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Updates a pending request to an accepted request and inserts an inverse accepted request with the opposite
+    // relationship
     override suspend fun acceptFriendRequest(userId: String, friendId: String): Friend? = dbQuery {
         val updateStatement = Friends.update({ (Friends.userId eq UUID.fromString(friendId)
                 and (Friends.friendId eq UUID.fromString(userId))) }) {
@@ -178,12 +189,14 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Returns true if a request with the given user Id and friend Id exists
     override suspend fun findFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
         val friendRequestExists = Friends.select { (Friends.userId eq UUID.fromString(userId)
                 and (Friends.friendId eq UUID.fromString(friendId))) }.count() > 0
         friendRequestExists
     }
 
+    // Deletes a pending friend request
     override suspend fun deleteFriendRequest(userId: String, friendId: String): Boolean = dbQuery {
         val deleted = Friends.deleteWhere {  (Friends.userId eq UUID.fromString(friendId)
                 and (Friends.friendId eq UUID.fromString(userId)) and (status eq "pending")) }
@@ -194,6 +207,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Deletes both sides of the relationship for an accepted friend request
     override suspend fun unfriend(userId: String, friendId: String): Boolean = dbQuery {
         try {
             transaction {
@@ -210,6 +224,7 @@ class DAOFacadeImpl : DAOFacade {
 
     }
 
+    // Inserts a course to a user's current courses table
     override suspend fun addUserCourse(userIdArg: String, course: UserCourse): UserCourse? = dbQuery {
         try {
             transaction {
@@ -229,6 +244,8 @@ class DAOFacadeImpl : DAOFacade {
                             it[component] = course.component
                             it[startTime] = course.startTime
                             it[endTime] = course.endTime
+                            it[startDate] = course.startDate
+                            it[endDate] = course.endDate
                             it[weekPattern] = course.weekPattern
                         }.resultedValues?.singleOrNull()?.let(::resultRowToCourse)
                     } else {
@@ -244,6 +261,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Replaces all of a user' current courses with the new given course list
     override suspend fun updateUserCourses(userIdArg: String, courses: List<UserCourse>): Boolean = dbQuery {
         try {
             transaction {
@@ -257,6 +275,8 @@ class DAOFacadeImpl : DAOFacade {
                         val component = it.component
                         val startTime = it.startTime
                         val endTime = it.endTime
+                        val startDate = it.startDate
+                        val endDate = it.endDate
                         val weekPattern = it.weekPattern
                         val courseTitle = it.courseTitle
                         UserCourses.insert {
@@ -267,6 +287,8 @@ class DAOFacadeImpl : DAOFacade {
                             it[UserCourses.component] = component
                             it[UserCourses.startTime] = startTime
                             it[UserCourses.endTime] = endTime
+                            it[UserCourses.startDate] = startDate
+                            it[UserCourses.endDate] = endDate
                             it[UserCourses.weekPattern] = weekPattern
                         }
 
@@ -282,12 +304,13 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Retrieves all of a user's current courses
     override suspend fun getAllUserCourses(id: String): List<UserCourse> = dbQuery {
         try {
             transaction {
                 val userCoursesQuery = (UserCourses innerJoin Users).slice(UserCourses.courseId, UserCourses.component
                     ,UserCourses.courseNum, UserCourses.courseTitle, UserCourses.startTime,
-                    UserCourses.endTime, UserCourses.weekPattern)
+                    UserCourses.endTime, UserCourses.startDate, UserCourses.endDate, UserCourses.weekPattern)
                     .select { Users.id eq UUID.fromString(id) }
 
                 userCoursesQuery.map(::resultRowToCourse)
@@ -298,6 +321,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Inserts a course to a user's wishlist
     override suspend fun addCourseToWishlist(userIdArg: String, wishlistCourse: WishlistCourse): WishlistCourse? = dbQuery {
         try {
             transaction {
@@ -332,6 +356,8 @@ class DAOFacadeImpl : DAOFacade {
             null
         }
     }
+
+    // Deletes a user's wishlist course
     override suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean = dbQuery {
         try {
             transaction {
@@ -349,8 +375,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
-
-
+    // Retrieves all wishlist courses of a user
     override suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse> = dbQuery {
         try {
             transaction {
@@ -370,6 +395,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Inserts a course to user's custom calendar
     override suspend fun addUserCalendarCourse(userIdArg: String, calendarIdArg: String, course: UserCalendarCourse):
             UserCalendarCourse? = dbQuery {
         try {
@@ -410,6 +436,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Replaces all of a user's courses in a custom calendar with the new given course list
     override suspend fun updateUserCalendarCourses(userIdArg: String, calendarIdArg: String, courses: List<UserCalendarCourse>):
             Boolean = dbQuery {
         try {
@@ -450,6 +477,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Retrieves all of the courses from a user's custom calendar
     override suspend fun getAllUserCalendarCourses(userId: String, calendarId: String):
             List<UserCalendarCourse> = dbQuery {
         try {
@@ -470,6 +498,7 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Inserts a new custom calendar for a user
     override suspend fun addCustomCalendar(userIdArg: String, calendar: CustomCalendarParams): CustomCalendar? = dbQuery {
         try {
             transaction {
@@ -500,11 +529,13 @@ class DAOFacadeImpl : DAOFacade {
         }
     }
 
+    // Deletes a user's custom calendar as well as its associated courses (cascade)
     override suspend fun deleteCustomCalendar(userIdArg: String, calendarId: String): Boolean = dbQuery {
         CustomCalendars.deleteWhere { (userId eq UUID.fromString(userIdArg)) and
                 (id eq UUID.fromString(calendarId))} > 0
     }
 
+    // Retrieves all of a user's custom calendar
     override suspend fun getCustomCalendars(userIdArg: String): List<CustomCalendar> = dbQuery {
         CustomCalendars.select { CustomCalendars.userId eq UUID.fromString(userIdArg)}.map (::resultRowToCalendar)
     }

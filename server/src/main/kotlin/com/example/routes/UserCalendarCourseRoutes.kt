@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.dao.dao
 import com.example.models.UserCalendarCourse
 import com.example.models.UserCalendarCourseList
+import com.example.util.ResponseData
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -16,7 +17,12 @@ fun Route.userCalendarCourseRouting() {
             val calendar = call.receive<UserCalendarCourseList>()
             val id = call.parameters.getOrFail<String>("id")
             val calendarId = call.parameters.getOrFail<String>("calendarId")
-            call.respond(dao.updateUserCalendarCourses(id, calendarId, calendar.courses))
+            val updateStatus = dao.updateUserCalendarCourses(id, calendarId, calendar.courses)
+            if (updateStatus) {
+                call.respond(ResponseData(data = true, message = "Update all courses success"))
+            } else {
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = false, message = "Fail to update all courses"))
+            }
         }
 
         post("/calendarCourses") {
@@ -25,9 +31,9 @@ fun Route.userCalendarCourseRouting() {
             val calendarId = call.parameters.getOrFail<String>("calendarId")
             val addedCourse: UserCalendarCourse? = dao.addUserCalendarCourse(id, calendarId, course)
             if (addedCourse != null) {
-                call.respond(addedCourse)
+                call.respond(ResponseData(data = addedCourse, message = "Add course success"))
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Fail to add course")
+                call.respond(HttpStatusCode.BadRequest,  ResponseData(data = null, message ="Fail to add course"))
             }
         }
 

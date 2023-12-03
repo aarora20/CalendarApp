@@ -4,6 +4,7 @@ import com.example.dao.dao
 import com.example.models.FriendParams
 import com.example.models.UsernameParams
 import com.example.service.friendService
+import com.example.util.ResponseData
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -27,9 +28,9 @@ fun Route.friendsRouting() {
             val params = call.receive<FriendParams>();
             val request = friendService.sendFriendRequest(params.userId, params.friendId);
             if (request != null) {
-                call.respond(request)
+                call.respond(ResponseData(data = request, message = "Success sending request"))
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Fail to send request")
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = null, message= "Fail to send request"))
             }
         }
 
@@ -38,9 +39,9 @@ fun Route.friendsRouting() {
             val params = call.receive<FriendParams>();
             val request = dao.unfriend(params.userId, params.friendId);
             if (!request) {
-                call.respond(HttpStatusCode.BadRequest, "Fail to unfriend")
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = false, message="Fail to unfriend"))
             } else {
-                call.respond(request)
+                call.respond(ResponseData(data = true, message = "Success unfriending"))
             }
         }
 
@@ -67,9 +68,9 @@ fun Route.friendsRouting() {
             val params = call.receive<FriendParams>();
             val request = dao.acceptFriendRequest(params.userId, params.friendId);
             if (request != null) {
-                call.respond(request)
+                call.respond(ResponseData(data = request, message = "Success accepting request"))
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Fail to accept request")
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = null, message = "Fail to accept request"))
             }
         }
 
@@ -78,9 +79,9 @@ fun Route.friendsRouting() {
             val params = call.receive<FriendParams>();
             val request = dao.deleteFriendRequest(params.userId, params.friendId);
             if (!request) {
-                call.respond(HttpStatusCode.BadRequest, "Fail to reject request")
+                call.respond(HttpStatusCode.BadRequest, ResponseData(data = false, message = "Fail to delete request"))
             } else {
-                call.respond(request)
+                call.respond(ResponseData(data = true, message = "Success deleting request"))
             }
         }
     }

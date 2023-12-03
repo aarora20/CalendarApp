@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 
 @Serializable
 data class UserCourse(val courseId: String, val courseNum: String, val courseTitle: String, val component: String,
-    val startTime: String, val endTime: String, val weekPattern: String)
+    val startTime: String, val endTime: String, val startDate: String, val endDate: String, val weekPattern: String)
 
 object UserCourses : UUIDTable() {
     val userId = reference("user_id", Users)
@@ -15,5 +15,7 @@ object UserCourses : UUIDTable() {
     val component = varchar("component", 50)
     val startTime = varchar("start_time", 50)
     val endTime = varchar("end_time", 50)
+    val startDate = varchar("start_date", 50)
+    val endDate = varchar("end_date", 50)
     val weekPattern = varchar("week_pattern", 50)
 }
