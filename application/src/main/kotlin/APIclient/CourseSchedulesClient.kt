@@ -13,6 +13,7 @@ import models.Courses
 import models.ScheduleData
 import models.UserCourse
 import models.WishCourse
+import util.RouteResponseData
 
 object CourseSchedulesClient {
     private val client = HttpClient(CIO) {
@@ -40,18 +41,17 @@ object CourseSchedulesClient {
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<UserCourse>>().data
         }
     }
 
     suspend fun updateSchedule(courses: List<UserCourse>, userId: String): Boolean {
-
         val response: HttpResponse = client.put("http://0.0.0.0:8080/users/$userId/courses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
         }
 
-        return response.body()
+        return response.status == HttpStatusCode.OK
     }
 
     suspend fun getCourseSchedule(courseId: String): List<ScheduleData> {

@@ -11,6 +11,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import models.CustomCalendar
 import models.CustomCalendarParams
+import util.RouteResponseData
 
 object CustomCalendarClient {
     private val client = HttpClient(CIO) {
@@ -33,13 +34,13 @@ object CustomCalendarClient {
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<CustomCalendar>>().data
         }
     }
 
     suspend fun deleteCalendar(userId: String, calendarId: String): Boolean {
         val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/calendars/$calendarId")
-        return response.status != HttpStatusCode.BadRequest
+        return response.status == HttpStatusCode.OK
     }
 
 
@@ -59,7 +60,7 @@ object CustomCalendarClient {
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<UserCalendarCourse>>().data
         }
     }
 
@@ -71,7 +72,6 @@ object CustomCalendarClient {
             setBody(mapOf("courses" to courses))
         }
 
-        return response.body()
+        return response.status == HttpStatusCode.OK
     }
-
 }
