@@ -1,0 +1,6 @@
+services:
+  planner-web:
+    build:
+      dockerfile: ./Dockerfile-planner
+    ports:
+      - "8081:8081"

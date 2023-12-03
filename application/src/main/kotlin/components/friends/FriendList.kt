@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import components.common.DividerComposable
+import components.common.WarningDialog
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Trash
@@ -89,7 +90,7 @@ fun FriendItem(user: User, removeFriend: (user: User) -> Unit) {
 
     when {
         openAlertDialog -> {
-            UnfriendDialog(
+            WarningDialog(
                 onDismissRequest = { openAlertDialog = false },
                 onConfirmation = {
                     friendScope.launch {
@@ -111,47 +112,4 @@ fun FriendItem(user: User, removeFriend: (user: User) -> Unit) {
         }
     }
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UnfriendDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Warning")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
 }

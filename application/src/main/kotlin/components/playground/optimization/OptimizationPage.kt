@@ -13,12 +13,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -223,26 +226,27 @@ fun transformCourseSectionsToCalendar(courseSections: List<CourseSection>): List
                     startTime = LocalDateTime.of(LocalDate.now(), LocalTime.parse(times[0].getStartTime())).toString(),
                     endTime = LocalDateTime.of(LocalDate.now(), LocalTime.parse(times[0].getEndTime())).toString(),
                     weekPattern = pattern
-            )
+                )
             )
         }
     }
     return calendarCourses
 }
 
-
 @Composable
 fun OptimizationPage(
     calendarId: String,
     courseNames: List<String>,
     courseMap:  Map<String, CourseDetails>,
-    goToCalendar: () -> Unit
+    selectedCourses: SnapshotStateList<CourseSchedule>,
+    toggleComputing: (Boolean) -> Unit,
+    updateCalendar: (id: String) -> Unit,
+    goToCalendar: () -> Unit,
 ) {
     var isSheetOpen by remember { mutableStateOf(false) }
-    val selectedCourses = remember { mutableStateListOf<CourseSchedule>() }
     Row (modifier = Modifier.fillMaxSize()) {
         Column (modifier = Modifier.fillMaxHeight().fillMaxWidth(if (isSheetOpen) { 0.7f} else {1f})) {
-            OptimizationSelection(calendarId, selectedCourses, { selectedCourses.remove(it) }, goToCalendar ) {
+            OptimizationSelection(calendarId, selectedCourses, toggleComputing, { selectedCourses.remove(it) }, goToCalendar, updateCalendar ) {
                 isSheetOpen = !isSheetOpen
             }
         }
@@ -262,12 +266,14 @@ fun OptimizationPage(
 fun OptimizationSelection(
     calendarId: String,
     selectedCourses: List<CourseSchedule>,
+    toggleComputing: (Boolean) -> Unit,
     removeItem: (courseSchedule: CourseSchedule) -> Unit,
     goToCalendar: () -> Unit,
+    updateCalendar: (id: String) -> Unit,
     openSideSheet: () -> Unit
 ) {
     val optimizeScope = rememberCoroutineScope()
-    val isDialogOpen by remember {  mutableStateOf(false) }
+    var isDialogOpen by remember {  mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -350,28 +356,22 @@ fun OptimizationSelection(
         ) {
             Button(
                 onClick = {
-                    optimizeScope.launch {
-                        try {
-                            val op = transformScheduleDataToOptimized(selectedCourses)
-                            val ans = OptimizationClient.optimizeSchedule(op)
-                            if (ans != null) {
-                                val newCourses = transformCourseSectionsToCalendar(ans)
-                                CustomCalendarClient.updateCalendar(store.getState().userId,
-                                    calendarId,
-                                    newCourses)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-
-
+                    isDialogOpen = true
                 },
                 modifier = Modifier.width(180.dp)
             ) {
                 Text("Optimize Schedule", color =Color.White)
             }
         }
+    }
+    if (isDialogOpen) {
+        OptimizationDialog(onDismissRequest = {
+            isDialogOpen = false
+        }, scope = optimizeScope,
+            selectedCourses = selectedCourses,
+            calendarId = calendarId,
+            updateCalendar = updateCalendar,
+            toggleComputing = toggleComputing)
     }
 }
 
@@ -447,10 +447,12 @@ fun OptimizeCourseSideSheet(courseNames: List<String>,
                     if (selectedCourse.isNotEmpty()) {
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
-                                .background(Color.Gray).padding(horizontal = 4.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                                .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(text = selectedCourse, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+                            Text(text = selectedCourse, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                textAlign = TextAlign.Center)
                         }
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
@@ -555,105 +557,114 @@ fun OptimizeItem(
 @Composable
 fun OptimizationDialog(
     onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    onCreateNewCalendar: (calendar: CustomCalendar) -> Unit,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    selectedCourses: List<CourseSchedule>,
+    calendarId: String,
+    updateCalendar: (id: String) -> Unit,
+    toggleComputing: (Boolean) -> Unit
 ) {
     var isLoading by remember {  mutableStateOf(false) }
     Dialog(
         onDismissRequest = { }
     ) {
-        var name by remember { mutableStateOf("") }
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(275.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
+        if (!isLoading) {
+            Card(
                 modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth()
+                    .height(275.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CustomIconButton(
+                            onClick = onDismissRequest,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                            tooltipText = "Close Modal",
+                            buttonRadius = 45.dp,
+                            buttonSize = 36.dp,
+                            backgroundColor = Color.Transparent,
+                            icon = TablerIcons.X
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                "Are you sure you want to optimize the current selection of courses? " +
+                                        "This action will overwrite your existing courses in your schedule."
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    isLoading = true
+                                    toggleComputing(true)
+                                    try {
+                                        val op = transformScheduleDataToOptimized(selectedCourses)
+                                        val ans = OptimizationClient.optimizeSchedule(op)
+                                        if (!ans.isNullOrEmpty()) {
+                                            val newCourses = transformCourseSectionsToCalendar(ans)
+                                            CustomCalendarClient.updateCalendar(store.getState().userId,
+                                                calendarId,
+                                                newCourses)
+                                            updateCalendar(calendarId)
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                    isLoading = false
+                                    toggleComputing(false)
+                                    onDismissRequest()
+                                }
+                            },
+                            modifier = Modifier.padding(20.dp),
+                            shape = RoundedCornerShape(50.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colorScheme.inverseOnSurface
+                            )
+                        ) {
+                            Text(text = "Confirm", modifier = Modifier.padding(horizontal = 4.dp))
+                        }
+                    }
+                }
+            }
+        } else {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(275.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
             ) {
                 Row (
-                    modifier = Modifier.fillMaxWidth().padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    CustomIconButton(
-                        onClick = onDismissRequest,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
-                        tooltipText = "Close Modal",
-                        buttonRadius = 20.dp,
-                        buttonSize = 15.dp,
-                        backgroundColor = Color.Transparent,
-                        icon = TablerIcons.X
+                    CircularProgressIndicator(
+                        modifier = Modifier.width(64.dp),
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
-                }
-
-                Row (
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = {
-                            name = it
-                        },
-                        label = { Text("name") },
-                        modifier = Modifier
-                            .fillMaxWidth().padding(horizontal = 20.dp)
-//                    .height(30.dp)
-                            .padding(top = 20.dp),
-                        textStyle = TextStyle(
-                            fontSize = 14.sp,
-                            color = Color.Black
-//                    fontStyle = MaterialTheme.typography.body2.fontStyle
-                        ),
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = {
-                            scope.launch {
-                                try {
-                                    if (name.isEmpty()) {
-                                        // Add Snackbar
-                                    } else {
-                                        val result = CustomCalendarClient.addCalendar(
-                                            store.getState().userId,
-                                            CustomCalendarParams(name)
-                                        )
-                                        if (result != null ) {
-                                            onCreateNewCalendar(result)
-                                            onConfirmation()
-                                        } else {
-                                            // error
-                                        }
-                                    }
-                                }catch (e: ClientRequestException) {
-                                    println("Error fetching data: ${e.message}")
-                                } catch (e: Exception) {
-                                    println(e.message)
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(20.dp),
-                        shape = RoundedCornerShape(50.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colorScheme.inverseOnSurface
-                        )
-                    ) {
-                        Text(text="Confirm", modifier = Modifier.padding(horizontal = 4.dp))
-                    }
                 }
             }
         }

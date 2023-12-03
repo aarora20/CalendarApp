@@ -31,7 +31,7 @@ object OptimizationClient {
     }
     suspend fun optimizeSchedule(schedule: OptimizedSchedule): List<CourseSection>? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8889/timeTable/solve") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8081/timeTable/solve") {
             contentType(ContentType.Application.Json)
             setBody(schedule)
             timeout {
@@ -39,13 +39,9 @@ object OptimizationClient {
             }
         }
 
-        println(response)
+        val body = response.body<RouteResponseData<List<CourseSection>>>()
 
-        return if (response.status == HttpStatusCode.BadRequest) {
-            null
-        } else {
-            response.body()
-        }
+        return body.data
     }
 
 }
