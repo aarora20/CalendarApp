@@ -59,7 +59,7 @@ sealed class AppScreen {
 
 }
 
-val INITIAL_STATE = AuthState("", "", "OCEAN")
+val INITIAL_STATE = AuthState("", "", "", "OCEAN")
 
 val store = createThreadSafeStore(::rootReducer, INITIAL_STATE)
 
@@ -112,14 +112,18 @@ fun landingPage(
         scope.launch{
             try {
                 isLoading = true
-                var token = TokenClient.getIdToken()
-                store.dispatch(SetToken(token))
+                var token = TokenClient.getIdToken("ktor")
+                store.dispatch(SetKtorToken(token))
                 courseList = CourseSchedulesClient.getCourses()
+                token = TokenClient.getIdToken("spring")
+                store.dispatch(SetSpringToken(token))
                 isLoading = false
                 while (true) {
                     delay(3000000);
-                    token = TokenClient.getIdToken()
-                    store.dispatch(SetToken(token))
+                    token = TokenClient.getIdToken("ktor")
+                    store.dispatch(SetKtorToken(token))
+                    token = TokenClient.getIdToken("spring")
+                    store.dispatch(SetSpringToken(token))
                 }
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")

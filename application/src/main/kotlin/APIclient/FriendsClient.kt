@@ -24,7 +24,7 @@ object FriendsClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/find") {
             contentType(ContentType.Application.Json)
             setBody(UsernameParams(username))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return response.body()
@@ -34,7 +34,7 @@ object FriendsClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/send") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -46,21 +46,21 @@ object FriendsClient {
 
     suspend fun getFriendList(userId: String): List<User> {
         val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.body()
     }
 
     suspend fun getIncomingList(userId: String): List<User> {
         val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/requests/incoming") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.body()
     }
 
     suspend fun getSentList(userId: String): List<User> {
         val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/requests/sent") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.body()
     }
@@ -70,7 +70,7 @@ object FriendsClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/requests/accept") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -84,7 +84,7 @@ object FriendsClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/requests/delete") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return response.status == HttpStatusCode.OK
@@ -95,7 +95,7 @@ object FriendsClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/friends/unfriend") {
             contentType(ContentType.Application.Json)
             setBody(FriendParams(userId, friendId))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return response.status == HttpStatusCode.OK

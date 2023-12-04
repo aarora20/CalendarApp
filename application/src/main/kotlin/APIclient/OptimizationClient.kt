@@ -35,7 +35,7 @@ object OptimizationClient {
         val response: HttpResponse = client.post("https://calendar-app-planner-server-ycd64g7ulq-pd.a.run.app/timeTable/solve") {
             contentType(ContentType.Application.Json)
             setBody(schedule)
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().springToken)
             timeout {
                 requestTimeoutMillis = 30000
             }

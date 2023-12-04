@@ -24,7 +24,7 @@ object AuthClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(user)
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -39,7 +39,7 @@ object AuthClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(user)
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {

@@ -1,8 +1,14 @@
 package store
 
-fun tokenReducer(state: String, action: Any): String =
+fun ktorTokenReducer(state: String, action: Any): String =
     when (action) {
-        is SetToken -> action.token
+        is SetKtorToken -> action.token
+        else -> state
+    }
+
+fun springTokenReducer(state: String, action: Any): String =
+    when (action) {
+        is SetSpringToken -> action.token
         else -> state
     }
 
@@ -23,7 +29,8 @@ fun calendarThemeReducer(state: String, action: Any): String =
 fun rootReducer(state: AuthState, action: Any) = when (action) {
     is LogoutUser -> AuthState() // Resets to default state
     else -> AuthState(
-        token = tokenReducer(state.token, action),
+        ktorToken = ktorTokenReducer(state.ktorToken, action),
+        springToken = springTokenReducer(state.springToken, action),
         userId = idReducer(state.userId, action),
         calendarTheme = calendarThemeReducer(state.calendarTheme, action)
     )

@@ -23,7 +23,7 @@ object CustomCalendarClient {
 
     suspend fun getCalendars(userId: String): List<CustomCalendar> {
         val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/${userId}/calendars") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.body()
     }
@@ -32,7 +32,7 @@ object CustomCalendarClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/calendars") {
             contentType(ContentType.Application.Json)
             setBody(calendarParams)
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -44,7 +44,7 @@ object CustomCalendarClient {
 
     suspend fun deleteCalendar(userId: String, calendarId: String): Boolean {
         val response: HttpResponse = client.delete("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/calendars/$calendarId") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.status == HttpStatusCode.OK
     }
@@ -52,7 +52,7 @@ object CustomCalendarClient {
 
     suspend fun getCalendarCourses(userId: String, calendarId: String): List<UserCalendarCourse> {
         val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/calendars/$calendarId/calendarCourses") {
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
         return response.body<List<UserCalendarCourse>>()
     }
@@ -63,7 +63,7 @@ object CustomCalendarClient {
         val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/calendars/$calendarId/calendarCourses") {
             contentType(ContentType.Application.Json)
             setBody(course)
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -79,7 +79,7 @@ object CustomCalendarClient {
                 "calendarCourses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
-            bearerAuth(store.getState().token)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return response.status == HttpStatusCode.OK
