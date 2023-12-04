@@ -1,0 +1,8 @@
+FROM openjdk:17
+
+EXPOSE 8081:8081
+
+RUN mkdir /app
+
+COPY ./build/libs/*-SNAPSHOT.jar /app/calendarApp.jar
+ENTRYPOINT ["java","-jar","/app/calendarApp.jar"]

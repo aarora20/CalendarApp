@@ -1,20 +1,23 @@
 package components.courseInfo
 
 import APIclient.CourseSchedulesClient
-import APIclient.CourseSchedulesClient.addToWishlist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Snackbar
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import components.common.CustomIconButton
 import components.courseSearch.DropSearch
 import components.courseSearch.SearchScreen
 import components.store
@@ -36,18 +40,102 @@ import models.UserCourse
 import models.WishCourse
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+data class WishlistTerms(
+    val text: String
+)
+
+private val selectedTerms = listOf(
+    WishlistTerms(
+        text = "1A"
+    ),
+    WishlistTerms(
+        text = "1B"
+    ),
+    WishlistTerms(
+        text = "2A"
+    ),
+    WishlistTerms(
+        text = "2B"
+    ),
+    WishlistTerms(
+        text = "3A"
+    ),
+    WishlistTerms(
+        text = "3B"
+    ),
+    WishlistTerms(
+        text = "4A"
+    ),
+    WishlistTerms(
+        text = "4B"
+    )
+)
+
+@Composable
+fun wishlistDropDown(
+    terms: List<WishlistTerms>,
+    scope: CoroutineScope,
+    course: CourseDetails,
+    wishListText: String,
+    changeWishListText: (text: String) -> Unit
+) {
+    var showDropdown by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            //.fillMaxWidth()
+            .clickable { showDropdown = true }
+            .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
+            .background(Color.White, RoundedCornerShape(4.dp))
+            .padding(8.dp)
+    ) {
+        Text(text = wishListText, style = MaterialTheme.typography.h6)
+        DropdownMenu(
+            expanded = showDropdown,
+            onDismissRequest = { showDropdown = false },
+        ) {
+            terms.forEach { term ->
+                DropdownMenuItem(
+                    onClick = {
+                        val selectedTerm = term.text
+                        changeWishListText("Added to Term: $selectedTerm")
+                        showDropdown = false
+                        // Add course to wishlist with the selected term
+                        scope.launch {
+                            val toAdd = WishCourse(
+                                subjectCode = course.subjectCode,
+                                catalogNumber = course.catalogNumber,
+                                courseTitle = course.title,
+                                termYear = selectedTerm // Add termYear information
+                            )
+                            val success = CourseSchedulesClient.addToWishlist(store.getState().userId, toAdd)
+                            if (!success) {
+                                println("Error adding course to wishlist.")
+                                changeWishListText("+ Wishlist")  // Revert button text on failure
+                            }
+                        }
+                    }
+                ) {
+                    Text(text = term.text)
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun coursePage(
     courseNames: List<String>,
-    addedCourses: Set<String>,
+    addedCourses: SnapshotStateList<String>,
     onBackClick: () -> Unit,
     course: CourseDetails,
     onChangeCourse: (course: String) -> Unit,
-    originScreen: SearchScreen
+    originScreen: SearchScreen,
+    //terms: List<WishlistTerms>
 ) {
     var schedules by remember { mutableStateOf(emptyList<ScheduleData>()) }
     val scope = rememberCoroutineScope()
+    var wishListText by remember { mutableStateOf("+ Wishlist") }
 
     LaunchedEffect(course) {
         scope.launch{
@@ -66,6 +154,7 @@ fun coursePage(
                 println(e.message)
                 emptyList()
             }
+            wishListText = "+ Wishlist"
         }
     }
 
@@ -79,11 +168,11 @@ fun coursePage(
 
     // sets the page as a column
     val snackbarState = remember { SnackbarHostState() }
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = {
-            androidx.compose.material3.SnackbarHost(hostState = snackbarState) {
-                androidx.compose.material3.Snackbar(
+            SnackbarHost(hostState = snackbarState) {
+                Snackbar(
                     snackbarData = it,
                     modifier = Modifier.width(500.dp),
                     )
@@ -98,39 +187,25 @@ fun coursePage(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                 ) {
                     Row (modifier = Modifier.weight(1f), verticalAlignment = Alignment.Top) {
-                        Box (
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)
-                        ) {
-                            PlainTooltipBox(
-                                tooltip = {Text("Back", color = Color.White)}
-                            ) {
-                                CompositionLocalProvider(
-                                    LocalMinimumInteractiveComponentEnforcement provides false
-                                ) {
-                                    IconButton(
-                                        onClick = updatedOnBackClick,
-                                        modifier = Modifier
-                                            .then(Modifier.size(36.dp))
-                                            .statusBarsPadding()
-                                            .background(
-                                                color = Color.LightGray,
-                                                shape = CircleShape
-                                            ).tooltipAnchor(),
-
-                                        ) {
-                                        Icon(
-                                            imageVector = (TablerIcons.ChevronLeft),
-                                            contentDescription = "Back Button",
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        CustomIconButton(
+                            onClick = updatedOnBackClick,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                            tooltipText = "Back",
+                            buttonRadius =  36.dp,
+                            buttonSize = 15.dp,
+                            backgroundColor = Color.LightGray,
+                            icon = TablerIcons.ChevronLeft
+                        )
                     }
 
                     Box (modifier = Modifier.weight(5f)){
-                        DropSearch(courseNames) { onChangeCourse(it) }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.Center)
+                        ) {
+                            DropSearch(courseNames) {
+                                onChangeCourse(it)
+                            }
+                        }
                     }
                 }
             }
@@ -141,12 +216,14 @@ fun coursePage(
                     verticalArrangement = Arrangement.Top,
                 ) {
                     // set the header of the page letting the user know this will provide course info
-                    Text(
-                        text = "Course Information",
-                        color = Color.Black,
-                        fontSize = 30.sp,
-                        maxLines = 1
-                    )
+                    SelectionContainer {
+                        Text(
+                            text = "Course Information",
+                            color = Color.Black,
+                            fontSize = 30.sp,
+                            maxLines = 1
+                        )
+                    }
 
                     // subsequent row provides the course code and its name
                     // also provides the user an option to add the course to their wish list
@@ -157,27 +234,17 @@ fun coursePage(
                     ) {
 
                         // provides the course code and name ie CS346: Application Development
-                        Text(
-                            text = course.subjectCode + course.catalogNumber + ": " + course.title,
-                            style = MaterialTheme.typography.h6
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = course.subjectCode + course.catalogNumber + ": " + course.title,
+                                style = MaterialTheme.typography.h6
+                            )
+                        }
 
                         // wish list option
-                        var wishList by remember { mutableStateOf("+ Wish List") }
-                        Button(
-                            onClick = {
-                                wishList = "Added to Wish List!"
-                                scope.launch {
-                                    val toAdd = WishCourse(course.subjectCode,course.catalogNumber,course.title)
-                                    val success = addToWishlist(store.getState().userId, toAdd)
-                                    if (!success) {
-                                        println("Error adding course to wishlist.")
-                                        wishList = "+ Wish List"  // Revert button text on failure
-                                    }
-                                }
-                            }
-                        ) {
-                            Text(wishList)
+                        // temporary list holding all terms
+                        wishlistDropDown(selectedTerms, scope, course, wishListText) {
+                            wishListText = it
                         }
                     }
 
@@ -202,10 +269,12 @@ fun coursePage(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         course.requirementsDescription?.let {
-                            Text(
-                                text = it,
-                                fontSize = 15.sp,
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = it,
+                                    fontSize = 15.sp,
+                                )
+                            }
                         }
                     }
 
@@ -215,10 +284,12 @@ fun coursePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Schedule for " + course.termName + ":",
-                            fontSize = 15.sp,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = "Schedule for " + course.termName + ":",
+                                fontSize = 15.sp,
+                            )
+                        }
                     }
                     tableScreen(course, schedules, scope, addedCourses, snackbarState)
                 }
@@ -234,21 +305,37 @@ fun RowScope.TableCell(
     header: Int,
 ) {
     if (header == 1) {
-        Text(
-            text = text,
+        Row (
             Modifier
                 .weight(weight, fill = true)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+        ) {
+            SelectionContainer (
+                Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = text,
+                Modifier
+                    .padding(8.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     } else {
-        Text(
-            text = text,
+        Row (
             Modifier
                 .weight(weight, fill = true)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+        ) {
+            SelectionContainer (
+                Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = text,
+                    Modifier
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -257,6 +344,10 @@ fun detectTimeConflict(
     addStartTime: String,
     addEndTime: String,
     daysPattern: String): String {
+
+    if (addStartTime.isEmpty() || addEndTime.isEmpty()) {
+        return "EMPTY TIMES"
+    }
 
     val startTime = LocalDateTime.parse(addStartTime)
     val endTime = LocalDateTime.parse(addEndTime)
@@ -333,7 +424,6 @@ fun detectTimeConflict(
     return "NO CONFLICT"
 }
 
-
 @Composable
 fun RowScope.TableCell(
     text: String,
@@ -341,7 +431,8 @@ fun RowScope.TableCell(
     scope: CoroutineScope,
     course: CourseDetails,
     schedule: ScheduleData,
-    snackBarState: SnackbarHostState
+    snackBarState: SnackbarHostState,
+    addedCourses: SnapshotStateList<String>,
 ) {
     var addCourseStr by remember { mutableStateOf(text) }
     TextButton(
@@ -356,20 +447,29 @@ fun RowScope.TableCell(
                         val isTimeConflict = detectTimeConflict(userCourses, schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                             schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(), schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
 
-                        if (isTimeConflict != "NO CONFLICT") {
+                        if (isTimeConflict == "EMPTY TIMES") {
                             snackBarState.showSnackbar(
-                                message = "Unable to Add due to Time Conflict with: " + isTimeConflict,
+                                message = "Unable to Add Due to Time Missing ",
+                                duration = SnackbarDuration.Short
+                            )
+                        } else if (isTimeConflict != "NO CONFLICT") {
+                            snackBarState.showSnackbar(
+                                message = "Unable to Add Due to Time Conflict with: $isTimeConflict",
                                 duration = SnackbarDuration.Short
                             )
                         } else {
+                            val pad = padding(schedule.classSection)
                             val toAdd = UserCourse(course.courseId,
                                 course.subjectCode + " " + course.catalogNumber,
-                                course.title, schedule.courseComponent + " " + schedule.classSection,
+                                course.title, schedule.courseComponent + " $pad" + schedule.classSection,
                                 schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                schedule.scheduleData?.get(0)?.scheduleStartDate.orEmpty(),
+                                schedule.scheduleData?.get(0)?.scheduleEndDate.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
                             CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
                             addCourseStr = "Added to Course Schedule!"
+                            addedCourses.add("${toAdd.courseNum}${toAdd.component}")
                         }
 
                     } catch (e: ClientRequestException) {
@@ -392,14 +492,15 @@ fun tableScreen(
     course: CourseDetails,
     schedules: List<ScheduleData>,
     scope: CoroutineScope,
-    addedCourses: Set<String>,
+    addedCourses: SnapshotStateList<String>,
     snackBarState: SnackbarHostState
 ) {
     // Each cell of a column must have the same weight.
     val sectionWeight = .15f // 15%
     val classWeight = .10f // 10%
+    val enrolledWeight = 0.10f // 10%
     val timeWeight = .3f // 30%
-    val dateWeight = 0.25f // 25%
+    val dateWeight = 0.15f // 15%
     val buttonWeight = .2f // 20%
     // The LazyColumn will be our table. Notice the use of the weights below
     LazyColumn(Modifier.fillMaxSize().padding(0.dp)) {
@@ -411,6 +512,7 @@ fun tableScreen(
             ) {
                 TableCell(text = "Class", weight = classWeight, header = 1)
                 TableCell(text = "Section", weight = sectionWeight, header = 1)
+                TableCell(text = "Enrolled", weight = enrolledWeight, header = 1)
                 TableCell(text = "Time", weight = timeWeight, header = 1)
                 TableCell(text = "Days", weight = dateWeight, header = 1)
                 TableCell(text = "Add to Course Schedule", weight = buttonWeight, header = 1)
@@ -418,13 +520,15 @@ fun tableScreen(
         }
         // Here are all the lines of your table.
         items(schedules) {
+            val preStartTime = it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty()
+            val preEndTime = it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty()
             val classNum  = it.classNumber
             val courseComp = it.courseComponent
             val sectionNum = it.classSection
-            val start = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
-                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
-            val end = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
-                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
+            val start = if  (preStartTime.isNotEmpty()) LocalDateTime.parse(preStartTime)
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase() else ""
+            val end = if (preEndTime.isNotEmpty()) LocalDateTime.parse(preEndTime)
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase() else ""
             val date = it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             Row(
                 Modifier.fillMaxWidth().border(0.dp, Color.Black),
@@ -433,13 +537,14 @@ fun tableScreen(
                 val pad = padding(sectionNum)
                 TableCell(text = classNum.toString(), weight = classWeight, header = 0)
                 TableCell(text = "$courseComp $pad$sectionNum", weight = sectionWeight, header = 0)
+                TableCell(text = "${it.enrolledStudents}/${it.maxEnrollmentCapacity}", weight = enrolledWeight, header = 0)
                 TableCell(text = "$start - $end", weight = timeWeight, header = 0)
                 TableCell(text = date, weight = dateWeight, header = 0)
                 TableCell(text = if (addedCourses.contains(
-                        "${course.subjectCode} ${course.catalogNumber}$courseComp $sectionNum")) {
+                        "${course.subjectCode} ${course.catalogNumber}$courseComp $pad$sectionNum")) {
                     "Added to Course Schedule!" }
                         else { "+ Course Schedule"},
-                    weight = buttonWeight, scope, course, it, snackBarState = snackBarState)
+                    weight = buttonWeight, scope, course, it, snackBarState = snackBarState, addedCourses)
             }
         }
     }

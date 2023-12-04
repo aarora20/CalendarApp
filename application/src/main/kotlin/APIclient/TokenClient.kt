@@ -12,9 +12,7 @@ import java.util.concurrent.ExecutionException
 
 object TokenClient {
 
-
-
-    suspend fun getIdToken() {
+    suspend fun getIdToken(): String {
 
         val jsonCredentialPath = "path-to-json-credential-file"
 
@@ -37,11 +35,11 @@ object TokenClient {
             //     .setTargetAudience(targetAudience)
             //     .build();
             val token: String = idToken.getTokenValue()
-            println(token);
-            println("Generated ID token.")
+            return token
 
         } catch (e: Exception) {
             println("Failed to obtain ID token")
         }
+        return ""
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -65,7 +66,7 @@ data class UniClass(
 )
 
 enum class Theme {
-    THEME1, THEME2
+    OCEAN, PASTEL, SUNSET, EARTH
 }
 
 val TimeFormatter = DateTimeFormatter.ofPattern("h:mma")
@@ -111,11 +112,15 @@ fun oneClass (
 
         val density = LocalWindowInfo.current.containerSize.width / 3 / 7
 
-        Text(uniclass.name + " " + uniclass.type,
+        SelectionContainer {
+            Text(uniclass.name + " " + uniclass.type,
 
-            fontSize = textSize.sp)
-        Text(uniclass.start.format(TimeFormatter).replace(".", "").uppercase() + " - " + uniclass.finish.format(TimeFormatter).replace(".", "").uppercase(),
-            fontSize = textSize.sp)
+                fontSize = textSize.sp)
+        }
+        SelectionContainer {
+            Text(uniclass.start.format(TimeFormatter).replace(".", "").uppercase() + " - " + uniclass.finish.format(TimeFormatter).replace(".", "").uppercase(),
+                fontSize = textSize.sp)
+        }
     }
 }
 
@@ -206,6 +211,30 @@ fun generateColors(courseList: List<UserCourse>, theme: Theme): Map<String, Colo
         Color(127, 179, 213),
         Color(84, 153, 199),
         Color(41, 128, 185),
+        Color(174, 214, 241),
+        Color(133, 193, 233),
+        Color(93, 173, 226),
+        Color(52, 152, 219),
+        Color(46, 134, 193),
+        Color(127, 179, 213),
+        Color(84, 153, 199),
+        Color(41, 128, 185),
+        Color(174, 214, 241),
+        Color(133, 193, 233),
+        Color(93, 173, 226),
+        Color(52, 152, 219),
+        Color(46, 134, 193),
+        Color(127, 179, 213),
+        Color(84, 153, 199),
+        Color(41, 128, 185),
+        Color(174, 214, 241),
+        Color(133, 193, 233),
+        Color(93, 173, 226),
+        Color(52, 152, 219),
+        Color(46, 134, 193),
+        Color(127, 179, 213),
+        Color(84, 153, 199),
+        Color(41, 128, 185),
     )
 
     val theme2Colors = listOf(
@@ -219,11 +248,107 @@ fun generateColors(courseList: List<UserCourse>, theme: Theme): Map<String, Colo
         Color(185, 251, 192),
         Color(251, 248, 204),
         Color(253, 228, 207),
+        Color(255, 207, 210),
+        Color(241, 192, 232),
+        Color(207, 186, 240),
+        Color(163, 196, 243),
+        Color(144, 219, 244),
+        Color(142, 236, 245),
+        Color(152, 245, 225),
+        Color(185, 251, 192),
+        Color(251, 248, 204),
+        Color(253, 228, 207),
+        Color(207, 186, 240),
+        Color(163, 196, 243),
+        Color(144, 219, 244),
+        Color(142, 236, 245),
+        Color(152, 245, 225),
+        Color(185, 251, 192),
+        Color(251, 248, 204),
+        Color(253, 228, 207),
+        Color(255, 207, 210),
+        Color(241, 192, 232),
+        Color(207, 186, 240),
+        Color(163, 196, 243),
+        Color(144, 219, 244),
+        Color(142, 236, 245),
+        Color(152, 245, 225),
+        Color(185, 251, 192),
+        Color(251, 248, 204),
+        Color(253, 228, 207),
+        )
+
+    val theme3Colors = listOf(
+        Color(255,248,182),
+        Color(255,189,145),
+        Color(255,141,113),
+        Color(255,112,126),
+        Color(255,213,179),
+        Color(255,182,158),
+        Color(255,167,145),
+        Color(255,248,182),
+        Color(255,189,145),
+        Color(255,141,113),
+        Color(255,112,126),
+        Color(255,213,179),
+        Color(255,182,158),
+        Color(255,167,145),
+        Color(255,248,182),
+        Color(255,189,145),
+        Color(255,141,113),
+        Color(255,112,126),
+        Color(255,213,179),
+        Color(255,182,158),
+        Color(255,167,145),
+        Color(255,248,182),
+        Color(255,189,145),
+        Color(255,141,113),
+        Color(255,112,126),
+        Color(255,213,179),
+        Color(255,182,158),
+        Color(255,167,145),
+        )
+
+    val theme4Colors = listOf(
+        Color(170,214,136),
+        Color(152,195,119),
+        Color(139,189,120),
+        Color(94,167,88),
+        Color(71,137,75),
+        Color(200,225,204),
+        Color(184,216,190),
+        Color(224,240,227),
+        Color(170,214,136),
+        Color(152,195,119),
+        Color(139,189,120),
+        Color(94,167,88),
+        Color(71,137,75),
+        Color(200,225,204),
+        Color(184,216,190),
+        Color(224,240,227),
+        Color(170,214,136),
+        Color(152,195,119),
+        Color(139,189,120),
+        Color(94,167,88),
+        Color(71,137,75),
+        Color(200,225,204),
+        Color(184,216,190),
+        Color(224,240,227),
+        Color(170,214,136),
+        Color(152,195,119),
+        Color(139,189,120),
+        Color(94,167,88),
+        Color(71,137,75),
+        Color(200,225,204),
+        Color(184,216,190),
+        Color(224,240,227),
     )
 
     val selectedThemeColors = when (theme) {
-        Theme.THEME1 -> theme1Colors
-        Theme.THEME2 -> theme2Colors
+        Theme.OCEAN -> theme1Colors
+        Theme.PASTEL -> theme2Colors
+        Theme.SUNSET -> theme3Colors
+        Theme.EARTH -> theme4Colors
     }
 
     for ((index, courseName) in distinctCourseNames.withIndex()) {

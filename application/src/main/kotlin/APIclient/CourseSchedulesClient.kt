@@ -1,5 +1,6 @@
 package APIclient
 
+import components.store
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -9,11 +10,11 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
 import models.Courses
 import models.ScheduleData
 import models.UserCourse
 import models.WishCourse
+import util.RouteResponseData
 
 object CourseSchedulesClient {
     private val client = HttpClient(CIO) {
@@ -22,62 +23,73 @@ object CourseSchedulesClient {
         }
     }
     suspend fun getCourses(): Courses {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/courses/1239")
+        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/courses/1241") {
+            bearerAuth(store.getState().token)
+        }
         return response.body<Courses>()
     }
 
     suspend fun getUserCourses(userId: String): List<UserCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/courses")
+        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses") {
+            bearerAuth(store.getState().token)
+        }
         return response.body<List<UserCourse>>()
     }
 
     suspend fun addUserCourse(course: UserCourse, userId: String): UserCourse? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/courses") {
+        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses") {
             contentType(ContentType.Application.Json)
             setBody(course)
+            bearerAuth(store.getState().token)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<UserCourse>>().data
         }
     }
 
     suspend fun updateSchedule(courses: List<UserCourse>, userId: String): Boolean {
-
-        val response: HttpResponse = client.put("http://0.0.0.0:8080/users/$userId/courses/all") {
+        val response: HttpResponse = client.put("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
+            bearerAuth(store.getState().token)
         }
 
-        return response.body()
+        return response.status == HttpStatusCode.OK
     }
 
     suspend fun getCourseSchedule(courseId: String): List<ScheduleData> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/classSchedules/1239/${courseId}")
+        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/classSchedules/1241/${courseId}") {
+            bearerAuth(store.getState().token)
+        }
         return response.body<List<ScheduleData>>()
     }
 
-    @OptIn(InternalAPI::class)
     suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/wishlist") {
+        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist") {
             contentType(ContentType.Application.Json)
             setBody(course)
+            bearerAuth(store.getState().token)
         }
 
         return response.status == HttpStatusCode.OK
     }
 
     suspend fun getWishlist(userId: String): List<WishCourse> {
-        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/wishlist")
+        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist") {
+            bearerAuth(store.getState().token)
+        }
         return response.body<List<WishCourse>>()
     }
 
-    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String): Boolean {
+    suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean {
         return try {
-            val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/wishlist/$subjectCode/$catalogNumber")
+            val response: HttpResponse = client.delete("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist/$subjectCode/$catalogNumber/$termYear") {
+                bearerAuth(store.getState().token)
+            }
             response.status == HttpStatusCode.NoContent
         } catch (e: ClientRequestException) {
             println("Error in request: ${e.message}")

@@ -3,6 +3,7 @@ package components.common
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material3.*
@@ -28,7 +29,9 @@ fun DividerComposable(text: String) {
             .weight(1f),
             color = Color.LightGray,
             thickness = 1.dp)
-        Text(text = text, fontSize = 14.sp, modifier = Modifier.padding(8.dp))
+        SelectionContainer {
+            Text(text = text, fontSize = 14.sp, modifier = Modifier.padding(8.dp))
+        }
         Divider(modifier = Modifier.fillMaxWidth().weight(1f),
             color = Color.LightGray,
             thickness = 1.dp)
@@ -76,4 +79,46 @@ fun CustomIconButton(
             }
         }
     }
+}
+
+@Composable
+fun WarningDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        icon = {
+            androidx.compose.material.Icon(icon, contentDescription = "Warning")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            androidx.compose.material.TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material.TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }

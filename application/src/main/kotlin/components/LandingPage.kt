@@ -14,17 +14,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.MenuBar
 import components.auth.LoginScreen
 import components.auth.RegisterScreen
 import components.courseSearch.CourseSearchScreen
 import components.friends.FriendsPage
 import components.home.HomeScreen
 import components.playground.CalendarEditView
-import components.playground.PlaygroundHome
+import components.playground.PlaygroundCalendarsPage
 import components.selectedCourses.selectionScreen
-import components.wishlist.wishCourses
-import components.wishlist.wishSelection
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
@@ -32,100 +34,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.CustomCalendar
-import models.UserCalendarCourse
 import org.reduxkotlin.createThreadSafeStore
-import store.AuthState
-import store.LogoutUser
-import store.rootReducer
-import java.io.File
-import java.io.FileInputStream
-
-// fake data for now for wishlist
-// Should replace with api get results
-private val listOfWishCourses = listOf(
-    wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "346",
-        title = "Application Development"
-    ),
-    wishCourses(
-        subjectCode = "CS",
-        catalogNumber = "240",
-        title = "Data Structures and Data Management"
-    ),
-    wishCourses(
-        subjectCode = "STAT",
-        catalogNumber = "373",
-        title = "Regression and Forecasting Methods in Finance"
-    )
-)
+import store.*
+import wishlistContainer
 
 @Immutable
 sealed class Screen {
     object Login: Screen()
     object SignUp: Screen()
     object Landing : Screen()
-}
-
-val INITIAL_STATE = AuthState("", "")
-
-val store = createThreadSafeStore(::rootReducer, INITIAL_STATE)
-
-@Composable
-fun landingPage() {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
-    var courseList by remember { mutableStateOf(emptyList<CourseDetails>()) }
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(true) {
-        scope.launch{
-            try {
-//                println(System.getProperty("user.dir"))
-////                println(FileInputStream("test.input").read())
-////                println(File("test.input").useLines { it.toList() })
-////                println(File(javaClass.getResource("/test.input").toURI()).useLines { it.toList() })
-////                println(javaClass.getResource("/test.input").readText())
-////                courseList = CourseSchedulesClient.getCourses()
-//                TokenClient.getIdToken();
-                while (true) {
-                    println("interval");
-                    delay(5000);
-                }
-            }catch (e: ClientRequestException) {
-                println("Error fetching data: ${e.message}")
-            } catch (e: Exception) {
-                println(e.message)
-            }
-        }
-    }
-
-    when (currentScreen) {
-        is Screen.Login -> {
-            LoginScreen(onSuccess = {
-                currentScreen = Screen.Landing
-            }, onRegister = {
-                currentScreen = Screen.SignUp
-            })
-        }
-        is Screen.SignUp -> {
-            RegisterScreen(
-                onSuccess = {
-                    currentScreen = Screen.Landing
-                }, onLogin = {
-                    currentScreen = Screen.Login
-                }
-            )
-        }
-        is Screen.Landing -> {
-            landingScreen(
-                courseList = courseList,
-                onLogout = {
-                    currentScreen = Screen.Login
-                }
-            )
-
-        }
-    }
 }
 
 
@@ -142,17 +59,140 @@ sealed class AppScreen {
 
 }
 
+val INITIAL_STATE = AuthState("", "", "OCEAN")
+
+val store = createThreadSafeStore(::rootReducer, INITIAL_STATE)
+
+@Composable
+fun landingPage(
+    windowScope: FrameWindowScope,
+) {
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.Login) }
+    var showInNav by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
+    var isComputing by remember { mutableStateOf(false) }
+    var isCalendarDialogOpen by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    var courseList by remember { mutableStateOf(emptyList<CourseDetails>()) }
+    val scope = rememberCoroutineScope()
+
+    windowScope.MenuBar {
+        Menu("File", mnemonic = 'F') {
+            Item(
+                "New Calendar",
+                onClick = {
+                    if (currentScreen == Screen.Landing && !isComputing) {
+                        showInNav = AppScreen.Playground
+                        isCalendarDialogOpen = true
+                    }
+                },
+                shortcut = KeyShortcut(
+                    Key.N, ctrl = true
+                )
+            )
+        }
+        Menu("View", mnemonic = 'V') {
+            Item(
+                "Search",
+                onClick = {
+                          if (currentScreen == Screen.Landing && !isComputing) {
+                              showInNav = AppScreen.CourseSearch
+                          }
+                },
+                shortcut = KeyShortcut(
+                    Key.S, ctrl = true
+                )
+            )
+        }
+    }
+
+
+
+    LaunchedEffect(true) {
+        scope.launch{
+            try {
+                isLoading = true
+                var token = TokenClient.getIdToken()
+                store.dispatch(SetToken(token))
+                courseList = CourseSchedulesClient.getCourses()
+                isLoading = false
+                while (true) {
+                    delay(3000000);
+                    token = TokenClient.getIdToken()
+                    store.dispatch(SetToken(token))
+                }
+            }catch (e: ClientRequestException) {
+                println("Error fetching data: ${e.message}")
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
+
+    if (isLoading) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+    } else {
+        when (currentScreen) {
+            is Screen.Login -> {
+                LoginScreen(onSuccess = {
+                    currentScreen = Screen.Landing
+                }, onRegister = {
+                    currentScreen = Screen.SignUp
+                })
+            }
+            is Screen.SignUp -> {
+                RegisterScreen(
+                    onSuccess = {
+                        currentScreen = Screen.Landing
+                    }, onLogin = {
+                        currentScreen = Screen.Login
+                    }
+                )
+            }
+            is Screen.Landing -> {
+                landingScreen(
+                    courseList = courseList,
+                    toggleComputing = { isComputing = it },
+                    isCalendarDialogOpen = isCalendarDialogOpen,
+                    toggleCalendarDialog = { isCalendarDialogOpen = it},
+                    onLogout = {
+                        currentScreen = Screen.Login
+                    },
+                    showInNav = showInNav
+                ) {
+                    showInNav = it
+                }
+
+            }
+        }
+
+    }
+}
 
 @Composable
 fun landingScreen(
     courseList: List<CourseDetails>,
-    onLogout: () -> Unit
+    toggleComputing: (Boolean) -> Unit,
+    isCalendarDialogOpen: Boolean,
+    toggleCalendarDialog: (Boolean) -> Unit,
+    onLogout: () -> Unit,
+    showInNav:  AppScreen,
+    navigateNav: (AppScreen) -> Unit
 ) {
-    var showInNav by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
+
     val calendarScope = rememberCoroutineScope()
     var customCalendars by remember { mutableStateOf(emptyList<CustomCalendar>()) }
     var selectedCalendar by remember { mutableStateOf(CustomCalendar("", "")) }
-    var userCourses by remember { mutableStateOf(emptyList<UserCalendarCourse>()) }
 
     LaunchedEffect(true) {
         calendarScope.launch {
@@ -163,6 +203,7 @@ fun landingScreen(
             }
         }
     }
+
     Row (
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -176,7 +217,7 @@ fun landingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth()
+                            .width(300.dp)
 
                     ) {
                         Card(
@@ -193,7 +234,7 @@ fun landingScreen(
                                     }
                                         },
                                 selected = showInNav == AppScreen.Home,
-                                onClick = {showInNav = AppScreen.Home},
+                                onClick = {navigateNav(AppScreen.Home)},
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent,
                                     selectedContainerColor = Color(0xFF6699CC)
@@ -212,7 +253,7 @@ fun landingScreen(
                                     }
                                 },
                                 selected = showInNav == AppScreen.CourseSearch,
-                                onClick = {showInNav = AppScreen.CourseSearch},
+                                onClick = {navigateNav(AppScreen.CourseSearch)},
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent,
                                     selectedContainerColor = Color(0xFF6699CC)
@@ -233,7 +274,7 @@ fun landingScreen(
                                     Text(text = "Friends", modifier = Modifier.padding(start = 8.dp))
                                 } },
                                 selected = showInNav == AppScreen.FriendsPage,
-                                onClick = {showInNav = AppScreen.FriendsPage},
+                                onClick = {navigateNav(AppScreen.FriendsPage)},
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent,
                                     selectedContainerColor = Color(0xFF6699CC)
@@ -251,7 +292,7 @@ fun landingScreen(
                                         Text(text = "Wishlist", modifier = Modifier.padding(start = 8.dp))
                                     } },
                                 selected = showInNav == AppScreen.Wishlist,
-                                onClick = {showInNav = AppScreen.Wishlist},
+                                onClick = {navigateNav(AppScreen.Wishlist)},
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent,
                                     selectedContainerColor = Color(0xFF6699CC)
@@ -275,7 +316,7 @@ fun landingScreen(
                                     }
                                     },
                                 selected = showInNav == AppScreen.Playground,
-                                onClick = {showInNav = AppScreen.Playground},
+                                onClick = {navigateNav(AppScreen.Playground)},
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent,
                                     selectedContainerColor = Color(0xFF6699CC)
@@ -295,7 +336,7 @@ fun landingScreen(
                                         NavigationDrawerItem(
                                             label = { Text(text = "Current Calendar") },
                                             selected = showInNav == AppScreen.CourseSelection,
-                                            onClick = {showInNav = AppScreen.CourseSelection},
+                                            onClick = {navigateNav(AppScreen.CourseSelection)},
                                             colors = NavigationDrawerItemDefaults.colors(
                                                 unselectedContainerColor = Color.Transparent,
                                                 selectedContainerColor = Color(0xFF6699CC)
@@ -311,10 +352,8 @@ fun landingScreen(
                                                 onClick = {
                                                     calendarScope.launch {
                                                         try {
-                                                            userCourses = CustomCalendarClient.getCalendarCourses(
-                                                                store.getState().userId, it.id)
                                                             selectedCalendar = it
-                                                            showInNav = AppScreen.AlternateSchedule
+                                                            navigateNav(AppScreen.AlternateSchedule)
 
                                                         } catch (e: Exception) {
                                                             e.printStackTrace()
@@ -345,7 +384,7 @@ fun landingScreen(
                                 selected = false,
                                 onClick = {
                                     // Dispatch LogoutUser action
-                                    store.dispatch(LogoutUser())
+                                    store.dispatch(SetUserID(""))
                                     // Navigate to Login Screen or perform other necessary cleanup
                                     onLogout()
                                 },
@@ -366,13 +405,13 @@ fun landingScreen(
                 is AppScreen.Home -> {
                     HomeScreen {
                         if (it == "Course Search") {
-                            showInNav = AppScreen.CourseSearch
+                            navigateNav(AppScreen.CourseSearch)
                         } else if (it == "Friends") {
-                            showInNav = AppScreen.FriendsPage
+                            navigateNav(AppScreen.FriendsPage)
                         } else if (it == "Wishlist") {
-                            showInNav = AppScreen.Wishlist
+                            navigateNav(AppScreen.Wishlist)
                         } else {
-                            showInNav = AppScreen.Playground
+                            navigateNav(AppScreen.Playground)
                         }
                     }
                 }
@@ -390,23 +429,46 @@ fun landingScreen(
                 }
 
                 is AppScreen.Wishlist -> {
-                    wishSelection()
+                    wishlistContainer(courses = courseList)
                 }
 
                 is AppScreen.Playground -> {
-                    PlaygroundHome(customCalendars,
+                    PlaygroundCalendarsPage(customCalendars,
+                        isCalendarDialogOpen,
+                        toggleCalendarDialog,
                         {
-                          showInNav = AppScreen.CourseSelection
+                          navigateNav(AppScreen.CourseSelection)
                         },
                         {
-                        selectedCalendar = it
-                        showInNav = AppScreen.AlternateSchedule
-                    }) {
+                            calendarScope.launch {
+                                try {
+                                    selectedCalendar = it
+                                    navigateNav(AppScreen.AlternateSchedule)
+
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                    }, {
                         calendarScope.launch {
                             try {
+                                val response = CustomCalendarClient.deleteCalendar(store.getState().userId, it.id)
+                                if (response) {
+                                    customCalendars = CustomCalendarClient.getCalendars(
+                                        store.getState().userId)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        }) {
+                        calendarScope.launch {
+                            try {
+                                selectedCalendar = it
                                 customCalendars = CustomCalendarClient.getCalendars(
                                     store.getState().userId)
-
+                                navigateNav(AppScreen.AlternateSchedule)
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -415,9 +477,8 @@ fun landingScreen(
                 }
                 is AppScreen.AlternateSchedule -> {
                     key (selectedCalendar) {
-                        CalendarEditView(userCourses, courseList, selectedCalendar) {
-                            showInNav = AppScreen.Playground
-                        }
+                        CalendarEditView(courseList, selectedCalendar, toggleComputing
+                        ) { navigateNav(AppScreen.Playground) }
                     }
                 }
             }

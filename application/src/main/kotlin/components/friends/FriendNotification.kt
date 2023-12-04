@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -86,13 +87,15 @@ fun NotificationItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = user.username,
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier
-                .padding(8.dp)
-                .weight(1f)
-        )
+        SelectionContainer {
+            Text(
+                text = user.username,
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1f)
+            )
+        }
 
         if (isIncoming) {
             CustomIconButton(

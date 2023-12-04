@@ -1,6 +1,7 @@
 package components.playground
 
 import APIclient.CustomCalendarClient
+import APIclient.FriendsClient
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,12 +12,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import components.common.CustomIconButton
+import components.common.WarningDialog
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Plus
@@ -38,7 +43,9 @@ import compose.icons.tablericons.Trash
 import compose.icons.tablericons.X
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import models.CustomCalendar
 import models.CustomCalendarParams
 
@@ -46,13 +53,14 @@ import models.CustomCalendarParams
 @Composable
 fun PlaygroundCalendarsPage(
     calendarList: List<CustomCalendar>,
+    isCalendarDialogOpen: Boolean,
+    toggleCalendarDialog: (Boolean) -> Unit,
     goToCurrent: () -> Unit,
     onClickCalendar: (calendar: CustomCalendar) -> Unit,
     onRemoveCalendar: (calendar: CustomCalendar) -> Unit,
     onCreateNewCalendar: (calendar: CustomCalendar) -> Unit
 ) {
     val calendarScope = rememberCoroutineScope()
-    var openDialog by remember {  mutableStateOf(false) }
 
     Column (
         modifier = Modifier.fillMaxWidth(),
@@ -61,13 +69,15 @@ fun PlaygroundCalendarsPage(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-            Text(
-                text = "Hello",
-                modifier = Modifier
-                    .padding(8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            SelectionContainer {
+                Text(
+                    text = "Hello",
+                    modifier = Modifier
+                        .padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
         }
 
         Row (
@@ -82,15 +92,17 @@ fun PlaygroundCalendarsPage(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "My Custom Calendars",
-                modifier = Modifier
-                    .padding(8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            SelectionContainer {
+                Text(
+                    text = "My Custom Calendars",
+                    modifier = Modifier
+                        .padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
             CustomIconButton(
-                onClick={ openDialog = true },
+                onClick={ toggleCalendarDialog(true) },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
                 tooltipText = "Create Calendar",
                 buttonRadius = 36.dp,
@@ -109,11 +121,11 @@ fun PlaygroundCalendarsPage(
         }
 
         when {
-            openDialog -> {
+            isCalendarDialogOpen -> {
                 CreateCalendarDialog(
-                    onDismissRequest = { openDialog = false },
+                    onDismissRequest = { toggleCalendarDialog(false) },
                     onConfirmation = {
-                        openDialog = false
+                        toggleCalendarDialog(false)
                     },
                     onCreateNewCalendar = onCreateNewCalendar,
                     calendarScope
@@ -143,7 +155,6 @@ fun CalendarListItem(goToCurrent: () -> Unit) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-
             Text(
                 text = "Current Calendar",
                 fontSize = 15.sp,
@@ -159,6 +170,7 @@ fun CalendarItem(calendar: CustomCalendar,
                  onClickCalendar: (calendar: CustomCalendar) -> Unit,
                  onRemoveCalendar: (calendar: CustomCalendar) -> Unit
 ) {
+    var isDialogOpen by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp, vertical = 4.dp)
@@ -191,7 +203,7 @@ fun CalendarItem(calendar: CustomCalendar,
                     modifier = Modifier.padding(start = 8.dp),
                 )
                 CustomIconButton(
-                    onClick= { onRemoveCalendar(calendar) },
+                    onClick= { isDialogOpen = true },
                     modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                     tooltipText= "Remove Calendar",
                     buttonRadius= 36.dp,
@@ -202,6 +214,18 @@ fun CalendarItem(calendar: CustomCalendar,
             }
 
         }
+    }
+    if (isDialogOpen) {
+        WarningDialog(
+            onDismissRequest = { isDialogOpen = false },
+            onConfirmation = {
+                onRemoveCalendar(calendar)
+                isDialogOpen = false
+            },
+            dialogTitle = "Warning",
+            dialogText = "Are you sure you want to delete this calendar? The associated courses will also be deleted.",
+            icon = Icons.Default.Warning
+        )
     }
 }
 
@@ -234,7 +258,9 @@ fun CreateCalendarDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    SelectionContainer {
+                        Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
                     CustomIconButton(
                         onClick = onDismissRequest,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),

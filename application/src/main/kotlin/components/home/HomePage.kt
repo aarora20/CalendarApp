@@ -2,6 +2,7 @@ package components.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,11 +36,13 @@ fun HomeScreen(
         val currentDate = LocalDate.now()
         val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EEEE MMMM dd, yyyy"))
         Column {
-            Text(
-                text = formattedDate,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Normal
-            )
+            SelectionContainer {
+                Text(
+                    text = formattedDate,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            }
         }
     }
     Row {
@@ -50,8 +53,12 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text ="Welcome!", fontFamily = FontFamily.Cursive, fontSize = 40.sp)
-            Text(text ="Click on one of the features below to get started:")
+            SelectionContainer {
+                Text(text ="Welcome!", fontFamily = FontFamily.Cursive, fontSize = 40.sp)
+            }
+            SelectionContainer {
+                Text(text ="Click on one of the features below to get started:")
+            }
             Row (
                 modifier = Modifier.padding(vertical = 20.dp),
                 horizontalArrangement = Arrangement.Center

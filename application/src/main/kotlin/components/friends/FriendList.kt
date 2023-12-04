@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -16,7 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import components.common.CustomIconButton
 import components.common.DividerComposable
+import components.common.WarningDialog
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Trash
@@ -68,28 +71,30 @@ fun FriendItem(user: User, removeFriend: (user: User) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = user.username,
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier
-                .padding(8.dp)
-                .weight(1f)
-        )
-
-        IconButton(
-            onClick = {
-                openAlertDialog = true
-            }
-        ) {
-            Icon(
-                imageVector = TablerIcons.Trash, "remove"
+        SelectionContainer {
+            Text(
+                text = user.username,
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1f)
             )
         }
+
+        CustomIconButton(
+            onClick = { openAlertDialog = true },
+            modifier =  Modifier.padding(end = 8.dp),
+            tooltipText= "Unfriend",
+            buttonRadius = 36.dp,
+            buttonSize = 25.dp,
+            backgroundColor= Color.Transparent,
+            icon = TablerIcons.Trash
+        )
     }
 
     when {
         openAlertDialog -> {
-            UnfriendDialog(
+            WarningDialog(
                 onDismissRequest = { openAlertDialog = false },
                 onConfirmation = {
                     friendScope.launch {
@@ -111,47 +116,4 @@ fun FriendItem(user: User, removeFriend: (user: User) -> Unit) {
         }
     }
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UnfriendDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Warning")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
 }

@@ -1,23 +1,37 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import components.landingPage
+import util.loadPreferences
+import util.savePreferences
 import java.awt.Dimension
 
 @Composable
 @Preview
-fun App() {
-    landingPage()
+fun App(
+    windowScope: FrameWindowScope,
+    ) {
+
+    landingPage(windowScope)
 }
 
 fun main() = application {
-    val state = rememberWindowState(placement = WindowPlacement.Maximized)
-    Window(onCloseRequest = ::exitApplication, state) {
-        window.minimumSize = Dimension(1700, 900)
-        App()
+    val preference = loadPreferences()
+    val state = rememberWindowState()
+    if (preference != null) {
+        state.size = preference
+    } else {
+        // By default, the window will be maximized
+        state.placement = WindowPlacement.Maximized
+    }
+
+    Window(onCloseRequest = {
+        savePreferences(state.size)
+         exitApplication()
+    } , state) {
+        window.minimumSize = Dimension(1000, 700)
+
+        App(this)
     }
 }
 

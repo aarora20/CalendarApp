@@ -42,7 +42,7 @@ interface DAOFacade {
 
     // Wishlist
     suspend fun addCourseToWishlist(userIdArg: String, wishlistCourse: WishlistCourse): WishlistCourse?
-    suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String): Boolean
+    suspend fun removeCourseFromWishlist(userIdArg: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean
     suspend fun getUserWishlist(userIdArg: String): List<WishlistCourse>
 
     // Custom Calendars and UserCalendarCourses (Playground feature)

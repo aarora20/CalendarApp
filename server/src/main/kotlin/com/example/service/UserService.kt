@@ -30,7 +30,7 @@ class UserService {
                 return Response(HttpStatusCode.BadRequest, data = ResponseData(message = "wrong password"))
             }
         } else {
-            return Response(HttpStatusCode.BadRequest, data = ResponseData(message = "user does not exists"))
+            return Response(HttpStatusCode.BadRequest, data = ResponseData(message = "user does not exist"))
         }
     }
 

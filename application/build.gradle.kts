@@ -41,7 +41,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CalendarApp"
-            packageVersion = "1.0.3"
+            packageVersion = "1.0.4"
         }
     }
 }
