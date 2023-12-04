@@ -46,192 +46,9 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import models.*
+import util.transformCourseSectionsToCalendar
+import util.transformScheduleDataToOptimized
 import java.time.*
-
-fun transformScheduleDataToOptimized(courseSchedules: List<CourseSchedule>): OptimizedSchedule {
-    val timeslots = mutableListOf<TimeSlot>()
-    val courseSections = mutableListOf<CourseSection>()
-
-    for (courseSchedule in courseSchedules) {
-        val componentMap: MutableMap<String, MutableList<TimeSlot>> = mutableMapOf()
-        for (schedule in courseSchedule.schedule) {
-            if (schedule.scheduleData.isNullOrEmpty()) {
-                continue
-            } else {
-                val courseTimeslots = mutableListOf<TimeSlot>()
-                val scheduleDetail = schedule.scheduleData[0]
-                val component = schedule.courseComponent
-                val startTime = LocalDateTime.parse(scheduleDetail.classMeetingStartTime).toLocalTime()
-                val endTime = LocalDateTime.parse(scheduleDetail.classMeetingEndTime).toLocalTime()
-                if (!Duration.between(startTime, endTime).isZero) {
-                    if (scheduleDetail.classMeetingDayPatternCode.contains("M")) {
-                        courseTimeslots.add(
-                            TimeSlot(
-                                DayOfWeek.MONDAY,
-                                startTime.toString(),
-                                endTime.toString(),
-                                schedule.classNumber.toString(),
-                                schedule.classSection.toString()
-                        )
-                        )
-                    }
-                    if (scheduleDetail.classMeetingDayPatternCode.contains("T")) {
-                        courseTimeslots.add(
-                            TimeSlot(
-                                DayOfWeek.TUESDAY,
-                                startTime.toString(),
-                                endTime.toString(),
-                                schedule.classNumber.toString(),
-                                schedule.classSection.toString()
-                            )
-                        )
-                    }
-                    if (scheduleDetail.classMeetingDayPatternCode.contains("W")) {
-                        courseTimeslots.add(
-                            TimeSlot(
-                                DayOfWeek.WEDNESDAY,
-                                startTime.toString(),
-                                endTime.toString(),
-                                schedule.classNumber.toString(),
-                                schedule.classSection.toString()
-                            )
-                        )
-                    }
-                    if (scheduleDetail.classMeetingDayPatternCode.contains("R")) {
-                        courseTimeslots.add(
-                            TimeSlot(
-                                DayOfWeek.THURSDAY,
-                                startTime.toString(),
-                                endTime.toString(),
-                                schedule.classNumber.toString(),
-                                schedule.classSection.toString()
-                            )
-                        )
-                    }
-                    if (scheduleDetail.classMeetingDayPatternCode.contains("F")) {
-                        courseTimeslots.add(
-                            TimeSlot(
-                                DayOfWeek.FRIDAY,
-                                startTime.toString(),
-                                endTime.toString(),
-                                schedule.classNumber.toString(),
-                                schedule.classSection.toString()
-                            )
-                        )
-                    }
-                }
-                if (courseTimeslots.isNotEmpty()) {
-                    for ((index, timeslot) in courseTimeslots.withIndex()) {
-                        if (!componentMap.containsKey(component + index)) {
-                            componentMap[component + index.toString()] = mutableListOf()
-                            componentMap[component + index.toString()]?.add(timeslot)
-                        } else {
-                            componentMap[component + index.toString()]?.add(timeslot)
-                        }
-                    }
-                    timeslots.addAll(courseTimeslots)
-                }
-            }
-        }
-        println(componentMap.keys)
-        for (key in componentMap.keys) {
-            if (key.contains("LEC")) {
-                componentMap[key]?.let {
-                    CourseSection(
-                        it,
-                        "${courseSchedule.course.subjectCode}${courseSchedule.course.catalogNumber} LEC",
-                        courseSchedule.course.courseId,
-                        courseSchedule.course.title,
-                    )
-                }?.let { courseSections.add(it) }
-            } else if (key.contains("TUT")) {
-                componentMap[key]?.let {
-                    CourseSection(
-                        it,
-                        "${courseSchedule.course.subjectCode}${courseSchedule.course.catalogNumber} TUT",
-                        courseSchedule.course.courseId,
-                        courseSchedule.course.title,
-                    )
-                }?.let { courseSections.add(it) }
-//            } else if (key.contains("TST")) {
-//                componentMap[key]?.let {
-//                    CourseSection(
-//                        it,
-//                        "${courseSchedule.course.subjectCode}${courseSchedule.course.catalogNumber} TST",
-//                        courseSchedule.course.courseId,
-//                        courseSchedule.course.title,
-//                    )
-//                }?.let { courseSections.add(it) }
-            } else if (key.contains("LAB")) {
-                componentMap[key]?.let {
-                    CourseSection(
-                        it,
-                        "${courseSchedule.course.subjectCode}${courseSchedule.course.catalogNumber} LAB",
-                        courseSchedule.course.courseId,
-                        courseSchedule.course.title,
-                    )
-                }?.let { courseSections.add(it) }
-            }
-        }
-    }
-    return OptimizedSchedule(
-        timeslots = timeslots,
-        courseSections = courseSections
-    )
-}
-
-fun transformCourseSectionsToCalendar(courseSections: List<CourseSection>): List<UserCalendarCourse> {
-    val sectionMap: MutableMap<SectionDetail, MutableList<TimeSlot>> = mutableMapOf()
-    val calendarCourses = mutableListOf<UserCalendarCourse>()
-    for (courseSection in courseSections) {
-        val detail = SectionDetail(
-            courseSection.getCourseSectionName(),
-            courseSection.getCourseId(),
-            courseSection.getCourseTitle()
-        )
-        if (!sectionMap.containsKey(detail)) {
-            sectionMap[detail] = mutableListOf()
-            courseSection.getSelectedTimeslot()?.let { sectionMap[detail]?.add(it) }
-        } else {
-            courseSection.getSelectedTimeslot()?.let { sectionMap[detail]?.add(it) }
-        }
-    }
-    for (key in sectionMap.keys) {
-        val times = sectionMap[key]
-        if (times != null) {
-            var pattern = ""
-            for (time in times) {
-                if (time.getDayOfWeek() == DayOfWeek.MONDAY) {
-                    pattern = pattern.plus("M")
-                }
-                if (time.getDayOfWeek() == DayOfWeek.TUESDAY) {
-                    pattern = pattern.plus("T")
-                }
-                if (time.getDayOfWeek() == DayOfWeek.WEDNESDAY) {
-                    pattern = pattern.plus("W")
-                }
-                if (time.getDayOfWeek() == DayOfWeek.THURSDAY) {
-                    pattern = pattern.plus("R")
-                }
-                if (time.getDayOfWeek() == DayOfWeek.FRIDAY) {
-                    pattern = pattern.plus("F")
-                }
-            }
-            calendarCourses.add(
-                UserCalendarCourse(
-                    courseId = key.courseId,
-                    courseNum = key.courseSectionName.substringBefore(" "),
-                    courseTitle = key.courseTitle,
-                    component = key.courseSectionName.substringAfter(" ") + times[0].getClassSection(),
-                    startTime = LocalDateTime.of(LocalDate.now(), LocalTime.parse(times[0].getStartTime())).toString(),
-                    endTime = LocalDateTime.of(LocalDate.now(), LocalTime.parse(times[0].getEndTime())).toString(),
-                    weekPattern = pattern
-                )
-            )
-        }
-    }
-    return calendarCourses
-}
 
 @Composable
 fun OptimizationPage(
@@ -274,106 +91,121 @@ fun OptimizationSelection(
 ) {
     val optimizeScope = rememberCoroutineScope()
     var isDialogOpen by remember {  mutableStateOf(false) }
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SelectionContainer {
-                Text(
-                    text = "Optimize Your Schedule",
-                    modifier = Modifier
-                        .padding(8.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+
+    val snackbarState = remember { SnackbarHostState() }
+    Scaffold(
+        containerColor = Color.Transparent,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarState) {
+                Snackbar(
+                    snackbarData = it,
+                    modifier = Modifier.width(500.dp),
                 )
             }
-            Button(
-                onClick = goToCalendar,
-                modifier = Modifier.width(180.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Calendar", color = Color.White)
-                }
-            }
-
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2)
+        },
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(selectedCourses) { it ->
-                OptimizeItem(
-                    it
-                ) {c ->
-                    removeItem(c)
-                }
-            }
-            if (selectedCourses.size < 8) {
-                item {
-                    Card(
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SelectionContainer {
+                    Text(
+                        text = "Optimize Your Schedule",
                         modifier = Modifier
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
-                            .height(70.dp)
-                            .clip(CardDefaults.shape)
-                            .clickable {
-                                openSideSheet()
-                            }
-                        ,
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.LightGray
-                        )
+                            .padding(8.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
-                    {
-                        Column(
+                }
+                Button(
+                    onClick = goToCalendar,
+                    modifier = Modifier.width(180.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Calendar", color = Color.White)
+                    }
+                }
+
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2)
+            ) {
+                items(selectedCourses) { it ->
+                    OptimizeItem(
+                        it
+                    ) {c ->
+                        removeItem(c)
+                    }
+                }
+                if (selectedCourses.size < 8) {
+                    item {
+                        Card(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .padding(10.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row (
-                                modifier = Modifier.fillMaxSize(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                                .height(70.dp)
+                                .clip(CardDefaults.shape)
+                                .clickable {
+                                    openSideSheet()
+                                }
+                            ,
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.LightGray
+                            )
+                        )
+                        {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .padding(10.dp),
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    imageVector = TablerIcons.Plus,
-                                    contentDescription = null
-                                )
+                                Row (
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = TablerIcons.Plus,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = {
-                    isDialogOpen = true
-                },
-                modifier = Modifier.width(180.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text("Optimize Schedule", color =Color.White)
+                Button(
+                    onClick = {
+                        isDialogOpen = true
+                    },
+                    modifier = Modifier.width(180.dp)
+                ) {
+                    Text("Optimize Schedule", color =Color.White)
+                }
             }
         }
-    }
-    if (isDialogOpen) {
-        OptimizationDialog(onDismissRequest = {
-            isDialogOpen = false
-        }, scope = optimizeScope,
-            selectedCourses = selectedCourses,
-            calendarId = calendarId,
-            updateCalendar = updateCalendar,
-            toggleComputing = toggleComputing)
+        if (isDialogOpen) {
+            OptimizationDialog(onDismissRequest = {
+                isDialogOpen = false
+            }, scope = optimizeScope,
+                selectedCourses = selectedCourses,
+                calendarId = calendarId,
+                snackBarState = snackbarState,
+                updateCalendar = updateCalendar,
+                toggleComputing = toggleComputing)
+        }
     }
 }
 
@@ -386,6 +218,7 @@ fun OptimizeCourseSideSheet(courseNames: List<String>,
     var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
     val scheduleScope = rememberCoroutineScope()
     var selectedCourse by remember { mutableStateOf("") }
+    var isTSTChecked by remember { mutableStateOf(true) }
     Column (
         modifier = Modifier.fillMaxSize().drawBehind {
             val strokeWidth = 2f
@@ -460,11 +293,33 @@ fun OptimizeCourseSideSheet(courseNames: List<String>,
                         }
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
+                                .background(Color.Gray)
+                                .padding(horizontal = 4.dp, vertical = 7.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SelectionContainer {
+                                Text(
+                                    "Include TST"
+                                )
+                            }
+                            Checkbox(
+                                checked = isTSTChecked,
+                                onCheckedChange = { isTSTChecked = it
+                                },
+                                modifier = Modifier.padding(4.dp),
+                                colors = CheckboxDefaults.colors()
+                            )
+
+                        }
+                        Row (
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
                                 .background(Color.Gray).clickable {
                                     courseMap[selectedCourse.substringBefore(" ")]?.let {
                                         CourseSchedule(
                                             course = it,
-                                            schedule = schedules
+                                            schedule = schedules,
+                                            includeTST = isTSTChecked
                                         )
                                     }?.let {
                                         addToOptimization(
@@ -566,6 +421,7 @@ fun OptimizationDialog(
     scope: CoroutineScope,
     selectedCourses: List<CourseSchedule>,
     calendarId: String,
+    snackBarState: SnackbarHostState,
     updateCalendar: (id: String) -> Unit,
     toggleComputing: (Boolean) -> Unit
 ) {
@@ -622,6 +478,7 @@ fun OptimizationDialog(
                         TextButton(
                             onClick = {
                                 scope.launch {
+                                    var message = ""
                                     isLoading = true
                                     toggleComputing(true)
                                     try {
@@ -633,13 +490,21 @@ fun OptimizationDialog(
                                                 calendarId,
                                                 newCourses)
                                             updateCalendar(calendarId)
+                                            message = "Optimization Found!"
+                                        } else {
+                                            message = "No Optimization Found!"
                                         }
                                     } catch (e: Exception) {
                                         e.printStackTrace()
+                                        message = "No Optimization Found!"
                                     }
                                     isLoading = false
                                     toggleComputing(false)
                                     onDismissRequest()
+                                    snackBarState.showSnackbar(
+                                        message = message,
+                                        duration = SnackbarDuration.Short
+                                    )
                                 }
                             },
                             modifier = Modifier.padding(20.dp),
