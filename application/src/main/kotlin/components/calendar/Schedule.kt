@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -111,11 +112,15 @@ fun oneClass (
 
         val density = LocalWindowInfo.current.containerSize.width / 3 / 7
 
-        Text(uniclass.name + " " + uniclass.type,
+        SelectionContainer {
+            Text(uniclass.name + " " + uniclass.type,
 
-            fontSize = textSize.sp)
-        Text(uniclass.start.format(TimeFormatter).replace(".", "").uppercase() + " - " + uniclass.finish.format(TimeFormatter).replace(".", "").uppercase(),
-            fontSize = textSize.sp)
+                fontSize = textSize.sp)
+        }
+        SelectionContainer {
+            Text(uniclass.start.format(TimeFormatter).replace(".", "").uppercase() + " - " + uniclass.finish.format(TimeFormatter).replace(".", "").uppercase(),
+                fontSize = textSize.sp)
+        }
     }
 }
 

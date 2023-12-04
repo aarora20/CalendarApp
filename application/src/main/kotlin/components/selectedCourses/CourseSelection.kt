@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material3.*
@@ -65,12 +66,14 @@ fun courseSelection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Course Selection",
-                    color = Color.Black,
-                    fontSize = 25.sp,
-                    maxLines = 1
-                )
+                SelectionContainer {
+                    Text(
+                        text = "Course Selection",
+                        color = Color.Black,
+                        fontSize = 25.sp,
+                        maxLines = 1
+                    )
+                }
 
                 Button (
                     onClick = onCalendarClick,
@@ -96,10 +99,12 @@ fun courseSelection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "List of Selected Courses",
-                    fontSize = 20.sp
-                )
+                SelectionContainer {
+                    Text(
+                        text = "List of Selected Courses",
+                        fontSize = 20.sp
+                    )
+                }
                 Row () {
                     CustomIconButton(
                         onClick= {
@@ -157,7 +162,9 @@ fun CourseCluster(components: List<UserCourse>, name: String, removeCourse: (c: 
             modifier = Modifier.fillMaxWidth().border(0.dp, Color.Black)
                 .background(Color.LightGray).padding(horizontal = 16.dp),
         ) {
-            Text(text = name, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+            SelectionContainer {
+                Text(text = name, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+            }
         }
         Row (modifier = Modifier.fillMaxWidth().border(0.dp, Color.Black)
             .padding(horizontal = 12.dp, vertical = 4.dp)) {
@@ -168,7 +175,9 @@ fun CourseCluster(components: List<UserCourse>, name: String, removeCourse: (c: 
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = course.component, modifier = Modifier.padding(vertical = 5.dp))
+                        SelectionContainer {
+                            Text(text = course.component, modifier = Modifier.padding(vertical = 5.dp))
+                        }
 
                         CustomIconButton(
                             onClick= {removeCourse(course)},

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -52,9 +53,11 @@ fun RegisterScreen(onSuccess: () -> Unit, onLogin: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text("Register New User", style = TextStyle(
-                fontWeight = FontWeight.Bold
-            ) )
+            SelectionContainer {
+                Text("Register New User", style = TextStyle(
+                    fontWeight = FontWeight.Bold
+                ) )
+            }
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },

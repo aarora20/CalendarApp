@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -55,9 +56,11 @@ fun LoginScreen(onSuccess: () -> Unit, onRegister: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text("Login to Calendar App", style = TextStyle(
-                fontWeight = FontWeight.Bold
-            ) )
+            SelectionContainer {
+                Text("Login to Calendar App", style = TextStyle(
+                    fontWeight = FontWeight.Bold
+                ) )
+            }
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -139,7 +142,9 @@ fun ClickableTextComposable(text: String, clickableText: String, onSwitch: () ->
     Row (
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text, modifier = Modifier.padding(end = 5.dp))
+        SelectionContainer {
+            Text(text, modifier = Modifier.padding(end = 5.dp))
+        }
         ClickableText(text = AnnotatedString(clickableText), style = TextStyle(
             color = Color.Blue
         ), onClick = {

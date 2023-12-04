@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -201,8 +202,9 @@ fun CompareCalendar(
                         //horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.padding(start = 15.dp)
                     ) {
-
-                        Text ("me")
+                        SelectionContainer {
+                            Text("me")
+                        }
                         Checkbox(
                             checked = isChecked1,
                             onCheckedChange = {
@@ -227,7 +229,9 @@ fun CompareCalendar(
                         Row (
                             //modifier = Modifier.fillMaxWidth(0.8f)
                         ) {
-                            Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            SelectionContainer {
+                                Text(friend.username,  maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
                         }
                         Checkbox(
                             checked = isChecked2,
