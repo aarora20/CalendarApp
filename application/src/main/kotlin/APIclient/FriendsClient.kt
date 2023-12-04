@@ -9,6 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import models.*
+import util.RouteResponseData
 
 object FriendsClient {
     private val client = HttpClient(CIO) {
@@ -36,7 +37,7 @@ object FriendsClient {
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<Friend>>().data
         }
     }
 
@@ -68,7 +69,7 @@ object FriendsClient {
         return if (response.status == HttpStatusCode.BadRequest) {
             null
         } else {
-            response.body()
+            response.body<RouteResponseData<Friend>>().data
         }
     }
 
@@ -78,11 +79,8 @@ object FriendsClient {
             setBody(FriendParams(userId, friendId))
         }
 
-        return if (response.status == HttpStatusCode.BadRequest) {
-            false
-        } else {
-            response.body()
-        }
+        return response.status == HttpStatusCode.OK
+
     }
 
     suspend fun unfriend(userId: String, friendId: String): Boolean {
@@ -91,10 +89,6 @@ object FriendsClient {
             setBody(FriendParams(userId, friendId))
         }
 
-        return if (response.status == HttpStatusCode.BadRequest) {
-            false
-        } else {
-            response.body()
-        }
+        return response.status == HttpStatusCode.OK
     }
 }

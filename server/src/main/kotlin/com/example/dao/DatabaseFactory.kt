@@ -11,7 +11,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object DatabaseFactory {
     fun init() {
         val driverClassName = "org.postgresql.Driver"
+        // with Docker
         val jdbcURL = "jdbc:postgresql://db:5432/calendarApp?user=postgres"
+            // for localhost without Docker
 //        val jdbcURL = "jdbc:postgresql://localhost:5432/calendarApp"
         val database = Database.connect(createHikariDataSource(jdbcURL, driverClassName))
 
