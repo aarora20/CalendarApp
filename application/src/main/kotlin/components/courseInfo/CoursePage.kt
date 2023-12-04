@@ -216,12 +216,14 @@ fun coursePage(
                     verticalArrangement = Arrangement.Top,
                 ) {
                     // set the header of the page letting the user know this will provide course info
-                    Text(
-                        text = "Course Information",
-                        color = Color.Black,
-                        fontSize = 30.sp,
-                        maxLines = 1
-                    )
+                    SelectionContainer {
+                        Text(
+                            text = "Course Information",
+                            color = Color.Black,
+                            fontSize = 30.sp,
+                            maxLines = 1
+                        )
+                    }
 
                     // subsequent row provides the course code and its name
                     // also provides the user an option to add the course to their wish list
@@ -232,10 +234,12 @@ fun coursePage(
                     ) {
 
                         // provides the course code and name ie CS346: Application Development
-                        Text(
-                            text = course.subjectCode + course.catalogNumber + ": " + course.title,
-                            style = MaterialTheme.typography.h6
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = course.subjectCode + course.catalogNumber + ": " + course.title,
+                                style = MaterialTheme.typography.h6
+                            )
+                        }
 
                         // wish list option
                         // temporary list holding all terms
@@ -265,10 +269,12 @@ fun coursePage(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         course.requirementsDescription?.let {
-                            Text(
-                                text = it,
-                                fontSize = 15.sp,
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = it,
+                                    fontSize = 15.sp,
+                                )
+                            }
                         }
                     }
 
@@ -278,10 +284,12 @@ fun coursePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Schedule for " + course.termName + ":",
-                            fontSize = 15.sp,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = "Schedule for " + course.termName + ":",
+                                fontSize = 15.sp,
+                            )
+                        }
                     }
                     tableScreen(course, schedules, scope, addedCourses, snackbarState)
                 }
@@ -297,21 +305,37 @@ fun RowScope.TableCell(
     header: Int,
 ) {
     if (header == 1) {
-        Text(
-            text = text,
+        Row (
             Modifier
                 .weight(weight, fill = true)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+        ) {
+            SelectionContainer (
+                Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = text,
+                Modifier
+                    .padding(8.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     } else {
-        Text(
-            text = text,
+        Row (
             Modifier
                 .weight(weight, fill = true)
-                .padding(8.dp),
-            textAlign = TextAlign.Center
-        )
+        ) {
+            SelectionContainer (
+                Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = text,
+                    Modifier
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -320,6 +344,10 @@ fun detectTimeConflict(
     addStartTime: String,
     addEndTime: String,
     daysPattern: String): String {
+
+    if (addStartTime.isEmpty() || addEndTime.isEmpty()) {
+        return "EMPTY TIMES"
+    }
 
     val startTime = LocalDateTime.parse(addStartTime)
     val endTime = LocalDateTime.parse(addEndTime)
@@ -419,9 +447,14 @@ fun RowScope.TableCell(
                         val isTimeConflict = detectTimeConflict(userCourses, schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                             schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(), schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
 
-                        if (isTimeConflict != "NO CONFLICT") {
+                        if (isTimeConflict == "EMPTY TIMES") {
                             snackBarState.showSnackbar(
-                                message = "Unable to Add due to Time Conflict with: " + isTimeConflict,
+                                message = "Unable to Add Due to Time Missing ",
+                                duration = SnackbarDuration.Short
+                            )
+                        } else if (isTimeConflict != "NO CONFLICT") {
+                            snackBarState.showSnackbar(
+                                message = "Unable to Add Due to Time Conflict with: $isTimeConflict",
                                 duration = SnackbarDuration.Short
                             )
                         } else {
@@ -431,6 +464,8 @@ fun RowScope.TableCell(
                                 course.title, schedule.courseComponent + " $pad" + schedule.classSection,
                                 schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                schedule.scheduleData?.get(0)?.scheduleStartDate.orEmpty(),
+                                schedule.scheduleData?.get(0)?.scheduleEndDate.orEmpty(),
                                 schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
                             CourseSchedulesClient.addUserCourse(toAdd, store.getState().userId)
                             addCourseStr = "Added to Course Schedule!"
@@ -485,13 +520,15 @@ fun tableScreen(
         }
         // Here are all the lines of your table.
         items(schedules) {
+            val preStartTime = it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty()
+            val preEndTime = it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty()
             val classNum  = it.classNumber
             val courseComp = it.courseComponent
             val sectionNum = it.classSection
-            val start = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
-                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
-            val end = LocalDateTime.parse(it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
-                .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
+            val start = if  (preStartTime.isNotEmpty()) LocalDateTime.parse(preStartTime)
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase() else ""
+            val end = if (preEndTime.isNotEmpty()) LocalDateTime.parse(preEndTime)
+                .format(components.calendar.TimeFormatter).replace(".", "").uppercase() else ""
             val date = it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             Row(
                 Modifier.fillMaxWidth().border(0.dp, Color.Black),

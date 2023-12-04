@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -68,13 +69,15 @@ fun PlaygroundCalendarsPage(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-            Text(
-                text = "Hello",
-                modifier = Modifier
-                    .padding(8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            SelectionContainer {
+                Text(
+                    text = "Hello",
+                    modifier = Modifier
+                        .padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
         }
 
         Row (
@@ -89,13 +92,15 @@ fun PlaygroundCalendarsPage(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "My Custom Calendars",
-                modifier = Modifier
-                    .padding(8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            SelectionContainer {
+                Text(
+                    text = "My Custom Calendars",
+                    modifier = Modifier
+                        .padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
             CustomIconButton(
                 onClick={ toggleCalendarDialog(true) },
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
@@ -150,7 +155,6 @@ fun CalendarListItem(goToCurrent: () -> Unit) {
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-
             Text(
                 text = "Current Calendar",
                 fontSize = 15.sp,
@@ -254,7 +258,9 @@ fun CreateCalendarDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    SelectionContainer {
+                        Text(text = "Create New Calendar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
                     CustomIconButton(
                         onClick = onDismissRequest,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),

@@ -281,13 +281,15 @@ fun OptimizationSelection(
             modifier = Modifier.fillMaxWidth().padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Optimize Your Schedule",
-                modifier = Modifier
-                    .padding(8.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            SelectionContainer {
+                Text(
+                    text = "Optimize Your Schedule",
+                    modifier = Modifier
+                        .padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
             Button(
                 onClick = goToCalendar,
                 modifier = Modifier.width(180.dp),
@@ -450,9 +452,11 @@ fun OptimizeCourseSideSheet(courseNames: List<String>,
                                 .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(text = selectedCourse, fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-                                textAlign = TextAlign.Center)
+                            SelectionContainer {
+                                Text(text = selectedCourse, fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                    textAlign = TextAlign.Center)
+                            }
                         }
                         Row (
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).border(0.dp, Color.Black)
@@ -524,12 +528,14 @@ fun OptimizeItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = courseSchedule.course.subjectCode + courseSchedule.course.catalogNumber +
-                            " " + courseSchedule.course.title,
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(start = 8.dp).fillMaxWidth(0.7f),
-                )
+                SelectionContainer {
+                    Text(
+                        text = courseSchedule.course.subjectCode + courseSchedule.course.catalogNumber +
+                                " " + courseSchedule.course.title,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 8.dp).fillMaxWidth(0.7f),
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(
                         0.3f).fillMaxHeight(),

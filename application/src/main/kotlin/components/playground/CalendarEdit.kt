@@ -4,7 +4,6 @@ import APIclient.CourseSchedulesClient
 import APIclient.CustomCalendarClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +28,7 @@ import components.common.CustomIconButton
 import components.courseInfo.padding
 import components.courseSearch.DropSearch
 import components.playground.optimization.OptimizationPage
+import components.selectedCourses.ThemeDropdown
 import components.store
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
@@ -36,8 +36,6 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 import models.*
 import java.time.LocalDateTime
-import components.selectedCourses.ThemeDropdown
-
 
 
 @Immutable
@@ -223,11 +221,13 @@ fun ScheduleSideSheet(courseNames: List<String>,
                                 .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(
-                                text = courseTitle, fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = courseTitle, fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                     LazyColumn(
@@ -282,10 +282,12 @@ fun ListSideSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "List of Selected Courses",
-                    fontSize = 20.sp
-                )
+                SelectionContainer {
+                    Text(
+                        text = "List of Selected Courses",
+                        fontSize = 20.sp
+                    )
+                }
                 Row () {
                     CustomIconButton(
                         onClick= {
@@ -339,7 +341,9 @@ fun CalendarCourseCluster(components: List<UserCalendarCourse>, name: String,
             modifier = Modifier.fillMaxWidth().border(0.dp, Color.Black)
                 .background(Color.LightGray).padding(horizontal = 16.dp),
         ) {
-            Text(text = name, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+            SelectionContainer {
+                Text(text = name, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+            }
         }
         Row (modifier = Modifier.fillMaxWidth().border(0.dp, Color.Black)
             .padding(horizontal = 12.dp, vertical = 4.dp)) {
@@ -350,8 +354,9 @@ fun CalendarCourseCluster(components: List<UserCalendarCourse>, name: String,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = course.component, modifier = Modifier.padding(vertical = 5.dp))
-
+                        SelectionContainer {
+                            Text(text = course.component, modifier = Modifier.padding(vertical = 5.dp))
+                        }
                         CustomIconButton(
                             onClick= {removeCourse(course)},
                             modifier= Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -450,12 +455,14 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                     backgroundColor = Color.LightGray,
                     icon = TablerIcons.ChevronLeft
                 )
-                Text(
-                    text = selectedCalendar.name,
-                    color = Color.Black,
-                    fontSize = 25.sp,
-                    maxLines = 1
-                )
+                SelectionContainer {
+                    Text(
+                        text = selectedCalendar.name,
+                        color = Color.Black,
+                        fontSize = 25.sp,
+                        maxLines = 1
+                    )
+                }
             }
             Row () {
 
@@ -499,7 +506,6 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                         Text("Optimize", color = Color.White)
                     }
                 }
-
             }
         }
         DropTarget<ScheduleData>(
@@ -507,8 +513,6 @@ fun ScheduleTarget(isSheetOpen: Boolean,
         ) {
                 isInBound, schedule ->
             schedule?.let {
-                print("incoming")
-                println(schedule)
                 if (isInBound) {
                     addCourseScope.launch {
                         try {
@@ -533,6 +537,7 @@ fun ScheduleTarget(isSheetOpen: Boolean,
                             e.printStackTrace()
                         }
                     }
+                    LocalDragTargetInfo.current.dataToDrop = null
                 }
             }
 

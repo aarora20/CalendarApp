@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -169,11 +170,13 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                 .background(Color.Gray).padding(horizontal = 6.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(
-                                text = selectedCourse, fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = selectedCourse, fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                     LazyColumn(
@@ -189,13 +192,18 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                             it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                             it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
                                             it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty())
-                                        if (isTimeConflict != "NO CONFLICT") {
+                                        if (isTimeConflict == "EMPTY TIMES") {
                                             snackBarState.showSnackbar(
-                                                message = "Unable to Add Due to Time Conflict With: " + isTimeConflict,
+                                                message = "Unable to Add Due to Time Missing",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        } else if (isTimeConflict != "NO CONFLICT") {
+                                            snackBarState.showSnackbar(
+                                                message = "Unable to Add Due to Time Conflict With: $isTimeConflict",
                                                 duration = SnackbarDuration.Short
                                             )
                                         } else {
-                                            val toAdd = courseMap[selectedCourse]
+                                            val toAdd = courseMap[selectedCourse.substringBefore(" ")]
                                             if (toAdd != null) {
                                                 val pad = padding(it.classSection)
                                                 val response = CourseSchedulesClient.addUserCourse(UserCourse(toAdd.courseId,
@@ -203,6 +211,8 @@ fun AddCourseSideSheet(courseNames: List<String>,
                                                     toAdd.title, it.courseComponent + " " + pad + it.classSection,
                                                     it.scheduleData?.get(0)?.classMeetingStartTime.orEmpty(),
                                                     it.scheduleData?.get(0)?.classMeetingEndTime.orEmpty(),
+                                                    it.scheduleData?.get(0)?.scheduleStartDate.orEmpty(),
+                                                    it.scheduleData?.get(0)?.scheduleEndDate.orEmpty(),
                                                     it.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()),
                                                     store.getState().userId,
                                                 )
@@ -236,13 +246,15 @@ fun AddableScheduleItem(schedule: ScheduleData,
         Modifier.background(Color.LightGray).border(0.dp, Color.Black).heightIn(max=80.dp).fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val preStartTime = schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty()
+        val preEndTime = schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty()
         val pad = padding(schedule.classSection)
         ScheduleCell(text = schedule.courseComponent + " $pad" + schedule.classSection, weight = 0.2f + shiftWeight)
-        ScheduleCell(text = "${
-            LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingStartTime.orEmpty())
+        ScheduleCell(text = if (preStartTime.isNotEmpty() && preEndTime.isNotEmpty()) "${
+            LocalDateTime.parse(preStartTime)
                 .format(components.calendar.TimeFormatter).replace(".", "").uppercase()} - " +
-                LocalDateTime.parse(schedule.scheduleData?.get(0)?.classMeetingEndTime.orEmpty())
-                    .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
+                LocalDateTime.parse(preEndTime)
+                    .format(components.calendar.TimeFormatter).replace(".", "").uppercase() else ""
             , weight = 0.4f + shiftWeight)
         ScheduleCell(text = schedule.scheduleData?.get(0)?.classMeetingDayPatternCode.orEmpty()
             .format(components.calendar.TimeFormatter).replace(".", "").uppercase()
@@ -274,12 +286,20 @@ fun RowScope.ScheduleCell(
     text: String,
     weight: Float,
 ) {
-    Text(
-        text = text,
-        modifier = Modifier
+    Row (
+        Modifier
             .weight(weight, fill = true)
-            .padding(8.dp),
-        textAlign = TextAlign.Center,
-        fontSize = 10.sp
-    )
+    ) {
+        SelectionContainer (
+            Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = text,
+                modifier = Modifier
+                    .padding(8.dp),
+                textAlign = TextAlign.Center,
+                fontSize = 10.sp
+            )
+        }
+    }
 }

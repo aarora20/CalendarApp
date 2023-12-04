@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -66,12 +67,14 @@ fun ExploreCoursesScreen(
         }
 
         Column(modifier = Modifier.padding(top = 56.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-            Text(
-                text = "Explore $subjectCode Courses",
-                color = Color.Black,
-                fontSize = 30.sp,
-                maxLines = 1
-            )
+            SelectionContainer {
+                Text(
+                    text = "Explore $subjectCode Courses",
+                    color = Color.Black,
+                    fontSize = 30.sp,
+                    maxLines = 1
+                )
+            }
 
             Row(
                 Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 10.dp),
