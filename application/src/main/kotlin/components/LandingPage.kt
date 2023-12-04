@@ -106,8 +106,6 @@ fun landingPage(
         }
     }
 
-
-
     LaunchedEffect(true) {
         scope.launch{
             try {
