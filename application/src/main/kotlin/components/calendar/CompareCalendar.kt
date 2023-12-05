@@ -75,14 +75,16 @@ fun CalendarCompareScreen(
 
     val themeColours = generateCompareColours(theme)
 
+    val dummy = LocalDateTime.parse("2023-12-06T00:00:00")
+
     val userSelectedCourses =  userList.map { UniClass(it.courseNum,
         it.component, themeColours[0], it.weekPattern, LocalDateTime.parse(it.startTime),
-        LocalDateTime.parse(it.endTime))
+        LocalDateTime.parse(it.endTime), dummy, dummy)
     }
 
     val friendSelectedCourses = friendList.map { UniClass(it.courseNum,
         it.component, themeColours[1], it.weekPattern, LocalDateTime.parse(it.startTime),
-        LocalDateTime.parse(it.endTime))
+        LocalDateTime.parse(it.endTime), dummy, dummy)
     }
 
     val selectedCourses = userSelectedCourses.plus(friendSelectedCourses)

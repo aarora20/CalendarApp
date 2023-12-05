@@ -62,7 +62,11 @@ data class UniClass(
     val start :LocalDateTime,
 
     // finish time
-    val finish :LocalDateTime
+    val finish :LocalDateTime,
+
+    val startDate: LocalDateTime,
+
+    val endDate: LocalDateTime
 )
 
 enum class Theme {
@@ -370,7 +374,7 @@ fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
 
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, colorMap[it.courseNum]!!, it.weekPattern, LocalDateTime.parse(it.startTime),
-        LocalDateTime.parse(it.endTime))
+        LocalDateTime.parse(it.endTime), LocalDateTime.parse(it.startDate), LocalDateTime.parse(it.endDate))
     }
 
     val term_start = LocalDateTime.parse("2023-09-10T00:00:00")
@@ -427,61 +431,27 @@ fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
         today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
     }
 
-    val mondayClasses = if (term_start <= monDate && monDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("M") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("M") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val mondayClasses = selectedCourses.filter {
+        (it.startDate <= monDate && monDate <= it.endDate) && ((it.days.contains("M") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("M") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val tuesdayClasses = if (term_start <= tuesDate && tuesDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("T") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("T") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val tuesdayClasses = selectedCourses.filter {(it.startDate <= tuesDate && tuesDate <= it.endDate) && ((it.days.contains("T") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("T") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val wednesdayClasses = if (term_start <= wedDate && wedDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("W") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("W") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val wednesdayClasses = selectedCourses.filter {(it.startDate <= wedDate && wedDate <= it.endDate) && ((it.days.contains("W") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("W") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val thursdayClasses = if (term_start <= thursDate && thursDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("R") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("R") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val thursdayClasses = selectedCourses.filter {(it.startDate <= thursDate && thursDate <= it.endDate) && ((it.days.contains("R") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("R") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val fridayClasses = if (term_start <= friDate && friDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("F") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("F") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val fridayClasses = selectedCourses.filter {(it.startDate <= friDate && friDate <= it.endDate) && ((it.days.contains("F") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("F") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val saturdayClasses = if (term_start <= satDate && satDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("Sa") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("Sa") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val saturdayClasses = selectedCourses.filter {(it.startDate <= satDate && satDate <= it.endDate) && ((it.days.contains("Sa") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("Sa") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
-    val sundayClasses = if (term_start <= sunDate && sunDate <= term_end) {
-        selectedCourses.filter {(it.days.contains("Su") && it.type.substring(0 ,3) != "TST")
-                || (it.days.contains("Su") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate)
-        }
-    } else {
-        emptyList()
-    }
+    val sundayClasses = selectedCourses.filter {(it.startDate <= sunDate && sunDate <= it.endDate) && ((it.days.contains("Su") && it.type.substring(0 ,3) != "TST")
+                || (it.days.contains("Su") && it.type.substring(0, 3) == "TST" && it.start <= monDate && it.finish <= sunDate))}
 
     val classes = listOf(mondayClasses, tuesdayClasses, wednesdayClasses,
         thursdayClasses, fridayClasses, saturdayClasses, sundayClasses)

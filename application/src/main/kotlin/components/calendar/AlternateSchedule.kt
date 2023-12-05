@@ -192,9 +192,11 @@ fun AlternateSchedule(courseList: List<UserCalendarCourse>, selectedTheme: Theme
 
     val colorMap = generateColorsAlternate(courseList, selectedTheme)
 
+    val dummy = LocalDateTime.parse("2023-12-06T00:00:00")
+
     val selectedCourses =  courseList.map { UniClass(it.courseNum,
         it.component, colorMap[it.courseNum]!!, it.weekPattern, LocalDateTime.parse(it.startTime),
-        LocalDateTime.parse(it.endTime))
+        LocalDateTime.parse(it.endTime), dummy, dummy)
     }
 
     val mondayClasses = selectedCourses.filter { it.days.contains("M") }
