@@ -143,8 +143,13 @@ fun courseSelection(
             }
             Row {
                 LazyColumn(Modifier.padding(0.dp)) {
-                    items(courseMap.keys.toList()) {
-                        courseMap[it]?.let { it1 -> CourseCluster(it1, it, removeCourse)}
+                    items(courseMap.keys.toList()) { name ->
+                        courseMap[name]?.let { it1 -> CourseCluster(it1.sortedBy { it.component }.sortedWith(compareBy(
+                            { it.component.substring(0,3) != "LEC" }, // First, order by whether termcode is not "LEC" (false first)
+                            { it.component.substring(0,3) != "TUT" }, // Second, order by whether termcode is not "TUT" (false first)
+                            { it.component.substring(0,3) != "TST" }, // Third, order by whether termcode is not "TST" (false first)
+                            { it.component.substring(0,3) }
+                        )), name, removeCourse)}
                         Spacer(modifier = Modifier.height(10.dp))
                     }
                 }

@@ -51,7 +51,6 @@ fun selectionScreen(
     var isSheetOpen by remember { mutableStateOf(false) }
     val courseNames = courses.map { "${it.subjectCode}${it.catalogNumber}" }
     val courseMap = courses.associateBy { it.subjectCode + it.catalogNumber }
-    var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
 
     LaunchedEffect(true) {
         userCourseScope.launch{
@@ -97,8 +96,8 @@ fun selectionScreen(
                 }
             }
             if (isSheetOpen) {
-                AddCourseSideSheet(courseNames, courseMap, schedules,
-                    selectedCourses, snackbarState, { schedules = it }) {
+                AddCourseSideSheet(courseNames, courseMap,
+                    selectedCourses, snackbarState) {
                     selectedCourses.add(it)
                 }
             }
@@ -109,15 +108,14 @@ fun selectionScreen(
 @Composable
 fun AddCourseSideSheet(courseNames: List<String>,
                        courseMap:  Map<String, CourseDetails>,
-                       schedules: List<ScheduleData>,
                        selectedCourses: List<UserCourse>,
                        snackBarState: SnackbarHostState,
-                       setSchedules: (scheduleData: List<ScheduleData>) -> Unit,
                        addToSchedule: (UserCourse) -> Unit
 ) {
 
     val addScope = rememberCoroutineScope()
     var selectedCourse by remember { mutableStateOf("") }
+    var schedules by remember {  mutableStateOf(emptyList<ScheduleData>()) }
     Column (
         modifier = Modifier.fillMaxSize().drawBehind {
             val strokeWidth = 2f
@@ -144,7 +142,7 @@ fun AddCourseSideSheet(courseNames: List<String>,
                             try {
                                 val course = courseMap[it]
                                 if (course != null) {
-                                    setSchedules( CourseSchedulesClient.getCourseSchedule(course.courseId)
+                                    schedules =( CourseSchedulesClient.getCourseSchedule(course.courseId)
                                         .sortedWith(compareBy(
                                             { it.courseComponent != "LEC" }, // First, order by whether termcode is not "LEC" (false first)
                                             { it.courseComponent != "TUT" }, // Second, order by whether termcode is not "TUT" (false first)
