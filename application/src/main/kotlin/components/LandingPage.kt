@@ -117,7 +117,7 @@ fun landingPage(
                 store.dispatch(SetSpringToken(token))
                 isLoading = false
                 while (true) {
-                    delay(3000000);
+                    delay(2500000);
                     token = TokenClient.getIdToken("ktor")
                     store.dispatch(SetKtorToken(token))
                     token = TokenClient.getIdToken("spring")

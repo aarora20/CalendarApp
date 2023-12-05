@@ -11,10 +11,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object DatabaseFactory {
     fun init() {
         val driverClassName = "org.postgresql.Driver"
-        val dbUser = System.getenv("DB_USER")
-        val dbPass = System.getenv("DB_PASS")
-        val dbName = System.getenv("DB_NAME")
-        val instanceConnectionName = System.getenv("INSTANCE_CONNECTION_NAME")
+        val dbUser = "postgres"
+        val dbPass = "GCPcalendarApp346\$\$"
+        val dbName = "calendarapp"
+        val instanceConnectionName = "calendarapp346:northamerica-northeast2:calendar-app-sql"
         val jdbcURL = "jdbc:postgresql:///${dbName}"
 //        val jdbcURL = "jdbc:postgresql://localhost:5432/calendarApp"
         val database = Database.connect(createHikariDataSource(jdbcURL, driverClassName, dbUser,

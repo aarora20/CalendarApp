@@ -1,8 +1,13 @@
+FROM gradle:7.4.1 AS build
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
+RUN gradle build
+
 FROM openjdk:17
 
 EXPOSE 8081:8081
 
 RUN mkdir /app
 
-COPY ./build/libs/*-SNAPSHOT.jar /app/calendarApp.jar
+COPY --from=build /home/gradle/src/build/libs/*-SNAPSHOT.jar /app/calendarApp.jar
 ENTRYPOINT ["java","-jar","/app/calendarApp.jar"]

@@ -18,11 +18,28 @@ object TokenClient {
         val targetAudienceSpring = "https://calendar-app-planner-server-ycd64g7ulq-pd.a.run.app"
 
         try {
-            val resourceDir = File(System.getProperty("compose.application.resources.dir"))
-            val serviceAccountCredentials: ServiceAccountCredentials =
-                withContext(Dispatchers.IO) {
-                    ServiceAccountCredentials.fromStream(FileInputStream(resourceDir.resolve("calendarapp346-db9002f5232a.json")))
-                }
+            var resourceDir: File?
+            resourceDir = try {
+                File(System.getProperty("compose.application.resources.dir"))
+            } catch (e: Exception) {
+                null
+            }
+            val serviceAccountCredentials: ServiceAccountCredentials
+            if (resourceDir == null)  {
+                serviceAccountCredentials =
+                    withContext(Dispatchers.IO) {
+                        ServiceAccountCredentials.fromStream(
+                            FileInputStream(File(javaClass.getResource("/common/calendarapp346-db9002f5232a.json").toURI()))
+                        )
+                    }
+            } else {
+                serviceAccountCredentials =
+                    withContext(Dispatchers.IO) {
+                        ServiceAccountCredentials.fromStream(
+                            FileInputStream(resourceDir.resolve("calendarapp346-db9002f5232a.json"))
+                        )
+                    }
+            }
 
             var token = ""
             // Obtain the id token by providing the target audience.
