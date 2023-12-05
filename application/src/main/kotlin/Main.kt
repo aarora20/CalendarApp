@@ -28,7 +28,7 @@ fun main() = application {
     Window(onCloseRequest = {
         savePreferences(state.size)
          exitApplication()
-    } , state) {
+    } , state, title = "QuestFlow") {
         window.minimumSize = Dimension(1000, 700)
 
         App(this)

@@ -2,6 +2,7 @@ package components
 
 import APIclient.CourseSchedulesClient
 import APIclient.CustomCalendarClient
+import APIclient.TokenClient
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,13 +30,12 @@ import components.selectedCourses.selectionScreen
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import models.CourseDetails
 import models.CustomCalendar
 import org.reduxkotlin.createThreadSafeStore
-import store.AuthState
-import store.LogoutUser
-import store.rootReducer
+import store.*
 import wishlistContainer
 
 @Immutable
@@ -59,7 +59,7 @@ sealed class AppScreen {
 
 }
 
-val INITIAL_STATE = AuthState("", "", "OCEAN")
+val INITIAL_STATE = AuthState("", "", "", "OCEAN")
 
 val store = createThreadSafeStore(::rootReducer, INITIAL_STATE)
 
@@ -71,6 +71,7 @@ fun landingPage(
     var showInNav by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
     var isComputing by remember { mutableStateOf(false) }
     var isCalendarDialogOpen by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     var courseList by remember { mutableStateOf(emptyList<CourseDetails>()) }
     val scope = rememberCoroutineScope()
@@ -105,12 +106,23 @@ fun landingPage(
         }
     }
 
-
-
     LaunchedEffect(true) {
         scope.launch{
             try {
+                isLoading = true
+                var token = TokenClient.getIdToken("ktor")
+                store.dispatch(SetKtorToken(token))
                 courseList = CourseSchedulesClient.getCourses()
+                token = TokenClient.getIdToken("spring")
+                store.dispatch(SetSpringToken(token))
+                isLoading = false
+                while (true) {
+                    delay(2500000);
+                    token = TokenClient.getIdToken("ktor")
+                    store.dispatch(SetKtorToken(token))
+                    token = TokenClient.getIdToken("spring")
+                    store.dispatch(SetSpringToken(token))
+                }
             }catch (e: ClientRequestException) {
                 println("Error fetching data: ${e.message}")
             } catch (e: Exception) {
@@ -119,38 +131,53 @@ fun landingPage(
         }
     }
 
-    when (currentScreen) {
-        is Screen.Login -> {
-            LoginScreen(onSuccess = {
-                currentScreen = Screen.Landing
-            }, onRegister = {
-                currentScreen = Screen.SignUp
-            })
-        }
-        is Screen.SignUp -> {
-            RegisterScreen(
-                onSuccess = {
-                    currentScreen = Screen.Landing
-                }, onLogin = {
-                    currentScreen = Screen.Login
-                }
+    if (isLoading) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
         }
-        is Screen.Landing -> {
-            landingScreen(
-                courseList = courseList,
-                toggleComputing = { isComputing = it },
-                isCalendarDialogOpen = isCalendarDialogOpen,
-                toggleCalendarDialog = { isCalendarDialogOpen = it},
-                onLogout = {
-                    currentScreen = Screen.Login
-                },
-                showInNav = showInNav
-            ) {
-                showInNav = it
+    } else {
+        when (currentScreen) {
+            is Screen.Login -> {
+                LoginScreen(onSuccess = {
+                    currentScreen = Screen.Landing
+                }, onRegister = {
+                    currentScreen = Screen.SignUp
+                })
             }
+            is Screen.SignUp -> {
+                RegisterScreen(
+                    onSuccess = {
+                        currentScreen = Screen.Landing
+                    }, onLogin = {
+                        currentScreen = Screen.Login
+                    }
+                )
+            }
+            is Screen.Landing -> {
+                landingScreen(
+                    courseList = courseList,
+                    toggleComputing = { isComputing = it },
+                    isCalendarDialogOpen = isCalendarDialogOpen,
+                    toggleCalendarDialog = { isCalendarDialogOpen = it},
+                    onLogout = {
+                        currentScreen = Screen.Login
+                    },
+                    showInNav = showInNav
+                ) {
+                    showInNav = it
+                }
 
+            }
         }
+
     }
 }
 
@@ -359,7 +386,7 @@ fun landingScreen(
                                 selected = false,
                                 onClick = {
                                     // Dispatch LogoutUser action
-                                    store.dispatch(LogoutUser())
+                                    store.dispatch(SetUserID(""))
                                     // Navigate to Login Screen or perform other necessary cleanup
                                     onLogout()
                                 },

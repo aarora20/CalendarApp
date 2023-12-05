@@ -31,6 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     implementation("org.reduxkotlin:redux-kotlin-threadsafe:0.5.5")
     implementation("br.com.devsrsouza.compose.icons:tabler-icons:1.1.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.20.0")
 }
 
 compose.desktop {
@@ -39,8 +40,9 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "CalendarApp"
-            packageVersion = "1.0.4"
+            packageName = "QuestFlow"
+            packageVersion = "1.0.5"
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("src/main/resources"))
         }
     }
 }

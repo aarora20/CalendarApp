@@ -1,5 +1,6 @@
 package APIclient
 
+import components.store
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -20,9 +21,10 @@ object AuthClient {
     }
     suspend fun loginUser(user: UserParams): RouteResponseData<AuthRes>? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/login") {
+        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(user)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {
@@ -34,9 +36,10 @@ object AuthClient {
 
     suspend fun registerUser(user: UserParams): RouteResponseData<AuthRes>? {
 
-        val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/register") {
+        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(user)
+            bearerAuth(store.getState().ktorToken)
         }
 
         return if (response.status == HttpStatusCode.BadRequest) {

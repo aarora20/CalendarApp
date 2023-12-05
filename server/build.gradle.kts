@@ -48,6 +48,8 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktor_version")
     implementation("com.zaxxer:HikariCP:$hikaricp_version")
     implementation("org.mindrot:jbcrypt:0.4")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("com.google.cloud.sql:postgres-socket-factory:1.14.1")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }

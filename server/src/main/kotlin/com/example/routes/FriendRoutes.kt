@@ -15,7 +15,7 @@ import io.ktor.server.util.*
 fun Route.friendsRouting() {
     // Find all similar users in the database to the given username
     route("/users/{id}/find") {
-        get() {
+        post() {
             val id = call.parameters.getOrFail<String>("id")
             val params = call.receive<UsernameParams>()
             call.respond(friendService.searchUsers(id, params.username))
