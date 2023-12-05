@@ -98,53 +98,55 @@ fun NotificationItem(
         }
 
         if (isIncoming) {
-            CustomIconButton(
-                onClick = {
-                    requestScope.launch {
-                        try {
-                            val friend = FriendsClient.acceptFriendRequest(store.getState().userId, user.id)
-                            if (friend != null) {
-                                requests.remove(user)
+            Row() {
+                CustomIconButton(
+                    onClick = {
+                        requestScope.launch {
+                            try {
+                                val friend = FriendsClient.acceptFriendRequest(store.getState().userId, user.id)
+                                if (friend != null) {
+                                    requests.remove(user)
+                                }
+                            }catch (e: ClientRequestException) {
+                                println("Error fetching data: ${e.message}")
+                            } catch (e: Exception) {
+                                println(e.message)
                             }
-                        }catch (e: ClientRequestException) {
-                            println("Error fetching data: ${e.message}")
-                        } catch (e: Exception) {
-                            println(e.message)
                         }
-                    }
-                },
-                modifier = Modifier,
-                tooltipText = "Accept Request",
-                buttonRadius = 48.dp,
-                buttonSize = 20.dp,
-                backgroundColor =  Color.Transparent,
-                icon =  TablerIcons.Check
+                    },
+                    modifier = Modifier,
+                    tooltipText = "Accept Request",
+                    buttonRadius = 48.dp,
+                    buttonSize = 20.dp,
+                    backgroundColor =  Color.Transparent,
+                    icon =  TablerIcons.Check
 
-            )
+                )
 
-            CustomIconButton(
-                onClick = {
-                    requestScope.launch {
-                        try {
-                            val rejectStatus = FriendsClient.rejectFriendRequest(store.getState().userId, user.id)
-                            if (rejectStatus) {
-                                requests.remove(user)
+                CustomIconButton(
+                    onClick = {
+                        requestScope.launch {
+                            try {
+                                val rejectStatus = FriendsClient.rejectFriendRequest(store.getState().userId, user.id)
+                                if (rejectStatus) {
+                                    requests.remove(user)
+                                }
+                            }catch (e: ClientRequestException) {
+                                println("Error fetching data: ${e.message}")
+                            } catch (e: Exception) {
+                                println(e.message)
                             }
-                        }catch (e: ClientRequestException) {
-                            println("Error fetching data: ${e.message}")
-                        } catch (e: Exception) {
-                            println(e.message)
                         }
-                    }
-                },
-                modifier = Modifier,
-                tooltipText = "Reject Request",
-                buttonRadius = 48.dp,
-                buttonSize = 20.dp,
-                backgroundColor =  Color.Transparent,
-                icon =  TablerIcons.Trash
+                    },
+                    modifier = Modifier,
+                    tooltipText = "Reject Request",
+                    buttonRadius = 48.dp,
+                    buttonSize = 20.dp,
+                    backgroundColor =  Color.Transparent,
+                    icon =  TablerIcons.Trash
 
-            )
+                )
+            }
         } else {
             CustomIconButton(
                 onClick = {
