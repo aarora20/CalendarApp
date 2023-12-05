@@ -3,23 +3,5 @@ services:
     build: .
     ports:
       - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-  db:
-    image: postgres
-    volumes:
-      - db:/var/lib/postgresql/data
-      - ./scripts:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_DB: calendarApp
-      POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 1s
-
-volumes:
-  db:
-    driver: local
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/calendarapp346-db9002f5232a.json

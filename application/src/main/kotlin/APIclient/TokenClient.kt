@@ -20,8 +20,10 @@ object TokenClient {
         try {
             var resourceDir: File?
             resourceDir = try {
+                // Will work if running from installer
                 File(System.getProperty("compose.application.resources.dir"))
             } catch (e: Exception) {
+                // Otherwise run from main
                 null
             }
             val serviceAccountCredentials: ServiceAccountCredentials
@@ -48,19 +50,11 @@ object TokenClient {
             val tokenOption: List<IdTokenProvider.Option> = mutableListOf<IdTokenProvider.Option>()
             if (type == "ktor") {
                 val idToken: IdToken = serviceAccountCredentials.idTokenWithAudience(targetAudienceKtor, tokenOption)
-                // The following method can also be used to generate the ID token.
-                // IdTokenCredentials idTokenCredentials = IdTokenCredentials.newBuilder()
-                //     .setIdTokenProvider(serviceAccountCredentials)
-                //     .setTargetAudience(targetAudience)
-                //     .build();
+
                 token = idToken.getTokenValue()
             } else {
                 val idToken: IdToken = serviceAccountCredentials.idTokenWithAudience(targetAudienceSpring, tokenOption)
-                // The following method can also be used to generate the ID token.
-                // IdTokenCredentials idTokenCredentials = IdTokenCredentials.newBuilder()
-                //     .setIdTokenProvider(serviceAccountCredentials)
-                //     .setTargetAudience(targetAudience)
-                //     .build();
+
                 token = idToken.getTokenValue()
             }
 

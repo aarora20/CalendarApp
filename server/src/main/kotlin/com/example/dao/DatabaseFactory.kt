@@ -16,7 +16,7 @@ object DatabaseFactory {
         val dbName = "calendarapp"
         val instanceConnectionName = "calendarapp346:northamerica-northeast2:calendar-app-sql"
         val jdbcURL = "jdbc:postgresql:///${dbName}"
-//        val jdbcURL = "jdbc:postgresql://localhost:5432/calendarApp"
+
         val database = Database.connect(createHikariDataSource(jdbcURL, driverClassName, dbUser,
             dbPass, instanceConnectionName))
 
