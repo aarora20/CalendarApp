@@ -432,9 +432,6 @@ fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
             .withNano(0)
     }
 
-
-    print(thursDate)
-
     val friDate = if (5 > dayOfWeekNumberNonNull) {
         today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY)).withHour(0)
             .withMinute(0)
@@ -470,8 +467,6 @@ fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
             .withSecond(0)
             .withNano(0)
     }
-
-    print(selectedCourses)
 
     val mondayClasses = selectedCourses.filter {(it.startDate <= monDate && monDate <= it.endDate) && (it.days.contains("M"))}
 
