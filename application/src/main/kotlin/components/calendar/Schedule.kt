@@ -391,42 +391,84 @@ fun CalendarRender(courseList: List<UserCourse>, selectedTheme: Theme) {
 
     val dayOfWeekNumber = weekDayNumberMap[dayOfWeek.toString()]
     val dayOfWeekNumberNonNull = dayOfWeekNumber ?: 0
-    val monDate = today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val monDate = today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0)
 
     val tuesDate = if (2 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.TUESDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.TUESDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
     val wedDate = if (3 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
     val thursDate = if (4 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.THURSDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.THURSDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
+
+    print(thursDate)
+
     val friDate = if (5 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
     val satDate = if (6 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
     val sunDate = if (7 > dayOfWeekNumberNonNull) {
-        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+        today.value.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     } else {
-        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        today.value.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
     }
 
     print(selectedCourses)
