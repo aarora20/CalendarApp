@@ -40,8 +40,8 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "CalendarApp"
-            packageVersion = "1.0.6"
+            packageName = "QuestFlow"
+            packageVersion = "1.0.5"
             appResourcesRootDir.set(project.layout.projectDirectory.dir("src/main/resources"))
         }
     }
