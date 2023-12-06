@@ -291,7 +291,9 @@ fun coursePage(
                             )
                         }
                     }
-                    tableScreen(course, schedules, scope, addedCourses, snackbarState)
+                    key (course) {
+                        tableScreen(course, schedules, scope, addedCourses, snackbarState)
+                    }
                 }
             }
         }
