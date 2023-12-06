@@ -35,10 +35,13 @@ The following links are sources that we used to build our project: <br>
 
 Calendar Layout: <https://danielrampelt.com/blog/jetpack-compose-custom-schedule-layout-part-1/>
    - The logic for implementing the calendar layout including drawing each course to the right time. <br>
+
 Fuzzy String Searching: <https://github.com/willowtreeapps/fuzzywuzzy-kotlin>
    - Originally, we were trying use this github library as an implementation dependency, but it turns out that the library was no longer maintained and the importing it was not an option. As such, we had to fork their repository to our own. <br>
+
 Drag and Drop: <https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1>
    - The blog was used to help with implementing the drag and drop feature for our custom calendars. <br>
+
 OptaPlanner Logic: <https://stackoverflow.com/questions/71572097/is-optaplanner-scheduling-ai-suitable-for-optimising-a-college-schedule>
    - The StackOverflow post was used to help use implementing the constraints for our course schedule optimization where the hard constraint was no overlapping courses, the medium constraint was minimize working days and the soft constraint was minimizing gaps between courses on the same day. <br>
 
