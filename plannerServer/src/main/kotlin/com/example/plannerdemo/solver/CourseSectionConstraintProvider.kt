@@ -13,7 +13,8 @@ import org.optaplanner.examples.common.experimental.api.IntervalBreak
 import java.time.Duration
 import java.time.LocalTime
 
-
+// The following constraints code were inspired from the following StackOverflow post:
+// https://stackoverflow.com/questions/71572097/is-optaplanner-scheduling-ai-suitable-for-optimising-a-college-schedule
 class TimeTableConstraintProvider : ConstraintProvider {
 
     override fun defineConstraints(constraintFactory: ConstraintFactory): Array<Constraint> {

@@ -13,6 +13,8 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 
+// The following pieces of code were inspired by the following blog:
+// https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1
 internal class DragTargetInfo {
     var isDragging:  Boolean by mutableStateOf(false)
     var dragPosition by mutableStateOf(Offset.Zero)

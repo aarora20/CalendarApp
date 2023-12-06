@@ -7,6 +7,9 @@ import fuzzySearch.ratio.PartialRatio
 import fuzzySearch.ratio.SimpleRatio
 
 
+// The whole fuzzySearch directory was forked from https://github.com/willowtreeapps/fuzzywuzzy-kotlin
+// due to the implementation not working
+
 /**
  * fuzzySearch.FuzzySearch facade class
  */
