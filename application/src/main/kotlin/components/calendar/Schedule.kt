@@ -115,7 +115,6 @@ fun oneClass (
     ) {
 
         val density = LocalWindowInfo.current.containerSize.width / 3 / 7
-
         SelectionContainer {
             Text(uniclass.name + " " + uniclass.type,
 
@@ -127,6 +126,10 @@ fun oneClass (
         }
     }
 }
+
+// SOURCE: THE SIDEBAR AND THE SCHEDULE FUNCTION were obtained from source
+// https://medium.com/@meytataliti/android-simple-calendar-with-jetpack-compose-662e4d1794b
+// gave us an initial start to the project, and learned about custom layouts.
 
 @Composable
 fun BasicSidebarLabel(
