@@ -21,7 +21,7 @@ object AuthClient {
     }
     suspend fun loginUser(user: UserParams): RouteResponseData<AuthRes>? {
 
-        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/login") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(user)
             bearerAuth(store.getState().ktorToken)
@@ -36,7 +36,7 @@ object AuthClient {
 
     suspend fun registerUser(user: UserParams): RouteResponseData<AuthRes>? {
 
-        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/auth/register") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(user)
             bearerAuth(store.getState().ktorToken)

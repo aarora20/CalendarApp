@@ -23,14 +23,14 @@ object CourseSchedulesClient {
         }
     }
     suspend fun getCourses(): Courses {
-        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/courses/1241") {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/courses/1241") {
             bearerAuth(store.getState().ktorToken)
         }
         return response.body<Courses>()
     }
 
     suspend fun getUserCourses(userId: String): List<UserCourse> {
-        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses") {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/courses") {
             bearerAuth(store.getState().ktorToken)
         }
         return response.body<List<UserCourse>>()
@@ -38,7 +38,7 @@ object CourseSchedulesClient {
 
     suspend fun addUserCourse(course: UserCourse, userId: String): UserCourse? {
 
-        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/courses") {
             contentType(ContentType.Application.Json)
             setBody(course)
             bearerAuth(store.getState().ktorToken)
@@ -52,7 +52,7 @@ object CourseSchedulesClient {
     }
 
     suspend fun updateSchedule(courses: List<UserCourse>, userId: String): Boolean {
-        val response: HttpResponse = client.put("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/courses/all") {
+        val response: HttpResponse = client.put("http://0.0.0.0:8080/users/$userId/courses/all") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("courses" to courses))
             bearerAuth(store.getState().ktorToken)
@@ -62,14 +62,14 @@ object CourseSchedulesClient {
     }
 
     suspend fun getCourseSchedule(courseId: String): List<ScheduleData> {
-        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/classSchedules/1241/${courseId}") {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/classSchedules/1241/${courseId}") {
             bearerAuth(store.getState().ktorToken)
         }
         return response.body<List<ScheduleData>>()
     }
 
     suspend fun addToWishlist(userId: String, course: WishCourse): Boolean {
-        val response: HttpResponse = client.post("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist") {
+        val response: HttpResponse = client.post("http://0.0.0.0:8080/users/$userId/wishlist") {
             contentType(ContentType.Application.Json)
             setBody(course)
             bearerAuth(store.getState().ktorToken)
@@ -79,7 +79,7 @@ object CourseSchedulesClient {
     }
 
     suspend fun getWishlist(userId: String): List<WishCourse> {
-        val response: HttpResponse = client.get("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist") {
+        val response: HttpResponse = client.get("http://0.0.0.0:8080/users/$userId/wishlist") {
             bearerAuth(store.getState().ktorToken)
         }
         return response.body<List<WishCourse>>()
@@ -87,7 +87,7 @@ object CourseSchedulesClient {
 
     suspend fun removeFromWishlist(userId: String, subjectCode: String, catalogNumber: String, termYear: String): Boolean {
         return try {
-            val response: HttpResponse = client.delete("https://calendar-app-server-ycd64g7ulq-pd.a.run.app/users/$userId/wishlist/$subjectCode/$catalogNumber/$termYear") {
+            val response: HttpResponse = client.delete("http://0.0.0.0:8080/users/$userId/wishlist/$subjectCode/$catalogNumber/$termYear") {
                 bearerAuth(store.getState().ktorToken)
             }
             response.status == HttpStatusCode.NoContent
