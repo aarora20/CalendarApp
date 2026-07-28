@@ -10,25 +10,25 @@ Cedric Wang, <c689wang@uwaterloo.ca> <br>
 Sachi Shah, <s274shah@uwaterloo.ca> <br>
 
 ## Project Proposal
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Project-Proposal
+https://github.com/aarora20/CalendarApp/wiki/Project-Proposal
 
 ## Getting Started
-Install the client for your system in [releases](https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/tree/main/releases?ref_type=heads) either [Final_Release_Quest_Flow.dmg](https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/blob/main/releases/Final_Release_QuestFlow.dmg?ref_type=heads) or [Final_Release_Quest_Flow.msi](https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/blob/main/releases/Final_Release_QuestFlow.dmg?ref_type=heads)
+Install the client for your system in [releases](https://github.com/aarora20/CalendarApp/tree/main/releases) either [Final_Release_Quest_Flow.dmg](https://github.com/aarora20/CalendarApp/blob/main/releases/Final_Release_QuestFlow.dmg) or [Final_Release_Quest_Flow.msi](https://github.com/aarora20/CalendarApp/blob/main/releases/Final_Release_QuestFlow.dmg)
 
 ## Detailed User Guide
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/User-Guide
+https://github.com/aarora20/CalendarApp/wiki/User-Guide
 
 ## Instructions for Running and Building
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Instructions
+https://github.com/aarora20/CalendarApp/wiki/Instructions
 
 ## Architecture & Design
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Architecture
+https://github.com/aarora20/CalendarApp/wiki/Architecture
 
 ## Reflections on Practices
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Reflection
+https://github.com/aarora20/CalendarApp/wiki/Reflection
 
 ## Software Releases
-https://git.uwaterloo.ca/c689wang/fullstack-project-CS346/-/wikis/Releases
+https://github.com/aarora20/CalendarApp/wiki/Releases
 
 ## Sources
 The following links are sources that we used to build our project: <br>
