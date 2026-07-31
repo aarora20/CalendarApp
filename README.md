@@ -1,7 +1,7 @@
 # QuestFlow
 
 ## Showcase
-https://aryamanarora.com/CalendarApp/
+https://aarora20.github.io/CalendarApp/
 
 ## Goal
 Develop a full-stack application that assists Waterloo students with course planning for upcoming semesters by preventing and detecting time conflicts, providing a calendar view of their schedule, along with functionality to share schedules with peers/friends. 
