@@ -55,7 +55,7 @@
     font-family:var(--sans); font-weight:420; line-height:1.6;
     -webkit-font-smoothing:antialiased; font-size:17px;
     letter-spacing:-0.005em;
-    overflow-x:hidden;
+    overflow-x:clip;
   }
   .qf ::selection{background:var(--violet); color:#fff}
   .wrap{max-width:1120px; margin:0 auto; padding:0 28px}
@@ -262,7 +262,7 @@
     .pulse::after{animation:none}
     *{scroll-behavior:auto !important}
   }
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth; scroll-padding-top:76px}
 </style>
 
 <div class="qf">
